@@ -1,14 +1,13 @@
-"use client";
+"use client";//landing page layout
 
-import Header from "@/components/common/Header/index";
+import Header from "@/components/common/Header";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
+import "./globals.css";
 import { usePathname } from "next/navigation";
-import "../globals.css";
-const inter = Inter({ subsets: ["latin"] });
 
-import ToasterContext from "../context/ToastContext";
+const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -27,11 +26,10 @@ export default function RootLayout({
           defaultTheme="light"
         >
           {!isStudentPortal && <Header />}
-          <ToasterContext />
           {children}
           <ScrollToTop />
         </ThemeProvider>
       </body>
     </html>
   );
-}
+} 

@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 };
 
 // Dynamic import for better performance
-const JobSearchAndFilters = dynamic(() => import("@/components/dashboard/student_portal/workspace/SearchBar_and_Filter"));
-const JobList = dynamic(() => import("@/components/jobs/JobList"));
+const JobSearchAndFilters = dynamic(() => import("@/components/jobs/existing/SearchBar_and_Filter"));
+const JobList = dynamic(() => import("@/components/jobs/existing/JobList"));
 
 // Loading component for Suspense
 const FiltersLoading = () => (
