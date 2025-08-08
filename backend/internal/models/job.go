@@ -1,39 +1,168 @@
 ﻿package models
 
 import (
-"time"
-"github.com/google/uuid"
-"gorm.io/gorm"
+    "database/sql/driver"
+    "encoding/json"
+    "time"
 )
 
 type Job struct {
-ID             uuid.UUID      json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"
-Title          string         json:"title" gorm:"not null"
-Company        string         json:"company" gorm:"not null"
-Location       string         json:"location" gorm:"not null"
-Salary         string         json:"salary"
-Duration       string         json:"duration"
-Category       string         json:"category" gorm:"not null"
-Description    string         json:"description" gorm:"not null"
-Skills         []string       json:"skills" gorm:"type:jsonb;not null"
-Requirements   []string       json:"requirements" gorm:"type:jsonb"
-ExperienceLevel string        json:"experience_level" gorm:"default:'Entry'"
-IsRemote       bool           json:"is_remote" gorm:"default:false"
-Deadline       *time.Time     json:"deadline"
-Status         string         json:"status" gorm:"default:'Active'"
-EmployerID     uuid.UUID      json:"employer_id" gorm:"type:uuid;not null"
-CreatedAt      time.Time      json:"created_at"
-UpdatedAt      time.Time      json:"updated_at"
-DeletedAt      gorm.DeletedAt json:"-" gorm:"index"
-
-// Relationships
-Employer      User           json:"employer,omitempty" gorm:"foreignKey:EmployerID"
-Applications  []Application  json:"applications,omitempty" gorm:"foreignKey:JobID"
+    ID              string              `json:"id" gorm:"primaryKey"`
+    Title           string              `json:"title"`
+    Description     string              `json:"description"`
+    Company         string              `json:"company"`
+    CompanyID       string              `json:"company_id"`
+    
+    // Enhanced matching fields
+    Skills          RequiredSkillsArray `json:"skills" gorm:"type:jsonb"`
+    ExperienceLevel string              `json:"experience_level"` // "entry" | "intermediate" | "advanced" | "senior" | "expert"
+    Location        string              `json:"location"`
+    Duration        int                 `json:"duration"`         // Duration in weeks
+    Category        string              `json:"category"`         // Job category/field
+    IsRemote        bool                `json:"is_remote"`
+    
+    // Job details
+    JobType         string              `json:"job_type"`         // "full-time" | "part-time" | "contract" | "internship"
+    Salary          SalaryRange         `json:"salary" gorm:"type:jsonb"`
+    Benefits        StringArray         `json:"benefits" gorm:"type:jsonb"`
+    Requirements    StringArray         `json:"requirements" gorm:"type:jsonb"`
+    
+    // Work arrangement
+    WorkArrangement WorkArrangement     `json:"work_arrangement" gorm:"type:jsonb"`
+    
+    // Application settings
+    ApplicationDeadline *time.Time      `json:"application_deadline,omitempty"`
+    StartDate          *time.Time       `json:"start_date,omitempty"`
+    EndDate            *time.Time       `json:"end_date,omitempty"`
+    
+    // Matching preferences
+    PreferredCandidates CandidatePreferences `json:"preferred_candidates" gorm:"type:jsonb"`
+    
+    // Status and metadata
+    Status          string              `json:"status"`           // "draft" | "active" | "paused" | "closed"
+    Views           int                 `json:"views"`
+    Applications    int                 `json:"applications"`
+    
+    // Timestamps
+    CreatedAt       time.Time           `json:"created_at"`
+    UpdatedAt       time.Time           `json:"updated_at"`
 }
 
-func (j *Job) BeforeCreate(tx *gorm.DB) error {
-if j.ID == uuid.Nil {
-j.ID = uuid.New()
+// Custom types for Job
+type RequiredSkillsArray []RequiredSkill
+
+type RequiredSkill struct {
+    Name            string  `json:"name"`
+    Level           int     `json:"level"`              // 1-5 scale
+    IsRequired      bool    `json:"is_required"`        // Required vs nice-to-have
+    Importance      float64 `json:"importance"`         // Weight in matching (0-1)
+    CanLearn        bool    `json:"can_learn"`          // Whether on-the-job learning is acceptable
 }
-return nil
+
+type SalaryRange struct {
+    Min             int     `json:"min"`
+    Max             int     `json:"max"`
+    Currency        string  `json:"currency"`
+    Period          string  `json:"period"`             // "hourly" | "monthly" | "yearly"
+    IsNegotiable    bool    `json:"is_negotiable"`
+}
+
+type WorkArrangement struct {
+    HoursPerWeek    int         `json:"hours_per_week"`
+    FlexibleHours   bool        `json:"flexible_hours"`
+    CoreHours       []TimeSlot  `json:"core_hours"`
+    RemoteRatio     float64     `json:"remote_ratio"`    // 0.0 (fully onsite) to 1.0 (fully remote)
+    TimeZones       []string    `json:"time_zones"`      // Accepted time zones
+}
+
+type CandidatePreferences struct {
+    PreferredExperience []string    `json:"preferred_experience"`
+    PreferredSkills     []string    `json:"preferred_skills"`
+    PreferredLocation   []string    `json:"preferred_location"`
+    MinAvailability     int         `json:"min_availability"`    // Minimum hours per week
+    CultureFit          []string    `json:"culture_fit"`         // Cultural values/traits
+}
+
+// GORM JSON marshaling for Job custom types
+func (r RequiredSkillsArray) Value() (driver.Value, error) {
+    return json.Marshal(r)
+}
+
+func (r *RequiredSkillsArray) Scan(value interface{}) error {
+    if value == nil {
+        return nil
+    }
+    bytes, ok := value.([]byte)
+    if !ok {
+        return errors.New("cannot scan non-bytes into RequiredSkillsArray")
+    }
+    return json.Unmarshal(bytes, r)
+}
+
+func (s SalaryRange) Value() (driver.Value, error) {
+    return json.Marshal(s)
+}
+
+func (s *SalaryRange) Scan(value interface{}) error {
+    if value == nil {
+        return nil
+    }
+    bytes, ok := value.([]byte)
+    if !ok {
+        return errors.New("cannot scan non-bytes into SalaryRange")
+    }
+    return json.Unmarshal(bytes, s)
+}
+
+func (w WorkArrangement) Value() (driver.Value, error) {
+    return json.Marshal(w)
+}
+
+func (w *WorkArrangement) Scan(value interface{}) error {
+    if value == nil {
+        return nil
+    }
+    bytes, ok := value.([]byte)
+    if !ok {
+        return errors.New("cannot scan non-bytes into WorkArrangement")
+    }
+    return json.Unmarshal(bytes, w)
+}
+
+func (c CandidatePreferences) Value() (driver.Value, error) {
+    return json.Marshal(c)
+}
+
+func (c *CandidatePreferences) Scan(value interface{}) error {
+    if value == nil {
+        return nil
+    }
+    bytes, ok := value.([]byte)
+    if !ok {
+        return errors.New("cannot scan non-bytes into CandidatePreferences")
+    }
+    return json.Unmarshal(bytes, c)
+}
+
+// Helper methods for Job
+func (j *Job) GetRequiredSkillByName(skillName string) *RequiredSkill {
+    for _, skill := range j.Skills {
+        if strings.EqualFold(skill.Name, skillName) {
+            return &skill
+        }
+    }
+    return nil
+}
+
+func (j *Job) GetRequiredSkillsLevel(skillName string) int {
+    skill := j.GetRequiredSkillByName(skillName)
+    if skill != nil {
+        return skill.Level
+    }
+    return 0
+}
+
+func (j *Job) IsSkillRequired(skillName string) bool {
+    skill := j.GetRequiredSkillByName(skillName)
+    return skill != nil && skill.IsRequired
 }

@@ -1,39 +1,132 @@
 ﻿package models
 
 import (
-"time"
-"github.com/google/uuid"
-"gorm.io/gorm"
+    "database/sql/driver"
+    "encoding/json"
+    "time"
 )
 
 type User struct {
-ID                uuid.UUID      json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"
-Name              string         json:"name" gorm:"not null"
-Email             string         json:"email" gorm:"unique;not null"
-Password          string         json:"-" gorm:"not null"
-Role              string         json:"role" gorm:"default:'student'"
-ProfileCompleted  bool           json:"profile_completed" gorm:"default:false"
-Skills            []string       json:"skills" gorm:"type:jsonb"
-Interests         []string       json:"interests" gorm:"type:jsonb"
-ExperienceLevel   string         json:"experience_level" gorm:"default:'Entry'"
-Location          string         json:"location"
-Availability      string         json:"availability"
-Bio               string         json:"bio"
-AvatarURL         string         json:"avatar_url"
-ResumeURL         string         json:"resume_url"
-VerifiedAt        *time.Time     json:"verified_at"
-CreatedAt         time.Time      json:"created_at"
-UpdatedAt         time.Time      json:"updated_at"
-DeletedAt         gorm.DeletedAt json:"-" gorm:"index"
-
-// Relationships
-Jobs          []Job          json:"jobs,omitempty" gorm:"foreignKey:EmployerID"
-Applications  []Application  json:"applications,omitempty" gorm:"foreignKey:StudentID"
+    ID              string          `json:"id" gorm:"primaryKey"`
+    Email           string          `json:"email" gorm:"uniqueIndex"`
+    Name            string          `json:"name"`
+    UserType        string          `json:"user_type"` // "student" | "employer"
+    
+    // Enhanced matching fields
+    Skills          SkillsArray     `json:"skills" gorm:"type:jsonb"`
+    Interests       StringArray     `json:"interests" gorm:"type:jsonb"`
+    ExperienceLevel string          `json:"experience_level"` // "entry" | "intermediate" | "advanced" | "senior" | "expert"
+    Location        string          `json:"location"`
+    Availability    Availability    `json:"availability" gorm:"type:jsonb"`
+    
+    // Additional profile fields
+    Bio             string          `json:"bio"`
+    Portfolio       string          `json:"portfolio"`
+    Resume          string          `json:"resume"`
+    PreferredSalary string          `json:"preferred_salary"`
+    WorkPreference  string          `json:"work_preference"` // "remote" | "onsite" | "hybrid"
+    
+    // Learning and career goals
+    LearningGoals   StringArray     `json:"learning_goals" gorm:"type:jsonb"`
+    CareerGoals     StringArray     `json:"career_goals" gorm:"type:jsonb"`
+    
+    // Timestamps
+    CreatedAt       time.Time       `json:"created_at"`
+    UpdatedAt       time.Time       `json:"updated_at"`
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) error {
-if u.ID == uuid.Nil {
-u.ID = uuid.New()
+// Custom types for JSON fields
+type SkillsArray []UserSkill
+
+type UserSkill struct {
+    Name        string  `json:"name"`
+    Level       int     `json:"level"`        // 1-5 scale
+    Experience  string  `json:"experience"`   // "0-1 years", "1-3 years", etc.
+    Verified    bool    `json:"verified"`     // Skill verification status
 }
-return nil
+
+type StringArray []string
+
+type Availability struct {
+    HoursPerWeek    int             `json:"hours_per_week"`
+    PreferredHours  []TimeSlot      `json:"preferred_hours"`
+    StartDate       *time.Time      `json:"start_date,omitempty"`
+    EndDate         *time.Time      `json:"end_date,omitempty"`
+    Timezone        string          `json:"timezone"`
+    IsFlexible      bool            `json:"is_flexible"`
+}
+
+type TimeSlot struct {
+    DayOfWeek   int     `json:"day_of_week"`  // 0=Sunday, 1=Monday, etc.
+    StartTime   string  `json:"start_time"`   // "09:00"
+    EndTime     string  `json:"end_time"`     // "17:00"
+}
+
+// GORM JSON marshaling for custom types
+func (s SkillsArray) Value() (driver.Value, error) {
+    return json.Marshal(s)
+}
+
+func (s *SkillsArray) Scan(value interface{}) error {
+    if value == nil {
+        return nil
+    }
+    bytes, ok := value.([]byte)
+    if !ok {
+        return errors.New("cannot scan non-bytes into SkillsArray")
+    }
+    return json.Unmarshal(bytes, s)
+}
+
+func (s StringArray) Value() (driver.Value, error) {
+    return json.Marshal(s)
+}
+
+func (s *StringArray) Scan(value interface{}) error {
+    if value == nil {
+        return nil
+    }
+    bytes, ok := value.([]byte)
+    if !ok {
+        return errors.New("cannot scan non-bytes into StringArray")
+    }
+    return json.Unmarshal(bytes, s)
+}
+
+func (a Availability) Value() (driver.Value, error) {
+    return json.Marshal(a)
+}
+
+func (a *Availability) Scan(value interface{}) error {
+    if value == nil {
+        return nil
+    }
+    bytes, ok := value.([]byte)
+    if !ok {
+        return errors.New("cannot scan non-bytes into Availability")
+    }
+    return json.Unmarshal(bytes, a)
+}
+
+// Helper methods for User
+func (u *User) GetSkillByName(skillName string) *UserSkill {
+    for _, skill := range u.Skills {
+        if strings.EqualFold(skill.Name, skillName) {
+            return &skill
+        }
+    }
+    return nil
+}
+
+func (u *User) HasSkill(skillName string, minLevel int) bool {
+    skill := u.GetSkillByName(skillName)
+    return skill != nil && skill.Level >= minLevel
+}
+
+func (u *User) GetSkillLevel(skillName string) int {
+    skill := u.GetSkillByName(skillName)
+    if skill != nil {
+        return skill.Level
+    }
+    return 0
 }

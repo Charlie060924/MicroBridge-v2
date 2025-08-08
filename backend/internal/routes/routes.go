@@ -1,75 +1,77 @@
 ﻿package routes
 
 import (
-"microbridge/backend/internal/handlers"
-"microbridge/backend/internal/middleware"
-
-"github.com/gin-gonic/gin"
-"gorm.io/gorm"
+	"net/http"
+	
+	"github.com/gin-gonic/gin"
+	"microbridge/backend/internal/handlers"
+	"microbridge/backend/internal/middleware"
+	"gorm.io/gorm"
 )
 
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
-// Initialize handlers
-authHandler := handlers.NewAuthHandler(db)
-userHandler := handlers.NewUserHandler(db)
-jobHandler := handlers.NewJobHandler(db)
-applicationHandler := handlers.NewApplicationHandler(db)
-matchingHandler := handlers.NewMatchingHandler(db)
-
-// API v1 routes
-v1 := r.Group("/api/v1")
-{
-// Auth routes
-auth := v1.Group("/auth")
-{
-auth.POST("/register", authHandler.Register)
-auth.POST("/login", authHandler.Login)
-auth.POST("/logout", authHandler.Logout)
-auth.GET("/me", middleware.AuthRequired(), authHandler.GetCurrentUser)
-}
-
-// User routes
-users := v1.Group("/users")
-users.Use(middleware.AuthRequired())
-{
-users.GET("/", userHandler.GetUsers)
-users.GET("/:id", userHandler.GetUser)
-users.PUT("/:id", userHandler.UpdateUser)
-users.DELETE("/:id", userHandler.DeleteUser)
-users.GET("/:id/skills", userHandler.GetUserSkills)
-users.PUT("/:id/skills", userHandler.UpdateUserSkills)
-}
-
-// Job routes
-jobs := v1.Group("/jobs")
-jobs.Use(middleware.AuthRequired())
-{
-jobs.GET("/", jobHandler.GetJobs)
-jobs.POST("/", jobHandler.CreateJob)
-jobs.GET("/:id", jobHandler.GetJob)
-jobs.PUT("/:id", jobHandler.UpdateJob)
-jobs.DELETE("/:id", jobHandler.DeleteJob)
-jobs.GET("/:id/applications", jobHandler.GetJobApplications)
-}
-
-// Application routes
-applications := v1.Group("/applications")
-applications.Use(middleware.AuthRequired())
-{
-applications.GET("/", applicationHandler.GetApplications)
-applications.POST("/", applicationHandler.CreateApplication)
-applications.GET("/:id", applicationHandler.GetApplication)
-applications.PUT("/:id/status", applicationHandler.UpdateApplicationStatus)
-}
-
-// Matching routes
-matching := v1.Group("/matching")
-matching.Use(middleware.AuthRequired())
-{
-matching.GET("/recommendations/:userId", matchingHandler.GetRecommendations)
-matching.GET("/calculate/:userId/:jobId", matchingHandler.CalculateMatchScore)
-matching.GET("/similar/:jobId", matchingHandler.GetSimilarJobs)
-matching.GET("/analytics/:userId", matchingHandler.GetMatchingAnalytics)
-}
-}
+	// API versioning
+	api := r.Group("/api/v1")
+	
+	// Middleware
+	api.Use(middleware.Logger())
+	api.Use(middleware.ErrorHandler())
+	api.Use(middleware.CORS())
+	
+	// Initialize handlers
+	userHandler := handlers.NewUserHandler(db)
+	jobHandler := handlers.NewJobHandler(db)
+	matchingHandler := handlers.NewMatchingHandler(db)
+	applicationHandler := handlers.NewApplicationHandler(db)
+	
+	// User routes
+	userRoutes := api.Group("/users")
+	{
+		userRoutes.POST("", userHandler.CreateUser)
+		userRoutes.GET("/:id", userHandler.GetUser)
+		userRoutes.PUT("/:id", userHandler.UpdateUser)
+		userRoutes.PUT("/:id/profile", userHandler.UpdateProfile)
+	}
+	
+	// Job routes
+	jobRoutes := api.Group("/jobs")
+	{
+		jobRoutes.GET("", jobHandler.GetJobs)
+		jobRoutes.POST("", jobHandler.CreateJob)
+		jobRoutes.GET("/:id", jobHandler.GetJob)
+		jobRoutes.PUT("/:id", jobHandler.UpdateJob)
+		jobRoutes.DELETE("/:id", jobHandler.DeleteJob)
+	}
+	
+	// Enhanced matching routes
+	matchingRoutes := api.Group("/matching")
+	{
+		// User-centric matching endpoints
+		matchingRoutes.GET("/recommendations/:userId", matchingHandler.GetRecommendations)
+		matchingRoutes.POST("/recommendations/:userId", matchingHandler.GetRecommendationsWithFilters)
+		matchingRoutes.GET("/calculate/:userId/:jobId", matchingHandler.CalculateMatchScore)
+		matchingRoutes.GET("/similar/:jobId", matchingHandler.GetSimilarJobs)
+		
+		// Analytics and insights
+		matchingRoutes.GET("/analytics/:userId", matchingHandler.GetMatchingAnalytics)
+		matchingRoutes.GET("/insights/:userId", matchingHandler.GetUserInsights)
+	}
+	
+	// Application routes
+	applicationRoutes := api.Group("/applications")
+	{
+		applicationRoutes.POST("", applicationHandler.CreateApplication)
+		applicationRoutes.GET("/:id", applicationHandler.GetApplication)
+		applicationRoutes.PUT("/:id", applicationHandler.UpdateApplication)
+		applicationRoutes.GET("/user/:userId", applicationHandler.GetUserApplications)
+		applicationRoutes.GET("/job/:jobId", applicationHandler.GetJobApplications)
+	}
+	
+	// Health check
+	api.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+			"service": "microbridge-api",
+		})
+	})
 }
