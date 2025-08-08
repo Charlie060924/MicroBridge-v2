@@ -11,16 +11,29 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [isStudentPortal, setIsStudentPortal] = useState(false);
+  const [shouldShowHeader, setShouldShowHeader] = useState(false);
 
-  // Handle client-side routing to prevent hydration mismatch
   useEffect(() => {
-    setIsStudentPortal(pathname?.startsWith('/student_portal') || false);
+    // Paths where header should be hidden
+    const noHeaderPaths = [
+      "/auth",          // covers /auth, /auth/login, /auth/register, etc.
+      "/onboarding",
+      "/employer_info",
+      "/students_info",
+      "/student_portal"
+    ];
+
+    // Hide header if the current path starts with any of the above
+    const hideHeader = noHeaderPaths.some(path =>
+      pathname?.startsWith(path)
+    );
+
+    setShouldShowHeader(!hideHeader);
   }, [pathname]);
 
   return (
     <>
-      {!isStudentPortal && <Header />}
+      {shouldShowHeader && <Header />}
       <ToasterContext />
       {children}
     </>
