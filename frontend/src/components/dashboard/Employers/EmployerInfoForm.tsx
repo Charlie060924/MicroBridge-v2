@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { companyTypes, industries, companySizes } from "./Emplyer_Info_Constant";
+import LevelProgressBar from "@/components/common/Level/LevelProgressBar";
+import { useLevel } from "@/hooks/useLevel";
 
 export default function EmployerInfoForm() {
   const router = useRouter();
+  const { gainXP, unlockAchievement } = useLevel();
   const [formData, setFormData] = useState({
     companyName: "",
     companyType: "",
@@ -34,6 +37,18 @@ export default function EmployerInfoForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submitted Employer Info:", formData);
+    
+    // Award XP for completing company profile
+    gainXP(75);
+    
+    // Unlock company profile achievement
+    unlockAchievement({
+      id: "company_profile",
+      title: "Company Creator",
+      description: "Set up your company profile",
+      icon: "🏢"
+    });
+    
     router.push("/employer/dashboard");
   };
 
@@ -44,6 +59,12 @@ export default function EmployerInfoForm() {
         <h2 className="mb-10 text-center text-3xl font-semibold text-black dark:text-white">
           Company Profile Information
         </h2>
+
+        {/* Company Level Progress */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">Company Level</h3>
+          <LevelProgressBar />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Logo Upload */}

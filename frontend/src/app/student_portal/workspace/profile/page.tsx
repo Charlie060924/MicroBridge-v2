@@ -1,275 +1,342 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { User, Mail, Phone, MapPin, Edit2, Award, Target, Code, BookOpen } from "lucide-react";
+import LevelSection from "./LevelSection";
+import SkillsAndGoals from "./SkillsAndGoals";
+import PortfolioSection from "./PortfolioSection";
+import ResumeSection from "./ResumeSection";
+import { useUser } from "@/hooks/useUser";
 
-function StudentInfoCard() {
-  function useModal() {
-    const [isOpen, setIsOpen] = React.useState(false);
-    const openModal = () => setIsOpen(true);
-    const closeModal = () => setIsOpen(false);
-    return { isOpen, openModal, closeModal };
+// Extended user data structure for profile
+interface ExtendedUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  bio: string;
+  location: string;
+  university: string;
+  degree: string;
+  major: string;
+  graduationDate: string;
+  skills: Array<{ skill: string; proficiency: number }>;
+  careerGoals: string[];
+  industry: string;
+  portfolioUrl: string;
+  resume: {
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  } | null;
+}
+
+// Mock extended user data - in real app this would come from API
+const getExtendedUserData = (): ExtendedUserData => ({
+  firstName: "Musharof",
+  lastName: "Chowdhury",
+  email: "musharof@pimjo.com",
+  phone: "+09 363 398 46",
+  bio: "Passionate software engineering student with a focus on full-stack development and emerging technologies.",
+  location: "Hong Kong",
+  university: "University of Hong Kong",
+  degree: "Bachelor of Engineering",
+  major: "Computer Science",
+  graduationDate: "June 2026",
+  skills: [
+    { skill: "React", proficiency: 4 },
+    { skill: "TypeScript", proficiency: 3 },
+    { skill: "Python", proficiency: 4 },
+    { skill: "Node.js", proficiency: 3 },
+    { skill: "SQL", proficiency: 3 },
+    { skill: "Git", proficiency: 4 }
+  ],
+  careerGoals: ["Software Engineer", "Full-Stack Developer"],
+  industry: "FinTech",
+  portfolioUrl: "https://musharof.dev",
+  resume: {
+    name: "Musharof_Chowdhury_Resume.pdf",
+    url: "/resumes/Musharof_Chowdhury_Resume.pdf",
+    size: 245760, // 240KB
+    type: "application/pdf"
   }
-  const { isOpen, openModal, closeModal } = useModal();
+});
 
-  const handleSave = () => {
-    console.log("Saving personal info...");
-    closeModal();
-  };
-
+function ProfileHeader() {
   return (
-    <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Personal Information
-          </h4>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Last Name
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Chowdhury
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Email address
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Phone
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +09 363 398 46
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Bio
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Team Manager
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <button
-          onClick={openModal}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
-        >
-          Edit
-          <svg
-            className="fill-current"
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z"
-              fill=""
-            />
-          </svg>
-        </button>
+    <div className="mb-8">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Profile
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">
+          Manage your personal information and career preferences
+        </p>
       </div>
-
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="relative w-full max-w-[700px] rounded-3xl bg-white p-6 dark:bg-gray-900">
-            <h4 className="mb-4 text-xl font-semibold text-gray-800 dark:text-white">
-              Edit Personal Information
-            </h4>
-            <form className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">First Name</label>
-                <input
-                  type="text"
-                  defaultValue="Musharof"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Last Name</label>
-                <input
-                  type="text"
-                  defaultValue="Chowdhury"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Email Address</label>
-                <input
-                  type="text"
-                  defaultValue="randomuser@pimjo.com"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Phone</label>
-                <input
-                  type="text"
-                  defaultValue="+09 363 398 46"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
-              </div>
-              <div className="lg:col-span-2">
-                <label className="text-sm text-gray-600 dark:text-gray-300">Bio</label>
-                <input
-                  type="text"
-                  defaultValue="Team Manager"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
-              </div>
-            </form>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={closeModal}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.05]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-function StudentEducationCard() {
-  function useModal() {
-    const [isOpen, setIsOpen] = React.useState(false);
-    const openModal = () => setIsOpen(true);
-    const closeModal = () => setIsOpen(false);
-    return { isOpen, openModal, closeModal };
-  }
-  const { isOpen, openModal, closeModal } = useModal();
+function PersonalInfoCard({ userData, onUpdate }: { userData: ExtendedUserData; onUpdate: (data: Partial<ExtendedUserData>) => void }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    email: userData.email,
+    phone: userData.phone,
+    bio: userData.bio,
+    location: userData.location,
+    university: userData.university,
+    degree: userData.degree,
+    major: userData.major
+  });
 
   const handleSave = () => {
-    console.log("Saving education info...");
-    closeModal();
+    onUpdate(formData);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      phone: userData.phone,
+      bio: userData.bio,
+      location: userData.location,
+      university: userData.university,
+      degree: userData.degree,
+      major: userData.major
+    });
+    setIsEditing(false);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
-    <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 mt-6">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Education Information
-          </h4>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">University</p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">University of Hong Kong</p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">Degree</p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">Bachelor of Engineering</p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">Major</p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">Chemical Engineering</p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">Expected Graduation</p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">June 2026</p>
-            </div>
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+            <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              Personal Information
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Your basic profile information and contact details
+            </p>
           </div>
         </div>
-
         <button
-          onClick={openModal}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
+          onClick={() => setIsEditing(!isEditing)}
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors duration-200"
         >
-          Edit
+          <Edit2 className="w-4 h-4" />
+          {isEditing ? "Cancel" : "Edit"}
         </button>
       </div>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="relative w-full max-w-[600px] rounded-xl bg-white p-6 dark:bg-gray-900">
-            <h4 className="mb-4 text-xl font-semibold text-gray-800 dark:text-white">
-              Edit Education Info
-            </h4>
-            <form className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">University</label>
-                <input
-                  type="text"
-                  defaultValue="University of Hong Kong"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
+      {/* User Avatar and Name Section */}
+      <div className="flex items-center gap-6 mb-8">
+        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+          <User className="w-10 h-10 text-white" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {isEditing ? formData.firstName + ' ' + formData.lastName : userData.firstName + ' ' + userData.lastName}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            {isEditing ? formData.bio : userData.bio}
+          </p>
+        </div>
+      </div>
+
+      {isEditing ? (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                First Name
+              </label>
+              <input
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => handleInputChange('firstName', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Last Name
+              </label>
+              <input
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Phone
+              </label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Location
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                University
+              </label>
+              <input
+                type="text"
+                value={formData.university}
+                onChange={(e) => handleInputChange('university', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Degree
+              </label>
+              <input
+                type="text"
+                value={formData.degree}
+                onChange={(e) => handleInputChange('degree', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Major
+              </label>
+              <input
+                type="text"
+                value={formData.major}
+                onChange={(e) => handleInputChange('major', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Bio
+            </label>
+            <textarea
+              value={formData.bio}
+              onChange={(e) => handleInputChange('bio', e.target.value)}
+              rows={3}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
+            />
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleSave}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            >
+              Save Changes
+            </button>
+            <button
+              onClick={handleCancel}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Degree</label>
-                <input
-                  type="text"
-                  defaultValue="Bachelor of Engineering"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
+                <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                <p className="font-medium text-gray-900 dark:text-white">{userData.email}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Major</label>
-                <input
-                  type="text"
-                  defaultValue="Chemical Engineering"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
+                <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                <p className="font-medium text-gray-900 dark:text-white">{userData.phone}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+                <MapPin className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Expected Graduation</label>
-                <input
-                  type="text"
-                  defaultValue="June 2026"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
+                <p className="text-sm text-gray-500 dark:text-gray-400">Location</p>
+                <p className="font-medium text-gray-900 dark:text-white">{userData.location}</p>
               </div>
-            </form>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={closeModal}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.05]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-              >
-                Save Changes
-              </button>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-50 dark:bg-orange-900/20 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">University</p>
+                <p className="font-medium text-gray-900 dark:text-white">{userData.university}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg flex items-center justify-center">
+                <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Degree</p>
+                <p className="font-medium text-gray-900 dark:text-white">{userData.degree}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-pink-50 dark:bg-pink-900/20 rounded-lg flex items-center justify-center">
+                <Code className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Major</p>
+                <p className="font-medium text-gray-900 dark:text-white">{userData.major}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -279,24 +346,103 @@ function StudentEducationCard() {
 }
 
 export default function ProfilePage() {
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">User Profile</h1>
-      </div>
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-        <div className="text-center py-12">
-          <div className="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">User Profile</h3>
-          <p className="text-gray-500 dark:text-gray-400">Your profile information will appear here.</p>
-        </div>
+  const { user, loading, error } = useUser();
+  const [userData, setUserData] = useState<ExtendedUserData>(getExtendedUserData());
 
-        <StudentInfoCard />
-        <StudentEducationCard />
+  // Handlers for data updates
+  const handlePersonalInfoUpdate = (updates: Partial<ExtendedUserData>) => {
+    setUserData(prev => ({ ...prev, ...updates }));
+    // In real app, this would call an API to update the user's information
+    console.log("Personal info updated:", updates);
+  };
+
+  const handlePortfolioUpdate = (newUrl: string) => {
+    setUserData(prev => ({ ...prev, portfolioUrl: newUrl }));
+    // In real app, this would call an API to update the user's portfolio URL
+    console.log("Portfolio URL updated:", newUrl);
+  };
+
+  const handleResumeUpload = async (file: File): Promise<void> => {
+    // In real app, this would upload the file to a server and return the file info
+    const newResume = {
+      name: file.name,
+      url: URL.createObjectURL(file), // In real app, this would be the server URL
+      size: file.size,
+      type: file.type
+    };
+    
+    setUserData(prev => ({ ...prev, resume: newResume }));
+    console.log("Resume uploaded:", file.name);
+  };
+
+  const handleResumeRemove = () => {
+    setUserData(prev => ({ ...prev, resume: null }));
+    // In real app, this would call an API to remove the resume
+    console.log("Resume removed");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Error Loading Profile</h3>
+          <p className="text-gray-500 dark:text-gray-400">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ProfileHeader />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Personal Info & Skills */}
+          <div className="lg:col-span-2 space-y-8">
+            <PersonalInfoCard userData={userData} onUpdate={handlePersonalInfoUpdate} />
+            <SkillsAndGoals 
+              userData={userData} 
+              onEdit={() => {
+                // In real app, this would navigate to the skills/goals edit form
+                console.log("Edit skills and goals");
+              }}
+            />
+            <PortfolioSection 
+              portfolioUrl={userData.portfolioUrl} 
+              onUpdate={handlePortfolioUpdate}
+            />
+            <ResumeSection 
+              resume={userData.resume}
+              onUpload={handleResumeUpload}
+              onRemove={handleResumeRemove}
+            />
+          </div>
+          
+          {/* Right Column - Level Section */}
+          <div className="lg:col-span-1">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-8 sticky top-8">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                Your Progress
+              </h3>
+              <LevelSection />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 ﻿package handlers
 
 import (
-	"encoding/json"
-	"net/http"
-	"strconv"
+    "encoding/json"
+    "net/http"
+    "strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,7 @@ type MatchingHandler struct {
 }
 
 func NewMatchingHandler(db *gorm.DB) *MatchingHandler {
-	return &MatchingHandler{
+    return &MatchingHandler{
 		recommender: matching.NewRecommender(db),
 		db:          db,
 	}
@@ -61,7 +61,7 @@ func (h *MatchingHandler) GetRecommendations(c *gin.Context) {
 
 	// Get recommendations with basic filtering
 	recommendations, err := h.recommender.GetRecommendations(userID, limit)
-	if err != nil {
+    if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -121,9 +121,9 @@ func (h *MatchingHandler) GetRecommendationsWithFilters(c *gin.Context) {
 	userID := c.Param("userId")
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
-		return
-	}
-
+        return
+    }
+    
 	var filters struct {
 		Limit            int       `json:"limit"`
 		MinScore         float64   `json:"min_score"`
@@ -142,9 +142,9 @@ func (h *MatchingHandler) GetRecommendationsWithFilters(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&filters); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
+        return
+    }
+    
 	// Set defaults
 	if filters.Limit <= 0 || filters.Limit > 100 {
 		filters.Limit = 20
@@ -155,14 +155,14 @@ func (h *MatchingHandler) GetRecommendationsWithFilters(c *gin.Context) {
 
 	// Get base recommendations
 	recommendations, err := h.recommender.GetRecommendations(userID, 100) // Get more to filter
-	if err != nil {
+    if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
+        return
+    }
+    
 	// Apply advanced filters
 	var filteredRecommendations []matching.Recommendation
-	for _, rec := range recommendations {
+    for _, rec := range recommendations {
 		if rec.MatchScore.TotalScore < filters.MinScore {
 			continue
 		}
@@ -244,7 +244,7 @@ func (h *MatchingHandler) GetRecommendationsWithFilters(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data": gin.H{
-			"recommendations": filteredRecommendations,
+        "recommendations": filteredRecommendations,
 			"filters_applied": filters,
 			"generated_at":    time.Now(),
 		},
@@ -300,7 +300,7 @@ func (h *MatchingHandler) GetSimilarJobs(c *gin.Context) {
 	}
 
 	recommendations, err := h.recommender.GetSimilarJobs(jobID, limit)
-	if err != nil {
+    if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -343,25 +343,25 @@ func (h *MatchingHandler) GetUserInsights(c *gin.Context) {
 	userID := c.Param("userId")
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
-		return
-	}
-
+        return
+    }
+    
 	// Get user
 	var user models.User
 	if err := h.db.Where("id = ?", userID).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
+        return
+    }
+    
 	// Get user's applications
 	var applications []models.Application
 	if err := h.db.Where("student_id = ?", userID).
 		Preload("Job").
 		Find(&applications).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
+        return
+    }
+    
 	// Generate insights
 	insights := h.generateUserInsights(&user, applications)
 

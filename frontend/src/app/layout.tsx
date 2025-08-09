@@ -6,6 +6,8 @@ import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { usePathname } from "next/navigation";
+import { LevelProvider } from "./context/LevelContext";
+import AchievementPopup from "@/components/common/Level/AchievementPopup";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,9 +27,12 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="light"
         >
-          {!isStudentPortal && <Header />}
-          {children}
-          <ScrollToTop />
+          <LevelProvider>
+            {!isStudentPortal && <Header />}
+            {children}
+            <ScrollToTop />
+            <AchievementPopup achievement={null} />
+          </LevelProvider>
         </ThemeProvider>
       </body>
     </html>

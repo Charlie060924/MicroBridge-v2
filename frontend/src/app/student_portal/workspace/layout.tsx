@@ -1,12 +1,11 @@
 "use client";
 
-import { SidebarProvider } from "@/context/SidebarContext";
-import { ThemeProvider } from "@/context/ThemeContext"; // Add this import
 import React from "react";
+import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import AppSidebar from "@/layout/AppSidebar";
 import AppHeader from "@/layout/AppHeader";
 import Backdrop from "@/layout/Backdrop";
-import { useSidebar } from "@/context/SidebarContext";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -28,14 +27,22 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     : "lg:ml-[90px]";
 
   return (
-    <div className="min-h-screen xl:flex">
+    <div className="min-h-screen flex flex-col xl:flex-row bg-gray-50 dark:bg-gray-900">
+      {/* Sidebar */}
       <AppSidebar />
+
+      {/* Backdrop for mobile menu */}
       <Backdrop />
+
+      {/* Main Content Area */}
       <div
-        className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${mainContentMargin}`}
       >
+        {/* Header */}
         <AppHeader />
-        <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+
+        {/* Page Content */}
+        <main className="flex-1 p-4 md:p-6">
           {children}
         </main>
       </div>

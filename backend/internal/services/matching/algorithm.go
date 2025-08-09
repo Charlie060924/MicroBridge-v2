@@ -2,8 +2,8 @@
 
 import (
 	"fmt"
-	"math"
-	"strings"
+    "math"
+    "strings"
 	"microbridge/backend/internal/models"
 )
 
@@ -35,12 +35,12 @@ func NewMatchingAlgorithm() *MatchingAlgorithm {
 
 // CalculateMatchScore calculates the overall match score between a user and job
 func (ma *MatchingAlgorithm) CalculateMatchScore(user *models.User, job *models.Job) *MatchScore {
-	// Early knockout check
+    // Early knockout check
 	if !ma.isViableMatch(user, job) {
-		return &MatchScore{
+        return &MatchScore{
 			TotalScore:    0.0,
 			MatchQuality:  "not_viable",
-			Recommendations: []string{"This position has requirements that don't match your current profile"},
+            Recommendations: []string{"This position has requirements that don't match your current profile"},
 		}
 	}
 
@@ -56,23 +56,23 @@ func (ma *MatchingAlgorithm) CalculateMatchScore(user *models.User, job *models.
 	j2uTimeCommitment := ma.calculateTimeCommitmentScore(user, job)
 	j2uCareerFit := ma.calculateCareerFitScore(user, job)
 
-	// Combine scores using weighted approach
+    // Combine scores using weighted approach
 	userToJob := ma.calculateUserToJobScore(u2jSkills, u2jExperience, u2jLocation, u2jAvailability, u2jLearning)
 	jobToUser := ma.calculateJobToUserScore(j2uInterest, j2uTimeCommitment, j2uCareerFit, u2jLearning)
 
-	// Final harmonic mean for balanced consideration
+    // Final harmonic mean for balanced consideration
 	overallScore := ma.calculateHarmonicMean(userToJob, jobToUser)
 
 	// Get matched and missing skills with gap analysis
 	matchedSkills, missingSkills, skillGaps := ma.getSkillMatchesWithGaps(user.Skills, job.Skills)
 
-	// Determine match quality and generate recommendations
+    // Determine match quality and generate recommendations
 	matchQuality, recommendations := ma.generateMatchInsights(overallScore, u2jSkills, user, job)
 
-	return &MatchScore{
+    return &MatchScore{
 		TotalScore:     overallScore,
-		UserToJobScore: userToJob,
-		JobToUserScore: jobToUser,
+        UserToJobScore: userToJob,
+        JobToUserScore: jobToUser,
 		Breakdown: map[string]float64{
 			"skills":       u2jSkills,
 			"experience":   u2jExperience,
@@ -86,8 +86,8 @@ func (ma *MatchingAlgorithm) CalculateMatchScore(user *models.User, job *models.
 		MatchedSkills:   matchedSkills,
 		MissingSkills:   missingSkills,
 		SkillGaps:       skillGaps,
-		MatchQuality:    matchQuality,
-		Recommendations: recommendations,
+        MatchQuality:    matchQuality,
+        Recommendations: recommendations,
 	}
 }
 
@@ -185,21 +185,21 @@ func (ma *MatchingAlgorithm) calculateExperienceScore(userLevel, jobLevel string
 	if userScore > jobScore {
 		score = math.Min(score+0.1, 1.0)
 	}
-
-	return score
+    
+    return score
 }
 
 // calculateLocationScore calculates location compatibility with enhanced logic
 func (ma *MatchingAlgorithm) calculateLocationScore(userLocation, jobLocation string, isRemote bool) float64 {
-	if isRemote {
+    if isRemote {
 		return 1.0 // Remote jobs are compatible with all locations
 	}
 
 	if userLocation == "" || jobLocation == "" {
 		return 0.5 // Partial score for missing data
-	}
-
-	if strings.EqualFold(userLocation, jobLocation) {
+    }
+    
+    if strings.EqualFold(userLocation, jobLocation) {
 		return 1.0 // Perfect location match
 	}
 
@@ -388,8 +388,8 @@ func (ma *MatchingAlgorithm) calculateWeightedScore(scores map[string]float64, w
 	}
 
 	if totalWeight == 0 {
-		return 0.0
-	}
+        return 0.0
+    }
 
 	return totalScore / totalWeight
 }
@@ -427,9 +427,9 @@ func (ma *MatchingAlgorithm) getSkillMatchesWithGaps(userSkills, jobSkills []str
 // generateMatchInsights generates match quality and recommendations
 func (ma *MatchingAlgorithm) generateMatchInsights(overallScore, skillsScore float64, user *models.User, job *models.Job) (string, []string) {
 	var matchQuality string
-	var recommendations []string
-
-	// Determine match quality
+    var recommendations []string
+    
+    // Determine match quality
 	if overallScore >= 0.8 {
 		matchQuality = "excellent"
 		recommendations = append(recommendations, "This is an excellent match for your profile!")
