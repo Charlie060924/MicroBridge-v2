@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, Settings, LogOut, ChevronDown } from "lucide-react";
+import { User, Settings, LogOut, ChevronDown, HelpCircle, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { useLevel } from "@/hooks/useLevel";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const { levelData } = useLevel();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -14,6 +16,9 @@ export default function UserDropdown() {
   const closeDropdown = () => {
     setIsOpen(false);
   };
+
+  // Calculate progress percentage
+  const progressPercentage = Math.min((levelData.xp / levelData.xpToNext) * 100, 100);
 
   return (
     <div className="relative">
@@ -24,16 +29,37 @@ export default function UserDropdown() {
         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
           <User className="h-4 w-4 text-white" />
         </div>
-        <span className="hidden md:block text-sm font-medium">Alex Johnson</span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
           <div className="py-2">
-            <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+            {/* User Info Section */}
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
               <p className="text-sm font-medium text-gray-900 dark:text-white">Alex Johnson</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">alex.johnson@example.com</p>
+              
+              {/* Level Progress Bar */}
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Level {levelData.level}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {levelData.xp}/{levelData.xpToNext} XP
+                  </span>
+                </div>
+                
+                                 {/* Progress Bar */}
+                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                   <div
+                     className="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all duration-300"
+                     style={{ width: `${progressPercentage}%` }}
+                   />
+                 </div>
+              </div>
             </div>
             
             <Link
@@ -55,6 +81,14 @@ export default function UserDropdown() {
             </Link>
             
             <div className="border-t border-gray-200 dark:border-gray-700 mt-1">
+              <Link
+                href="/help"
+                className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                onClick={closeDropdown}
+              >
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Help Center
+              </Link>
               <Link
                 href="/auth/signout"
                 className="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
