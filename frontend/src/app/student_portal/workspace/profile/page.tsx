@@ -381,6 +381,17 @@ export default function ProfilePage() {
     console.log("Resume removed");
   };
 
+  const handleSkillsAndGoalsUpdate = (skillsAndGoalsData: { skills: Array<{ skill: string; proficiency: number }>; careerGoals: string[]; industry: string }) => {
+    setUserData(prev => ({ 
+      ...prev, 
+      skills: skillsAndGoalsData.skills,
+      careerGoals: skillsAndGoalsData.careerGoals,
+      industry: skillsAndGoalsData.industry
+    }));
+    // In real app, this would call an API to update the user's skills and goals
+    console.log("Skills and goals updated:", skillsAndGoalsData);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
@@ -417,10 +428,7 @@ export default function ProfilePage() {
             <PersonalInfoCard userData={userData} onUpdate={handlePersonalInfoUpdate} />
             <SkillsAndGoals 
               userData={userData} 
-              onEdit={() => {
-                // In real app, this would navigate to the skills/goals edit form
-                console.log("Edit skills and goals");
-              }}
+              onSave={handleSkillsAndGoalsUpdate}
             />
             <PortfolioSection 
               portfolioUrl={userData.portfolioUrl} 

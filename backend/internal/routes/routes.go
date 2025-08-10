@@ -18,11 +18,15 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	api.Use(middleware.ErrorHandler())
 	api.Use(middleware.CORS())
 	
+	// Initialize services
+	notificationService := services.NewNotificationService(db)
+	
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(db)
 	jobHandler := handlers.NewJobHandler(db)
 	matchingHandler := handlers.NewMatchingHandler(db)
 	applicationHandler := handlers.NewApplicationHandler(db)
+	notificationHandler := handlers.NewNotificationHandler(notificationService)
 	
 	// User routes
 	userRoutes := api.Group("/users")
@@ -65,6 +69,19 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		applicationRoutes.PUT("/:id", applicationHandler.UpdateApplication)
 		applicationRoutes.GET("/user/:userId", applicationHandler.GetUserApplications)
 		applicationRoutes.GET("/job/:jobId", applicationHandler.GetJobApplications)
+	}
+	
+	// Notification routes
+	notificationRoutes := api.Group("/notifications")
+	{
+		notificationRoutes.GET("", notificationHandler.GetNotifications)
+		notificationRoutes.GET("/unread-count", notificationHandler.GetUnreadCount)
+		notificationRoutes.PUT("/:id/read", notificationHandler.MarkAsRead)
+		notificationRoutes.PUT("/mark-all-read", notificationHandler.MarkAllAsRead)
+		notificationRoutes.DELETE("/:id", notificationHandler.DeleteNotification)
+		notificationRoutes.GET("/settings", notificationHandler.GetNotificationSettings)
+		notificationRoutes.PUT("/settings", notificationHandler.UpdateNotificationSettings)
+		notificationRoutes.POST("", notificationHandler.CreateNotification)
 	}
 	
 	// Health check

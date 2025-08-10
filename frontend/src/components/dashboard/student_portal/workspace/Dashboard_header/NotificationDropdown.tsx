@@ -1,91 +1,66 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bell, Check, X } from "lucide-react";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  type: "info" | "success" | "warning" | "error";
-  isRead: boolean;
-}
+import { Bell, Check, X, ExternalLink, Trash2 } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
+import { notificationService } from "@/services/notificationService";
+import Link from "next/link";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "New Job Match",
-      message: "A new micro-internship opportunity matches your skills",
-      time: "2 min ago",
-      type: "success",
-      isRead: false
-    },
-    {
-      id: "2",
-      title: "Project Update",
-      message: "Your ongoing project has been updated with new requirements",
-      time: "15 min ago",
-      type: "info",
-      isRead: false
-    },
-    {
-      id: "3",
-      title: "Payment Received",
-      message: "Payment of $150 has been processed for your completed project",
-      time: "1 hour ago",
-      type: "success",
-      isRead: true
-    },
-    {
-      id: "4",
-      title: "Deadline Reminder",
-      message: "Your project 'Website Redesign' is due in 2 days",
-      time: "3 hours ago",
-      type: "warning",
-      isRead: false
-    }
-  ]);
-
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    error,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    refresh
+  } = useNotifications({
+    autoRefresh: true,
+    refreshInterval: 30000, // 30 seconds
+    initialLimit: 10
+  });
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
+    if (!isOpen) {
+      refresh(); // Refresh notifications when opening
+    }
   };
 
   const closeDropdown = () => {
     setIsOpen(false);
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, isRead: true }
-          : notification
-      )
-    );
+  const handleMarkAsRead = async (id: number) => {
+    try {
+      await markAsRead(id);
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, isRead: true }))
-    );
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead();
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  };
+
+  const handleDeleteNotification = async (id: number) => {
+    try {
+      await deleteNotification(id);
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+    }
   };
 
   const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "success":
-        return <div className="w-2 h-2 bg-green-500 rounded-full"></div>;
-      case "warning":
-        return <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>;
-      case "error":
-        return <div className="w-2 h-2 bg-red-500 rounded-full"></div>;
-      default:
-        return <div className="w-2 h-2 bg-blue-500 rounded-full"></div>;
-    }
+    const iconConfig = notificationService.getNotificationIcon(type);
+    return <div className={iconConfig.className}></div>;
   };
 
   return (
@@ -112,7 +87,7 @@ export default function NotificationDropdown() {
             <div className="flex items-center space-x-2">
               {unreadCount > 0 && (
                 <button
-                  onClick={markAllAsRead}
+                  onClick={handleMarkAllAsRead}
                   className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Mark all read
@@ -129,7 +104,16 @@ export default function NotificationDropdown() {
 
           {/* Notifications List */}
           <div className="max-h-96 overflow-y-auto">
-            {notifications.length === 0 ? (
+            {loading ? (
+              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                Loading notifications...
+              </div>
+            ) : error ? (
+              <div className="p-4 text-center text-red-500 dark:text-red-400">
+                {error}
+              </div>
+            ) : notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                 No notifications
               </div>
@@ -139,7 +123,7 @@ export default function NotificationDropdown() {
                   <div
                     key={notification.id}
                     className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                      !notification.isRead ? "bg-blue-50 dark:bg-blue-900/20" : ""
+                      !notification.is_read ? "bg-blue-50 dark:bg-blue-900/20" : ""
                     }`}
                   >
                     <div className="flex items-start space-x-3">
@@ -149,24 +133,43 @@ export default function NotificationDropdown() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <p className={`text-sm font-medium ${
-                            !notification.isRead 
+                            !notification.is_read 
                               ? "text-gray-900 dark:text-white" 
                               : "text-gray-700 dark:text-gray-300"
                           }`}>
                             {notification.title}
                           </p>
-                          <button
-                            onClick={() => markAsRead(notification.id)}
-                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                          >
-                            <Check className="h-4 w-4" />
-                          </button>
+                          <div className="flex items-center space-x-1">
+                            {notification.action_url && notification.action_text && (
+                              <Link
+                                href={notification.action_url}
+                                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                onClick={closeDropdown}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </Link>
+                            )}
+                            <button
+                              onClick={() => handleMarkAsRead(notification.id)}
+                              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              title="Mark as read"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteNotification(notification.id)}
+                              className="text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                              title="Delete notification"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           {notification.message}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                          {notification.time}
+                          {notificationService.formatTimeAgo(notification.created_at)}
                         </p>
                       </div>
                     </div>
@@ -178,9 +181,13 @@ export default function NotificationDropdown() {
 
           {/* Footer */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <button className="w-full text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+            <Link
+              href="/student_portal/workspace/notifications"
+              className="block w-full text-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+              onClick={closeDropdown}
+            >
               View all notifications
-            </button>
+            </Link>
           </div>
         </div>
       )}
