@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import AppSidebar from "@/layout/AppSidebar";
@@ -19,15 +19,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+  const [isMobile, setIsMobile] = useState(false);
 
-  const mainContentMargin = isMobileOpen
-    ? "ml-0"
-    : isExpanded || isHovered
-    ? "lg:ml-[290px]"
-    : "lg:ml-[90px]";
+  // Calculate sidebar width based on state
+  const getSidebarWidth = () => {
+    if (isMobileOpen) return 0;
+    if (isExpanded || isHovered) return 290;
+    return 90;
+  };
+
+  const sidebarWidth = getSidebarWidth();
+
+  // Handle responsive behavior
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col xl:flex-row bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 sidebar-layout">
       {/* Sidebar */}
       <AppSidebar />
 
@@ -36,13 +51,18 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${mainContentMargin}`}
+        className="flex-1 flex flex-col sidebar-layout-content"
+        style={{
+          marginLeft: isMobile ? 0 : `${sidebarWidth}px`,
+          width: isMobile ? '100vw' : `calc(100vw - ${sidebarWidth}px)`,
+          maxWidth: isMobile ? '100vw' : `calc(100vw - ${sidebarWidth}px)`
+        }}
       >
         {/* Header */}
         <AppHeader />
 
         {/* Page Content */}
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-x-hidden">
           {children}
         </main>
       </div>

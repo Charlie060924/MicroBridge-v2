@@ -264,3 +264,21 @@ pre {
 .menu-item-text {
   @apply ml-3;
 }
+
+/* Sidebar Layout Styles */
+.sidebar-layout {
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar-layout-content {
+  transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+/* Ensure content doesn't overflow on mobile */
+@media (max-width: 1023px) {
+  .sidebar-layout-content {
+    margin-left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+}

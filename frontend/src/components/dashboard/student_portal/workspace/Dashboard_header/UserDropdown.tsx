@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, Settings, LogOut, ChevronDown, HelpCircle, TrendingUp } from "lucide-react";
+import { User, Settings, LogOut, ChevronDown, HelpCircle, TrendingUp, Star } from "lucide-react";
 import Link from "next/link";
 import { useLevel } from "@/hooks/useLevel";
 
@@ -32,7 +32,7 @@ export default function UserDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
           <div className="py-2">
             {/* User Info Section */}
             <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
@@ -52,13 +52,23 @@ export default function UserDropdown() {
                   </span>
                 </div>
                 
-                                 {/* Progress Bar */}
-                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                   <div
-                     className="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all duration-300"
-                     style={{ width: `${progressPercentage}%` }}
-                   />
-                 </div>
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+                
+                {/* Clickable Level System Link */}
+                <Link
+                  href="/student_portal/workspace/levels"
+                  className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  onClick={closeDropdown}
+                >
+                  <Star className="w-3 h-3" />
+                  <span>View Level System</span>
+                </Link>
               </div>
             </div>
             

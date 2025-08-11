@@ -3,6 +3,8 @@
 import (
     "database/sql/driver"
     "encoding/json"
+    "errors"
+    "strings"
     "time"
 )
 
@@ -30,6 +32,19 @@ type User struct {
     LearningGoals   StringArray     `json:"learning_goals" gorm:"type:jsonb"`
     CareerGoals     StringArray     `json:"career_goals" gorm:"type:jsonb"`
     
+    // Enhanced Level System fields
+    Level           int             `json:"level" gorm:"default:1"`
+    XP              int             `json:"xp" gorm:"default:0"`
+    TotalXP         int             `json:"total_xp" gorm:"default:0"`
+    CareerCoins     int             `json:"career_coins" gorm:"default:0"`
+    UnlockedFeatures StringArray    `json:"unlocked_features" gorm:"type:jsonb"`
+    Achievements    AchievementArray `json:"achievements" gorm:"type:jsonb"`
+    StreakDays      int             `json:"streak_days" gorm:"default:0"`
+    TotalStreakDays int             `json:"total_streak_days" gorm:"default:0"`
+    PrestigeLevel   int             `json:"prestige_level" gorm:"default:0"`
+    MetaAchievements StringArray    `json:"meta_achievements" gorm:"type:jsonb"`
+    LastActivityAt  *time.Time      `json:"last_activity_at"`
+    
     // Timestamps
     CreatedAt       time.Time       `json:"created_at"`
     UpdatedAt       time.Time       `json:"updated_at"`
@@ -46,6 +61,17 @@ type UserSkill struct {
 }
 
 type StringArray []string
+
+type AchievementArray []UserAchievement
+
+type UserAchievement struct {
+    ID          string  `json:"id"`
+    Title       string  `json:"title"`
+    Description string  `json:"description"`
+    Icon        string  `json:"icon"`
+    UnlockedAt  string  `json:"unlocked_at"` // ISO timestamp
+    Category    string  `json:"category"`
+}
 
 type Availability struct {
     HoursPerWeek    int             `json:"hours_per_week"`
@@ -93,6 +119,21 @@ func (s *StringArray) Scan(value interface{}) error {
     return json.Unmarshal(bytes, s)
 }
 
+func (a AchievementArray) Value() (driver.Value, error) {
+    return json.Marshal(a)
+}
+
+func (a *AchievementArray) Scan(value interface{}) error {
+    if value == nil {
+        return nil
+    }
+    bytes, ok := value.([]byte)
+    if !ok {
+        return errors.New("cannot scan non-bytes into AchievementArray")
+    }
+    return json.Unmarshal(bytes, a)
+}
+
 func (a Availability) Value() (driver.Value, error) {
     return json.Marshal(a)
 }
@@ -129,4 +170,82 @@ func (u *User) GetSkillLevel(skillName string) int {
         return skill.Level
     }
     return 0
+}
+
+// Enhanced Level System helper methods
+func (u *User) AddXP(amount int) {
+    u.XP += amount
+    u.TotalXP += amount
+    u.UpdatedAt = time.Now()
+}
+
+func (u *User) AddCareerCoins(amount int) {
+    u.CareerCoins += amount
+    u.UpdatedAt = time.Now()
+}
+
+func (u *User) SpendCareerCoins(amount int) bool {
+    if u.CareerCoins >= amount {
+        u.CareerCoins -= amount
+        u.UpdatedAt = time.Now()
+        return true
+    }
+    return false
+}
+
+func (u *User) UnlockFeature(featureID string) {
+    for _, feature := range u.UnlockedFeatures {
+        if feature == featureID {
+            return // Already unlocked
+        }
+    }
+    u.UnlockedFeatures = append(u.UnlockedFeatures, featureID)
+    u.UpdatedAt = time.Now()
+}
+
+func (u *User) HasFeatureUnlocked(featureID string) bool {
+    for _, feature := range u.UnlockedFeatures {
+        if feature == featureID {
+            return true
+        }
+    }
+    return false
+}
+
+func (u *User) UnlockAchievement(achievement UserAchievement) {
+    for _, existing := range u.Achievements {
+        if existing.ID == achievement.ID {
+            return // Already unlocked
+        }
+    }
+    u.Achievements = append(u.Achievements, achievement)
+    u.UpdatedAt = time.Now()
+}
+
+func (u *User) UpdateStreak(didActivityToday bool) {
+    if didActivityToday {
+        u.StreakDays++
+        if u.StreakDays > u.TotalStreakDays {
+            u.TotalStreakDays = u.StreakDays
+        }
+    } else {
+        u.StreakDays = 0
+    }
+    u.LastActivityAt = &time.Time{}
+    *u.LastActivityAt = time.Now()
+    u.UpdatedAt = time.Now()
+}
+
+func (u *User) CanPrestige() bool {
+    return u.Level >= 20
+}
+
+func (u *User) Prestige() bool {
+    if !u.CanPrestige() {
+        return false
+    }
+    u.PrestigeLevel++
+    u.Achievements = AchievementArray{} // Reset achievements
+    u.UpdatedAt = time.Now()
+    return true
 }
