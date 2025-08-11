@@ -85,7 +85,7 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ projects, onProjectCl
           <PlayCircle className="h-8 w-8 text-gray-400" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          No Ongoing Projects
+          No Current Projects
         </h3>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
           You don't have any active projects at the moment.
@@ -103,10 +103,10 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ projects, onProjectCl
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Ongoing Projects
+            Current Projects
           </h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Track your current micro-internship projects
+            Track your active micro-internship projects
           </p>
         </div>
         <span className="text-sm text-gray-500 dark:text-gray-400">

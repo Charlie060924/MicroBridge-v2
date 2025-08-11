@@ -77,7 +77,7 @@ const Recommendations: React.FC<RecommendationsProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Recommended for You
+              Recommended Jobs
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               Based on your skills and preferences

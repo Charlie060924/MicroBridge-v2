@@ -2,19 +2,20 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, Bell, Calendar, TrendingUp } from "lucide-react";
+import { User, Calendar, TrendingUp } from "lucide-react";
 import dynamic from 'next/dynamic';
 
 // Import types from the components that define them
 import { Job } from "./JobCategoryCard";
 import { Project } from "./OngoingProjects";
+import { RecentlyViewedJob, recentlyViewedJobsService } from "@/services/recentlyViewedJobsService";
 
 const SearchBar = dynamic(() => import("./SearchBar_and_Filter/SearchBar"), {
   loading: () => <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
   ssr: false
 });
 
-const FeaturedJobs = dynamic(() => import("./FeaturedJobs"), {
+const RecentlyViewedJobs = dynamic(() => import("./RecentlyViewedJobs"), {
   loading: () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {[...Array(3)].map((_, i) => (
@@ -56,6 +57,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   
   // Real data state
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
+  const [recentlyViewedJobs, setRecentlyViewedJobs] = useState<RecentlyViewedJob[]>([]);
   const [ongoingProjects, setOngoingProjects] = useState<Project[]>([]);
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
@@ -139,9 +141,20 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
         setFeaturedJobs(mockJobs);
         setOngoingProjects(mockProjects);
         setUserSkills(mockSkills);
+
+        // Load recently viewed jobs from localStorage
+        const recentJobs = recentlyViewedJobsService.getRecentlyViewedJobs();
+        if (recentJobs.length === 0) {
+          // Use mock data for development if no recent jobs exist
+          const mockRecentJobs = recentlyViewedJobsService.getMockRecentlyViewedJobs();
+          setRecentlyViewedJobs(mockRecentJobs);
+        } else {
+          setRecentlyViewedJobs(recentJobs);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         setFeaturedJobs([]);
+        setRecentlyViewedJobs([]);
         setOngoingProjects([]);
         setUserSkills([]);
       } finally {
@@ -217,6 +230,9 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   }, []);
 
   const handleJobClick = useCallback((job: Job) => {
+    // Add job to recently viewed when clicked
+    recentlyViewedJobsService.addRecentlyViewedJob(job);
+    
     router.prefetch(`/student_portal/workspace/job-details/${job.id}`);
     router.push(`/student_portal/workspace/job-details/${job.id}`);
   }, [router]);
@@ -344,26 +360,29 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
               />
             ) : (
               <div className="space-y-8">
-                <FeaturedJobs
-                  jobs={featuredJobs}
+                {/* Step 2: Replace Featured Jobs with Recently Viewed Jobs */}
+                <RecentlyViewedJobs
+                  jobs={recentlyViewedJobs}
                   onBookmark={handleBookmark}
                   onJobClick={handleJobClick}
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Step 2: Replace Ongoing Projects with Recommended Jobs */}
                   <div className="lg:col-span-2">
-                    <OngoingProjects
-                      projects={ongoingProjects}
-                      onProjectClick={handleProjectClick}
-                    />
-                  </div>
-
-                  <div>
                     <Recommendations
                       jobs={featuredJobs.slice(0, 3)}
                       onBookmark={handleBookmark}
                       onJobClick={handleJobClick}
                       userSkills={userSkills}
+                    />
+                  </div>
+
+                  {/* Step 2: Replace Recommended Jobs with Ongoing Projects */}
+                  <div>
+                    <OngoingProjects
+                      projects={ongoingProjects}
+                      onProjectClick={handleProjectClick}
                     />
                   </div>
                 </div>
