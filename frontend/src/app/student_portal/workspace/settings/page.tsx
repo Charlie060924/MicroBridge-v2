@@ -9,6 +9,9 @@ import AppearanceSettingsSection from './sections/AppearanceSettingsSection';
 import PrivacySecuritySection from './sections/PrivacySecuritySection';
 import OtherSettingsSection from './sections/OtherSettingsSection';
 import { useSettings } from './hooks/useSettings';
+import { useSettingsShortcuts } from '@/hooks/useKeyboardShortcuts';
+import StickyActionBar, { SettingsActionBar } from '@/components/common/StickyActionBar';
+import { animations } from '@/components/common/ui/Animations';
 
 export default function SettingsPage() {
   const { settings, saveSettings, resetSettings, isLoading, hasChanges } = useSettings();
@@ -33,29 +36,16 @@ export default function SettingsPage() {
     }
   };
 
-  // Micro-animation variants matching dashboard style
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.15,
-        staggerChildren: 0.08,
-      },
-    },
-  };
+  // Keyboard shortcuts
+  useSettingsShortcuts({
+    onSave: handleSaveAll,
+    onReset: handleReset,
+    onClose: () => window.history.back()
+  });
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut" as const,
-      },
-    },
-  };
+  // Use centralized animations
+  const containerVariants = animations.stagger.container;
+  const itemVariants = animations.card;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -133,8 +123,17 @@ export default function SettingsPage() {
               please ensure you're signed in to your account.
             </p>
           </div>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
+                 </motion.div>
+       </motion.div>
+       
+       {/* Sticky Action Bar */}
+       <SettingsActionBar
+         isVisible={hasChanges}
+         onSave={handleSaveAll}
+         onReset={handleReset}
+         isSaving={isSaving}
+         hasChanges={hasChanges}
+       />
+     </div>
+   );
+ }
