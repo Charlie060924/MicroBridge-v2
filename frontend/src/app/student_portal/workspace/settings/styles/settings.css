@@ -1,0 +1,64 @@
+/* Settings Page Specific Styles */
+
+/* Custom scrollbar for settings sections */
+.settings-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* Dark mode scrollbar */
+.dark .settings-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.3);
+}
+
+.dark .settings-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.5);
+}
+
+/* Smooth transitions for all interactive elements */
+.settings-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus styles for better accessibility */
+.settings-focus:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Custom animation for loading states */
+@keyframes settings-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.settings-loading {
+  animation: settings-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Hover effects for cards */
+.settings-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark mode card hover */
+.dark .settings-card-hover:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
