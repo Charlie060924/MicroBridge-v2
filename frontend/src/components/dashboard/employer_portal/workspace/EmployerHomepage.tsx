@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, FileText, Briefcase, Users, Clock, Plus, Eye, TrendingUp } from "lucide-react";
+import { User, FileText, Briefcase, Users, Clock, Plus, Eye, BarChart3 } from "lucide-react";
 import dynamic from 'next/dynamic';
 
 // Import types
@@ -57,11 +57,13 @@ const StatCard = dynamic(() => import("./StatCard"), {
   loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
 });
 
-const ChartCard = dynamic(() => import("./ChartCard"), {
+
+
+const JobListCard = dynamic(() => import("./JobListCard"), {
   loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
 });
 
-const JobListCard = dynamic(() => import("./JobListCard"), {
+const JobPostingPerformance = dynamic(() => import("./JobPostingPerformance"), {
   loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
 });
 
@@ -388,8 +390,9 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
 
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Job Postings */}
-          <div className="lg:col-span-2">
+          {/* Left Column - Job Postings and Performance */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Recent Job Postings */}
             <JobListCard
               title="Recent Job Postings"
               subtitle="Your latest job listings and their performance"
@@ -399,36 +402,22 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
               onEditJob={(jobId) => router.push(`/employer_portal/workspace/post-job/${jobId}`)}
               onManageJobs={handleManageJobs}
             />
+
+            {/* Job Posting Performance - directly underneath Recent Job Postings */}
+            <JobPostingPerformance
+              title="Job Posting Performance"
+              subtitle="Track posting effectiveness with applications and conversion rates"
+              icon={BarChart3}
+            />
           </div>
 
-          {/* Recommended Candidates */}
+          {/* Right Column - Recommended Candidates */}
           <div>
             <RecommendedCandidates 
               candidates={recommendedCandidates}
               onViewCandidate={(candidateId) => router.push(`/employer_portal/workspace/candidates/${candidateId}`)}
             />
           </div>
-        </div>
-
-        {/* Bottom Section - Analytics Chart */}
-        <div className="mt-8">
-          <ChartCard
-            title="Application Trends"
-            subtitle="Track your application volume over time"
-            icon={TrendingUp}
-          >
-            <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <div className="text-center">
-                <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">
-                  Chart visualization will be implemented here
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-                  Shows application trends, conversion rates, and hiring funnel
-                </p>
-              </div>
-            </div>
-          </ChartCard>
         </div>
       </div>
     </div>
