@@ -59,7 +59,7 @@ const Contact = lazy(() => import("@/components/marketing/Contact")
 const Blog = lazy(() => import("@/components/marketing/Blog")
   .then(module => ({ default: module.default })));
 
-const Footer = lazy(() => import("@/components/common/Footer")
+const Footer = lazy(() => import("@/components/common/Footer/index")
   .then(module => ({ default: module.default })));
 
 // Loading skeleton components

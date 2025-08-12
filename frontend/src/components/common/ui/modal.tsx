@@ -71,7 +71,7 @@ const Modal: React.FC<ModalProps> = ({
       y: 0,
       transition: {
         duration: 0.2,
-        ease: "easeOut"
+        ease: "easeOut" as const
       }
     },
     exit: {
@@ -80,7 +80,7 @@ const Modal: React.FC<ModalProps> = ({
       y: 20,
       transition: {
         duration: 0.15,
-        ease: "easeIn"
+        ease: "easeIn" as const
       }
     }
   };

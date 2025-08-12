@@ -16,7 +16,7 @@ import {
   CheckCircle,
   ExternalLink
 } from "lucide-react";
-import { Job } from "@/components/student_portal/workspace/JobCategoryCard";
+import { Job } from "@/components/dashboard/student_portal/workspace/JobCategoryCard";
 
 const JobDetailsPage: React.FC = () => {
   const params = useParams();

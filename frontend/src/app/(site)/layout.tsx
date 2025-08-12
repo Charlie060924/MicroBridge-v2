@@ -18,7 +18,6 @@ export default function SiteLayout({
     const noHeaderPaths = [
       "/auth",          // covers /auth, /auth/login, /auth/register, etc.
       "/onboarding",
-      "/employer_info",
       "/students_info",
       "/student_portal"
     ];

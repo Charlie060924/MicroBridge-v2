@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle, FileText, Edit3 } from "lucide-react";
-import { Job } from "@/components/student_portal/workspace/JobCategoryCard";
+import { Job } from "@/components/dashboard/student_portal/workspace/JobCategoryCard";
 
 interface ApplicationForm {
   fullName: string;

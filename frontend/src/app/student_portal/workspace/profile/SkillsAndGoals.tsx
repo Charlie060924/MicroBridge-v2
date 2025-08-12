@@ -6,15 +6,32 @@ interface Skill {
   proficiency: number;
 }
 
-interface UserData {
-  skills: Skill[];
+interface ExtendedUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  bio: string;
+  location: string;
+  university: string;
+  degree: string;
+  major: string;
+  graduationDate: string;
+  skills: Array<{ skill: string; proficiency: number }>;
   careerGoals: string[];
   industry: string;
+  portfolioUrl: string;
+  resume: {
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  } | null;
 }
 
 interface SkillsAndGoalsProps {
-  userData: UserData;
-  onSave?: (data: UserData) => void;
+  userData: ExtendedUserData;
+  onSave?: (data: { skills: Array<{ skill: string; proficiency: number }>; careerGoals: string[]; industry: string }) => void;
 }
 
 const getProficiencyColor = (proficiency: number) => {
@@ -62,7 +79,7 @@ const proficiencyOptions = [
 function SkillsAndGoals({ userData, onSave }: SkillsAndGoalsProps) {
   const [isEditingSkills, setIsEditingSkills] = useState(false);
   const [isEditingGoals, setIsEditingGoals] = useState(false);
-  const [formData, setFormData] = useState<UserData>(userData);
+  const [formData, setFormData] = useState<ExtendedUserData>(userData);
   const [newSkill, setNewSkill] = useState({ skill: "", proficiency: 3 });
   const [newGoal, setNewGoal] = useState("");
 
@@ -90,7 +107,11 @@ function SkillsAndGoals({ userData, onSave }: SkillsAndGoalsProps) {
 
   const handleSaveSkills = () => {
     if (onSave) {
-      onSave(formData);
+      onSave({
+        skills: formData.skills,
+        careerGoals: formData.careerGoals,
+        industry: formData.industry,
+      });
     }
     setIsEditingSkills(false);
     setNewSkill({ skill: "", proficiency: 3 });
@@ -98,7 +119,11 @@ function SkillsAndGoals({ userData, onSave }: SkillsAndGoalsProps) {
 
   const handleSaveGoals = () => {
     if (onSave) {
-      onSave(formData);
+      onSave({
+        skills: formData.skills,
+        careerGoals: formData.careerGoals,
+        industry: formData.industry,
+      });
     }
     setIsEditingGoals(false);
     setNewGoal("");
@@ -516,31 +541,4 @@ function SkillsAndGoals({ userData, onSave }: SkillsAndGoalsProps) {
 }
 
 // Demo Component
-export default function Demo() {
-  const [userData, setUserData] = useState({
-    skills: [
-      { skill: "React", proficiency: 4 },
-      { skill: "TypeScript", proficiency: 3 },
-      { skill: "Node.js", proficiency: 3 },
-      { skill: "Python", proficiency: 2 },
-    ],
-    careerGoals: ["Senior Frontend Developer", "Full Stack Engineer", "Tech Lead"],
-    industry: "Technology"
-  });
-
-  const handleSave = (data: UserData) => {
-    setUserData(data);
-    console.log("Data saved:", data);
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          Skills & Career Goals Demo
-        </h1>
-        <SkillsAndGoals userData={userData} onSave={handleSave} />
-      </div>
-    </div>
-  );
-}
+export default SkillsAndGoals;

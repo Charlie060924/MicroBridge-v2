@@ -39,7 +39,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       y: 0,
       transition: {
         duration: 0.3,
-        ease: "easeOut",
+        ease: "easeOut" as const,
         staggerChildren: 0.1
       }
     }
@@ -50,7 +50,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.2, ease: "easeOut" }
+      transition: { duration: 0.2, ease: "easeOut" as const }
     }
   };
 

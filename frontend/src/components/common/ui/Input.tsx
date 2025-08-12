@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps {
   label?: string;
   error?: string;
   success?: string;
@@ -10,6 +10,17 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   iconPosition?: 'left' | 'right';
   helperText?: string;
   className?: string;
+  id?: string;
+  disabled?: boolean;
+  placeholder?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  type?: string;
+  name?: string;
+  required?: boolean;
+  autoComplete?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(({

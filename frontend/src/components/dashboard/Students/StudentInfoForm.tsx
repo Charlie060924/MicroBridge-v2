@@ -3,16 +3,16 @@
 import React, { useCallback, useMemo, useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  FiUser,
-  FiMail,
-  FiEdit2,
-  FiBook,
-  FiBriefcase,
-  FiCode,
-  FiClock,
-  FiDollarSign,
-  FiUpload,
-} from "react-icons/fi";
+  User,
+  Mail,
+  Edit2,
+  BookOpen,
+  Briefcase,
+  Code,
+  Clock,
+  DollarSign,
+  Upload,
+} from "lucide-react";
 import {
   educationLevels,
   academicMajors,
@@ -171,10 +171,11 @@ const StudentInfoForm: React.FC = () => {
   // Handlers (stable with useCallback)
   const handleFieldChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const { name, value, type, checked } = e.target as HTMLInputElement | HTMLSelectElement;
+      const { name, value, type } = e.target;
       if (type === "checkbox") {
         // for checkboxes, value comes from checked
-        dispatch({ type: "SET_FIELD", field: name as keyof FormData, value: (checked as any) });
+        const checked = (e.target as HTMLInputElement).checked;
+        dispatch({ type: "SET_FIELD", field: name as keyof FormData, value: checked });
       } else {
         dispatch({ type: "SET_FIELD", field: name as keyof FormData, value });
       }
@@ -385,14 +386,14 @@ const StudentInfoForm: React.FC = () => {
             {currentStep === 1 && (
     <div className="space-y-6">
       <h3 className="text-2xl font-semibold flex items-center gap-2">
-        <FiUser className="text-blue-500" /> Basic Information
+        <User className="text-blue-500" /> Basic Information
       </h3>
       
       <div className="space-y-6">
         {/* First Name */}
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiUser className="mr-2 text-gray-500" /> First Name *
+            <User className="mr-2 text-gray-500" /> First Name *
           </label>
             <input
               type="text"
@@ -411,7 +412,7 @@ const StudentInfoForm: React.FC = () => {
         {/* Last Name */}
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiUser className="mr-2 text-gray-500" /> Last Name *
+            <User className="mr-2 text-gray-500" /> Last Name *
           </label>
             <input
               type="text"
@@ -430,7 +431,7 @@ const StudentInfoForm: React.FC = () => {
         {/* Preferred Name */}
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiEdit2 className="mr-2 text-gray-500" /> Preferred Name *
+            <Edit2 className="mr-2 text-gray-500" /> Preferred Name *
           </label>
           <input
             type="text"
@@ -454,7 +455,7 @@ const StudentInfoForm: React.FC = () => {
         {/* Email */}
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiMail className="mr-2 text-gray-500" /> Email Address *
+            <Mail className="mr-2 text-gray-500" /> Email Address *
           </label>
           <input
             type="email"
@@ -477,13 +478,13 @@ const StudentInfoForm: React.FC = () => {
             {currentStep === 2 && (
     <div className="space-y-6">
       <h3 className="text-2xl font-semibold flex items-center gap-2">
-        <FiBook className="text-blue-500" /> Education Background
+        <BookOpen className="text-blue-500" /> Education Background
       </h3>
       
       <div className="space-y-6">
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiBook className="mr-2 text-gray-500" /> Education Level *
+            <BookOpen className="mr-2 text-gray-500" /> Education Level *
           </label>
           <select
             name="educationLevel"
@@ -506,7 +507,7 @@ const StudentInfoForm: React.FC = () => {
 
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiBook className="mr-2 text-gray-500" /> Major/Field of Study *
+            <BookOpen className="mr-2 text-gray-500" /> Major/Field of Study *
           </label>
           <select
             name="major"
@@ -534,13 +535,13 @@ const StudentInfoForm: React.FC = () => {
             {currentStep === 3 && (
     <div className="space-y-6">
       <h3 className="text-2xl font-semibold flex items-center gap-2">
-        <FiBriefcase className="text-blue-500" /> Career Goals
+        <Briefcase className="text-blue-500" /> Career Goals
       </h3>
       
       <div className="space-y-6">
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiBriefcase className="mr-2 text-gray-500" /> Primary Career Goal *
+            <Briefcase className="mr-2 text-gray-500" /> Primary Career Goal *
           </label>
           <select
             name="careerGoal"
@@ -563,7 +564,7 @@ const StudentInfoForm: React.FC = () => {
 
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiBriefcase className="mr-2 text-gray-500" /> Target Industry *
+            <Briefcase className="mr-2 text-gray-500" /> Target Industry *
           </label>
           <select
             name="industry"
@@ -591,7 +592,7 @@ const StudentInfoForm: React.FC = () => {
             {currentStep === 4 && (
     <div className="space-y-6">
       <h3 className="text-2xl font-semibold flex items-center gap-2">
-        <FiCode className="text-blue-500" /> Technical Skills
+        <Code className="text-blue-500" /> Technical Skills
       </h3>
       
       <div className="space-y-4">
@@ -664,13 +665,13 @@ const StudentInfoForm: React.FC = () => {
             {currentStep === 5 && (
     <div className="space-y-6">
       <h3 className="text-2xl font-semibold flex items-center gap-2">
-        <FiClock className="text-blue-500" /> Availability
+        <Clock className="text-blue-500" /> Availability
       </h3>
       
       <div className="space-y-6">
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiClock className="mr-2 text-gray-500" /> Weekly Availability *
+            <Clock className="mr-2 text-gray-500" /> Weekly Availability *
           </label>
           <select
             name="availability"
@@ -693,7 +694,7 @@ const StudentInfoForm: React.FC = () => {
 
         <div className="space-y-2">
           <label className="flex items-center text-sm font-medium text-gray-700">
-            <FiClock className="mr-2 text-gray-500" /> Preferred Project Duration *
+            <Clock className="mr-2 text-gray-500" /> Preferred Project Duration *
           </label>
           <select
             name="projectDuration"
@@ -721,13 +722,13 @@ const StudentInfoForm: React.FC = () => {
             {currentStep === 6 && (
       <div className="space-y-6">
         <h3 className="text-2xl font-semibold flex items-center gap-2">
-          <FiDollarSign className="text-blue-500" /> Compensation Preferences
+          <DollarSign className="text-blue-500" /> Compensation Preferences
         </h3>
         
         <div className="space-y-8">
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
-              <FiDollarSign className="mr-2 text-gray-500" /> Preferred Payment Structure *
+              <DollarSign className="mr-2 text-gray-500" /> Preferred Payment Structure *
             </label>
                     {errors.paymentType && <p className="text-sm text-red-600 mb-2">{errors.paymentType}</p>}
             <div className="grid gap-4 md:grid-cols-3">
@@ -751,7 +752,7 @@ const StudentInfoForm: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="flex items-center text-sm font-medium text-gray-700">
-                  <FiDollarSign className="mr-2 text-gray-500" /> Expected Project Fee Range *
+                  <DollarSign className="mr-2 text-gray-500" /> Expected Project Fee Range *
                 </label>
                 <select
                           name="salaryRange"
@@ -837,12 +838,12 @@ const StudentInfoForm: React.FC = () => {
             {currentStep === 7 && (
     <div className="space-y-6">
       <h3 className="text-2xl font-semibold flex items-center gap-2">
-        <FiUpload className="text-blue-500" /> Upload Your Resume
+        <Upload className="text-blue-500" /> Upload Your Resume
       </h3>
       
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
         <div className="flex justify-center mb-4">
-          <FiUpload className="w-12 h-12 text-gray-400" />
+                          <Upload className="w-12 h-12 text-gray-400" />
         </div>
         <p className="mb-2 text-sm text-gray-500">
           <span className="font-semibold">Click to upload</span> or drag and drop

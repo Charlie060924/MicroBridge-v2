@@ -36,7 +36,7 @@ const Testimonial = lazy(() => import("@/components/marketing/Testimonial/index"
 const Pricing = lazy(() => import("@/components/marketing/Pricing/index").catch(() => ({ default: () => <div>Error loading Pricing</div> })));
 const FAQ = lazy(() => import("@/components/marketing/FAQ/index").catch(() => ({ default: () => <div>Error loading FAQ</div> })));
 const Contact = lazy(() => import("@/components/marketing/Contact/index").catch(() => ({ default: () => <div>Error loading Contact</div> })));
-const Blog = lazy(() => import("@/components/marketing/Blog/index").catch(() => ({ default: () => <div>Error loading Blog</div> })));
+const Blog = lazy(() => import("@/components/marketing/Blog/index"));
 const Footer = lazy(() => import("@/components/common/Footer/index").catch(() => ({ default: () => <div>Error loading Footer</div> })));
 
 // Create intersection observer components for critical/non-critical sections

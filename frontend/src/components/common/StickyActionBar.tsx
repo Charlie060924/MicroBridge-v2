@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, X, Check, Edit3, Send } from 'lucide-react';
+import { Save, X, Check, Edit3, Send, LucideIcon } from 'lucide-react';
 import Button from './ui/Button';
 
 interface Action {
   label: string;
   onClick: () => void;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: LucideIcon;
   loading?: boolean;
   disabled?: boolean;
 }
@@ -39,7 +39,7 @@ const StickyActionBar: React.FC<StickyActionBarProps> = ({
       scale: 1,
       transition: {
         duration: 0.3,
-        ease: "easeOut"
+        ease: "easeOut" as const
       }
     },
     exit: {
@@ -48,7 +48,7 @@ const StickyActionBar: React.FC<StickyActionBarProps> = ({
       scale: 0.95,
       transition: {
         duration: 0.2,
-        ease: "easeIn"
+        ease: "easeIn" as const
       }
     }
   };
@@ -115,7 +115,9 @@ const StickyActionBar: React.FC<StickyActionBarProps> = ({
                     onClick={onClose}
                     icon={X}
                     aria-label="Close"
-                  />
+                  >
+                    Close
+                  </Button>
                 </motion.div>
               )}
             </div>

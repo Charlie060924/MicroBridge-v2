@@ -7,7 +7,7 @@ import type {
   EventContentArg,
 } from "@fullcalendar/core";
 import { useModal } from "@/hooks/useModal";
-import { Modal } from "@/components/common/ui/modal";
+import Modal from "@/components/common/ui/modal";
 
 // Define types
 interface CalendarEvent extends EventInput {

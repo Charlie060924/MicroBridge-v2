@@ -167,14 +167,29 @@ export const LevelProvider = ({ children }: { children: ReactNode }) => {
     setLevelData(initialData);
   };
 
-  // Don't render until we have level data
-  if (!levelData) {
+  // Don't render until we have level data, but only on client side
+  if (typeof window !== 'undefined' && !levelData) {
     return <div>Loading level system...</div>;
   }
 
+  // Provide default level data if null (for SSR)
+  const defaultLevelData: LevelData = {
+    level: 1,
+    xp: 0,
+    xpToNext: 100,
+    achievements: [],
+    totalXP: 0,
+    careerCoins: 0,
+    unlockedFeatures: ["daily_dashes", "streaks"],
+    streakDays: 0,
+    totalStreakDays: 0,
+    prestigeLevel: 0,
+    metaAchievements: []
+  };
+
   return (
     <LevelContext.Provider value={{ 
-      levelData, 
+      levelData: levelData || defaultLevelData, 
       gainXP, 
       addCC, 
       spendCC, 

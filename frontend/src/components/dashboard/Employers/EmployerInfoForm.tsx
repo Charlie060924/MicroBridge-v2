@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { companyTypes, industries, companySizes } from "./Emplyer_Info_Constant";
 import LevelProgressBar from "@/components/common/Level/LevelProgressBar";
 import { useLevel } from "@/hooks/useLevel";
+import { User, ArrowLeft } from "lucide-react";
 
 export default function EmployerInfoForm() {
   const router = useRouter();
@@ -49,16 +51,36 @@ export default function EmployerInfoForm() {
       icon: "🏢"
     });
     
-    router.push("/employer/dashboard");
+    router.push("/employer_portal/workspace/profile?fromRoleSelection=true");
   };
 
   return (
-    <section className="pb-20 pt-32 lg:pt-40 xl:pt-44">
-    <div className="mx-auto max-w-3xl px-6">
-      <div className="bg-white dark:bg-gray-900 shadow-md rounded-xl p-8">
-        <h2 className="mb-10 text-center text-3xl font-semibold text-black dark:text-white">
-          Company Profile Information
-        </h2>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-4xl mx-auto">
+                <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-8">
+          {/* Header with navigation */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/employer_portal/workspace/profile"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Profile
+              </Link>
+            </div>
+            <Link
+              href="/employer_portal/workspace/profile"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-300 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors duration-200"
+            >
+              <User className="w-4 h-4" />
+              Personal Profile
+            </Link>
+          </div>
+          
+          <h2 className="mb-10 text-center text-3xl font-semibold text-black dark:text-white">
+            Company Profile Information
+          </h2>
 
         {/* Company Level Progress */}
         <div className="mb-6">
@@ -226,9 +248,9 @@ export default function EmployerInfoForm() {
             Save Company Profile
           </button>
         </form>
+        </div>
       </div>
-      </div>
-    </section>
+    </div>
   );
 }
 
