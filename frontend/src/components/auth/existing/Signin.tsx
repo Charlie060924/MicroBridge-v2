@@ -4,19 +4,39 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 const Signin = () => {
   const router = useRouter();
+  const { login } = useAuth();
   const [data, setData] = useState({
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (data.email && data.password) {
-      // TODO: Add your login API/authentication logic here if any
-      router.push("/onboarding"); // Redirect on successful login
+      setIsLoading(true);
+      try {
+        const result = await login(data.email, data.password);
+        if (result.success) {
+          // Redirect based on user role
+          const userRole = localStorage.getItem('mock_user_role') || 'student';
+          if (userRole === 'employer') {
+            router.push("/employer_portal/workspace");
+          } else {
+            router.push("/student_portal/workspace");
+          }
+        } else {
+          alert(result.error || "Login failed");
+        }
+      } catch (error) {
+        alert("Login failed. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       alert("Please enter both email and password.");
     }
@@ -145,21 +165,24 @@ const Signin = () => {
 
               <button
                 type="submit"
-                className="inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-opacity-90 dark:bg-btndark"
+                disabled={isLoading}
+                className="inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-opacity-90 dark:bg-btndark disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Log in
-                <svg
-                  className="fill-white"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
-                    fill="white"
-                  />
-                </svg>
+                {isLoading ? "Logging in..." : "Log in"}
+                {!isLoading && (
+                  <svg
+                    className="fill-white"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
+                      fill="white"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
 
@@ -175,6 +198,33 @@ const Signin = () => {
               </p>
             </div>
           </form>
+          
+          {/* Test buttons for development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 pt-4 border-t border-stroke dark:border-strokedark text-center">
+              <p className="text-sm text-gray-500 mb-2">Quick Test (Dev Only):</p>
+              <div className="flex gap-2 justify-center">
+                <button
+                  onClick={() => {
+                    localStorage.setItem('mock_user_role', 'student');
+                    setData({ email: 'student@test.com', password: 'password' });
+                  }}
+                  className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Set Student
+                </button>
+                <button
+                  onClick={() => {
+                    localStorage.setItem('mock_user_role', 'employer');
+                    setData({ email: 'employer@test.com', password: 'password' });
+                  }}
+                  className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+                >
+                  Set Employer
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

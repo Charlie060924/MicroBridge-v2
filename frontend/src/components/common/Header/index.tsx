@@ -132,13 +132,13 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleStickyMenu);
   }, [handleStickyMenu]);
 
-  const headerClasses = `fixed left-0 top-0 z-99999 w-full py-7 ${
+  const headerClasses = `fixed left-0 top-0 z-50 w-full py-7 bg-white dark:bg-black ${
     stickyMenu
-      ? "bg-white !py-4 shadow-sm transition duration-100 dark:bg-black"
+      ? "!py-4 shadow-sm transition duration-100"
       : ""
   }`;
 
-  const navMenuClasses = `invisible h-0 w-full items-center justify-between xl:visible xl:flex xl:h-auto xl:w-full ${
+  const navMenuClasses = `visible h-auto w-full items-center justify-between flex xl:flex xl:h-auto xl:w-full ${
     navigationOpen &&
     "navbar !visible mt-4 h-auto max-h-[400px] rounded-md bg-white p-7.5 shadow-solid-5 dark:bg-blacksection xl:h-auto xl:p-0 xl:shadow-none xl:dark:bg-transparent"
   }`;

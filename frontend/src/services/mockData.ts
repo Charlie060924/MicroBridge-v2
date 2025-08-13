@@ -347,7 +347,9 @@ export const mockApi = {
   // User
   getCurrentUser: async (): Promise<User> => {
     await new Promise(resolve => setTimeout(resolve, 100));
-    return mockUsers[0]; // Return first user as current user
+    // For testing: check if we want to simulate an employer user
+    const isEmployer = localStorage.getItem('mock_user_role') === 'employer';
+    return isEmployer ? mockUsers[1] : mockUsers[0]; // Return employer or student
   },
   
   // Authentication (mock)

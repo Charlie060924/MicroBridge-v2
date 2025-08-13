@@ -1,7 +1,7 @@
 "use client";
 import { ThemeToggleButton } from "@/components/dashboard/StudentDashboard/Dashboard_common/ThemeToggleButton";
 import NotificationDropdown from "@/components/dashboard/student_portal/workspace/Dashboard_header/NotificationDropdown";
-import UserDropdown from "@/components/dashboard/student_portal/workspace/Dashboard_header/UserDropdown";
+import UserDropdown from "@/components/dashboard/student_portal/workspace/Dashboard_header/EmployerUserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import Link from "next/link";
 import React, { useState ,useEffect,useRef} from "react";
@@ -127,9 +127,6 @@ const EmployerAppHeader: React.FC = () => {
               <Briefcase className="h-5 w-5" />
             </Link>
             
-            {/* Theme Toggle */}
-            <ThemeToggleButton />
-            
             {/* Calendar Button */}
             <Link
               href="/employer_portal/workspace/calendar"
@@ -137,6 +134,11 @@ const EmployerAppHeader: React.FC = () => {
             >
               <Calendar className="h-5 w-5" />
             </Link>
+            
+            {/* Theme Toggle */}
+            <ThemeToggleButton />
+            
+
             
             {/* Notification Dropdown */}
             <NotificationDropdown />

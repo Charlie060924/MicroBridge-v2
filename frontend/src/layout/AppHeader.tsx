@@ -112,9 +112,6 @@ const AppHeader: React.FC = () => {
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
-            {/* Theme Toggle */}
-            <ThemeToggleButton />
-            
             {/* Calendar Button */}
             <Link
               href="/student_portal/workspace/calendar"
@@ -122,6 +119,11 @@ const AppHeader: React.FC = () => {
             >
               <Calendar className="h-5 w-5" />
             </Link>
+            
+            {/* Theme Toggle */}
+            <ThemeToggleButton />
+            
+
             
             {/* Notification Dropdown */}
             <NotificationDropdown />

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { useLevel } from "@/hooks/useLevel";
-import { Star } from "lucide-react";
+import { Star, CreditCard } from "lucide-react";
 
 const navItems = [
   {
@@ -20,8 +20,9 @@ const navItems = [
     path: "/student_portal/workspace/applications",
   },
   {
-    name: "Calendar",
-    path: "/student_portal/workspace/calendar",
+    name: "Billing",
+    path: "/billing",
+    icon: CreditCard,
   },
   {
     name: "Level System",

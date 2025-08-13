@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Suspense, lazy } from "react";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import LandingLayout from "./(site)/landing-layout";
 
 export const metadata: Metadata = {
   title: "MicroBridge - Student-Startup Collaboration Platform",
@@ -60,45 +61,47 @@ export default function Home() {
   console.log("Home component rendering");
   
   return (
-    <main>
-      {/* Above-the-fold components */}
-      <LazyLoadComponent>
-        <Hero />
-      </LazyLoadComponent>
-      
-      <LazyLoadComponent>
-        <Brands />
-      </LazyLoadComponent>
+    <LandingLayout>
+      <main>
+        {/* Above-the-fold components */}
+        <LazyLoadComponent>
+          <Hero />
+        </LazyLoadComponent>
+        
+        <LazyLoadComponent>
+          <Brands />
+        </LazyLoadComponent>
 
-      {/* Main features */}
-      <LazyLoadComponent>
-        <Feature />
-      </LazyLoadComponent>
+        {/* Main features */}
+        <LazyLoadComponent>
+          <Feature />
+        </LazyLoadComponent>
 
-      <LazyLoadComponent>
-        <FeaturesTab />
-      </LazyLoadComponent>
+        <LazyLoadComponent>
+          <FeaturesTab />
+        </LazyLoadComponent>
 
-      {/* Below-the-fold components (less critical) */}
-      <NonCriticalSection>
-        <Testimonial />
-      </NonCriticalSection>
+        {/* Below-the-fold components (less critical) */}
+        <NonCriticalSection>
+          <Testimonial />
+        </NonCriticalSection>
 
-      <NonCriticalSection>
-        <Pricing />
-      </NonCriticalSection>
+        <NonCriticalSection>
+          <Pricing />
+        </NonCriticalSection>
 
-      <NonCriticalSection>
-        <FAQ />
-      </NonCriticalSection>
+        <NonCriticalSection>
+          <FAQ />
+        </NonCriticalSection>
 
-      <NonCriticalSection>
-        <Contact />
-      </NonCriticalSection>
+        <NonCriticalSection>
+          <Contact />
+        </NonCriticalSection>
 
-      <NonCriticalSection>
-        <Footer />
-      </NonCriticalSection>
-    </main>
+        <NonCriticalSection>
+          <Footer />
+        </NonCriticalSection>
+      </main>
+    </LandingLayout>
   );
 }

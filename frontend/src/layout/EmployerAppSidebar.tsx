@@ -14,7 +14,8 @@ import {
   BarChart3,
   FileText,
   Plus,
-  Building
+  Building,
+  CreditCard
 } from "lucide-react";
 
 const navItems = [
@@ -47,9 +48,9 @@ const navItems = [
     icon: Users,
   },
   {
-    name: "Calendar",
-    path: "/employer_portal/workspace/calendar",
-    icon: Calendar,
+    name: "Billing",
+    path: "/billing",
+    icon: CreditCard,
   },
   {
     name: "Reports",

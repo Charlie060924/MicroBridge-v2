@@ -1,130 +1,99 @@
-# Header Visibility Control System
+# Layout Structure and Header Management
 
 ## Overview
 
-This system provides centralized control over header visibility across different pages in the application. It uses a custom hook `useHeaderVisibility` to determine whether the header should be displayed based on the current route.
+This document describes the current layout structure and how headers are managed across different pages in the application.
 
-## How It Works
+## Layout Hierarchy
 
-### 1. Layout Hierarchy
+The application has multiple layout layers:
 
-The application has multiple layout layers that can show headers:
+- **Root Layout** (`/app/layout.tsx`) - Base layout with no header (provides theme, context, etc.)
+- **Landing Layout** (`/app/(site)/landing-layout.tsx`) - Header for landing page only
+- **Site Layout** (`/app/(site)/layout.tsx`) - No header for other marketing pages
+- **Student Portal Layout** (`/app/student_portal/workspace/layout.tsx`) - AppHeader for student portal
+- **Employer Portal Layout** (`/app/employer_portal/workspace/layout.tsx`) - EmployerAppHeader for employer portal
+- **Jobs Layout** (`/app/jobs/layout.tsx`) - No header for job pages
 
-- **Root Layout** (`/app/layout.tsx`) - Main application header
-- **Site Layout** (`/app/(site)/layout.tsx`) - Site-specific header
-- **Employer Portal Layout** (`/app/employer_portal/workspace/layout.tsx`) - Employer app header
+## Header Strategy
 
-### 2. Header Control Logic
+### Current Approach
 
-The `useHeaderVisibility` hook manages header display based on:
-
-- **No Header Paths**: Routes where headers should be hidden
-- **Force Show Paths**: Routes where headers should always be shown
-- **Default Behavior**: Show header for all other routes
+- **Landing Page**: Uses `LandingLayout` with Header component
+- **Marketing Pages**: No header (clean, focused experience)
+- **Student Portal**: Uses `AppHeader` (portal-specific header)
+- **Employer Portal**: Uses `EmployerAppHeader` (portal-specific header)
+- **Job Pages**: No header (clean job viewing experience)
 
 ## Usage
 
-### Using the Hook
+### Landing Page Layout
 
 ```typescript
-import { useHeaderVisibility } from "@/hooks/useHeaderVisibility";
+// In /app/(site)/page.tsx
+import LandingLayout from "./landing-layout";
 
-function MyLayout({ children }) {
-  const shouldShowHeader = useHeaderVisibility();
-  
+export default function Home() {
+  return (
+    <LandingLayout>
+      <main>
+        {/* Landing page content */}
+      </main>
+    </LandingLayout>
+  );
+}
+```
+
+### Portal Layouts
+
+The student and employer portals use their own specific headers:
+
+```typescript
+// Student portal uses AppHeader
+// Employer portal uses EmployerAppHeader
+// Both are automatically applied via their respective layouts
+```
+
+## Adding New Pages
+
+### For Marketing Pages (No Header)
+
+Simply create the page in the `(site)` directory - it will automatically use the no-header layout.
+
+### For Pages That Need Headers
+
+1. **Create a specific layout** for the page/route group
+2. **Import and use the appropriate header component**
+3. **Wrap the page content** with the layout
+
+### Example: Adding a new section with header
+
+```typescript
+// Create /app/new-section/layout.tsx
+import Header from "@/components/common/Header";
+
+export default function NewSectionLayout({ children }) {
   return (
     <>
-      {shouldShowHeader && <Header />}
+      <Header />
       {children}
     </>
   );
 }
 ```
 
-### Checking Specific Paths
-
-```typescript
-import { shouldShowHeaderForPath } from "@/hooks/useHeaderVisibility";
-
-const shouldShow = shouldShowHeaderForPath("/jobs/edit/123");
-// Returns false - header will be hidden
-```
-
-## Configuration
-
-### No Header Paths
-
-These routes will hide the header:
-
-```typescript
-const noHeaderPaths = [
-  "/auth",                    // Authentication pages
-  "/onboarding",              // Onboarding flow
-  "/students_info",           // Student information pages
-  "/student_portal",          // Student portal
-  "/jobs/edit",               // Job edit pages
-  "/jobs/analytics",          // Job analytics pages
-  "/employer_portal"          // Employer portal
-];
-```
-
-### Force Show Paths
-
-These routes will always show the header:
-
-```typescript
-const forceShowHeaderPaths = [
-  "/jobs"                     // Main jobs listing page
-];
-```
-
-## Adding New Routes
-
-To add header control for new routes:
-
-1. **Add to `noHeaderPaths`** if the route should hide the header
-2. **Add to `forceShowHeaderPaths`** if the route should always show the header
-3. **Update the hook** in `useHeaderVisibility.ts`
-
-### Example: Adding a new admin page
-
-```typescript
-// In useHeaderVisibility.ts
-const noHeaderPaths = [
-  // ... existing paths
-  "/admin"                    // Hide header for admin pages
-];
-
-const forceShowHeaderPaths = [
-  // ... existing paths
-  "/admin/dashboard"          // Show header for admin dashboard
-];
-```
-
 ## Best Practices
 
-1. **Be Specific**: Use exact path matches when possible
-2. **Use Prefixes**: Use `startsWith()` for route groups (e.g., `/jobs/edit`)
-3. **Test Thoroughly**: Verify header behavior on all affected routes
-4. **Document Changes**: Update this README when adding new routes
-
-## Troubleshooting
-
-### Header Still Showing
-
-1. Check if the route is in `noHeaderPaths`
-2. Verify the layout is using `useHeaderVisibility`
-3. Check for conflicting layout logic
-
-### Header Not Showing
-
-1. Check if the route is in `forceShowHeaderPaths`
-2. Verify the layout is properly importing the hook
-3. Check browser console for errors
+1. **Use Specific Layouts**: Create dedicated layouts for different sections
+2. **Keep Headers Minimal**: Only use headers where navigation is essential
+3. **Consistent Experience**: Maintain consistent header behavior within sections
+4. **Test Responsiveness**: Ensure headers work well on all devices
 
 ## Files
 
-- `useHeaderVisibility.ts` - Main hook and utility functions
-- `layout.tsx` - Root layout implementation
-- `(site)/layout.tsx` - Site layout implementation
-- `jobs/layout.tsx` - Jobs-specific layout
+- `layout.tsx` - Root layout (no header)
+- `(site)/landing-layout.tsx` - Landing page layout with header
+- `(site)/layout.tsx` - Marketing pages layout (no header)
+- `student_portal/workspace/layout.tsx` - Student portal layout with AppHeader
+- `employer_portal/workspace/layout.tsx` - Employer portal layout with EmployerAppHeader
+- `jobs/layout.tsx` - Jobs layout (no header)
