@@ -14,6 +14,7 @@ import Button from '@/components/common/ui/Button';
 import PaymentList from './PaymentList';
 import BillingHistoryTable from './BillingHistoryTable';
 import PaymentSetupModal from './PaymentSetupModal';
+import PaymentDetailsModal from './PaymentDetailsModal';
 
 interface Payment {
   id: string;
@@ -25,6 +26,18 @@ interface Payment {
   status: string;
   date: string;
   dueDate?: string;
+  transactionId?: string;
+  paymentMethod?: string;
+  planName?: string;
+  subscriptionType?: string;
+  failureReason?: string;
+  retryInstructions?: string;
+  notes?: string;
+  payoutDetails?: {
+    method: string;
+    account: string;
+    estimatedDate: string;
+  };
 }
 
 interface BillingHistory {
@@ -35,6 +48,18 @@ interface BillingHistory {
   amount: number;
   date: string;
   status: string;
+  transactionId?: string;
+  paymentMethod?: string;
+  planName?: string;
+  subscriptionType?: string;
+  failureReason?: string;
+  retryInstructions?: string;
+  notes?: string;
+  payoutDetails?: {
+    method: string;
+    account: string;
+    estimatedDate: string;
+  };
 }
 
 interface SharedBillingDashboardProps {
@@ -45,8 +70,28 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('pending');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPaymentDetailsModalOpen, setIsPaymentDetailsModalOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState<Payment | BillingHistory | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Restore navigation state on component mount
+  useEffect(() => {
+    import('@/utils/navigationMemory').then(({ NavigationMemory }) => {
+      const state = NavigationMemory.getState();
+      if (state && state.origin === '/billing') {
+        if (state.activeTab) {
+          setActiveTab(state.activeTab);
+        }
+        if (state.searchTerm) {
+          setSearchTerm(state.searchTerm);
+        }
+        if (state.scrollPosition) {
+          NavigationMemory.restoreScrollPosition(state.scrollPosition);
+        }
+      }
+    });
+  }, []);
 
   // Mock data - replace with API calls
   const [pendingPayments] = useState<Payment[]>(
@@ -59,7 +104,12 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         deposit: 250,
         status: 'pending',
         date: '2024-01-15',
-        dueDate: '2024-01-25'
+        dueDate: '2024-01-25',
+        transactionId: 'TXN-EMP-001',
+        paymentMethod: 'Credit Card',
+        planName: 'Premium Plan',
+        subscriptionType: 'Monthly',
+        notes: 'Payment pending for milestone 1 completion'
       },
       {
         id: '2',
@@ -69,7 +119,12 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         deposit: 180,
         status: 'pending',
         date: '2024-01-18',
-        dueDate: '2024-01-28'
+        dueDate: '2024-01-28',
+        transactionId: 'TXN-EMP-002',
+        paymentMethod: 'Bank Transfer',
+        planName: 'Standard Plan',
+        subscriptionType: 'One-time',
+        notes: 'Awaiting project kickoff confirmation'
       }
     ] : [
       {
@@ -78,7 +133,15 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         employerName: 'TechCorp Inc.',
         amount: 2500,
         status: 'confirmed',
-        date: '2024-01-25'
+        date: '2024-01-25',
+        transactionId: 'TXN-STU-001',
+        paymentMethod: 'Platform Escrow',
+        payoutDetails: {
+          method: 'PayPal',
+          account: 'alex.johnson@email.com',
+          estimatedDate: '2024-01-30'
+        },
+        notes: 'Payment confirmed and secured in escrow'
       },
       {
         id: '2',
@@ -86,7 +149,15 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         employerName: 'DesignStudio',
         amount: 1800,
         status: 'pending',
-        date: '2024-01-28'
+        date: '2024-01-28',
+        transactionId: 'TXN-STU-002',
+        paymentMethod: 'Platform Escrow',
+        payoutDetails: {
+          method: 'Bank Transfer',
+          account: '****1234',
+          estimatedDate: '2024-02-05'
+        },
+        notes: 'Payment processing - awaiting employer confirmation'
       }
     ]
   );
@@ -101,7 +172,12 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         deposit: 320,
         status: 'secured',
         date: '2024-01-10',
-        dueDate: '2024-02-10'
+        dueDate: '2024-02-10',
+        transactionId: 'TXN-EMP-003',
+        paymentMethod: 'Credit Card',
+        planName: 'Premium Plan',
+        subscriptionType: 'Monthly',
+        notes: 'Deposit secured - project in progress'
       },
       {
         id: '4',
@@ -111,7 +187,12 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         deposit: 120,
         status: 'released',
         date: '2024-01-05',
-        dueDate: '2024-01-15'
+        dueDate: '2024-01-15',
+        transactionId: 'TXN-EMP-004',
+        paymentMethod: 'Bank Transfer',
+        planName: 'Standard Plan',
+        subscriptionType: 'One-time',
+        notes: 'Payment released upon project completion'
       }
     ] : [
       {
@@ -120,7 +201,15 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         employerName: 'DataTech Solutions',
         amount: 3200,
         status: 'processing',
-        date: '2024-01-10'
+        date: '2024-01-10',
+        transactionId: 'TXN-STU-003',
+        paymentMethod: 'Platform Escrow',
+        payoutDetails: {
+          method: 'PayPal',
+          account: 'mike.chen@email.com',
+          estimatedDate: '2024-01-20'
+        },
+        notes: 'Payment processing - project milestone completed'
       },
       {
         id: '2',
@@ -128,7 +217,15 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         employerName: 'ContentPro',
         amount: 1200,
         status: 'processing',
-        date: '2024-01-15'
+        date: '2024-01-15',
+        transactionId: 'TXN-STU-004',
+        paymentMethod: 'Platform Escrow',
+        payoutDetails: {
+          method: 'Bank Transfer',
+          account: '****5678',
+          estimatedDate: '2024-01-25'
+        },
+        notes: 'Payment processing - content review in progress'
       }
     ]
   );
@@ -141,7 +238,12 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         studentName: 'John Smith',
         amount: 800,
         date: '2024-01-20',
-        status: 'completed'
+        status: 'completed',
+        transactionId: 'TXN-EMP-005',
+        paymentMethod: 'Credit Card',
+        planName: 'Basic Plan',
+        subscriptionType: 'One-time',
+        notes: 'Logo design project completed successfully'
       },
       {
         id: 'INV-002',
@@ -149,7 +251,12 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         studentName: 'Lisa Brown',
         amount: 1500,
         date: '2024-01-18',
-        status: 'completed'
+        status: 'completed',
+        transactionId: 'TXN-EMP-006',
+        paymentMethod: 'Bank Transfer',
+        planName: 'Premium Plan',
+        subscriptionType: 'Monthly',
+        notes: 'Monthly social media management service'
       }
     ] : [
       {
@@ -158,7 +265,15 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         employerName: 'StartupXYZ',
         amount: 800,
         date: '2024-01-20',
-        status: 'completed'
+        status: 'completed',
+        transactionId: 'TXN-STU-005',
+        paymentMethod: 'Platform Escrow',
+        payoutDetails: {
+          method: 'PayPal',
+          account: 'john.smith@email.com',
+          estimatedDate: '2024-01-22'
+        },
+        notes: 'Logo design project payment received'
       },
       {
         id: 'TXN-002',
@@ -166,7 +281,15 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
         employerName: 'MarketingPro',
         amount: 1500,
         date: '2024-01-18',
-        status: 'completed'
+        status: 'completed',
+        transactionId: 'TXN-STU-006',
+        paymentMethod: 'Platform Escrow',
+        payoutDetails: {
+          method: 'Bank Transfer',
+          account: '****9012',
+          estimatedDate: '2024-01-20'
+        },
+        notes: 'Monthly social media management payment'
       }
     ]
   );
@@ -181,13 +304,18 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
     router.push(`/billing/checkout?projectId=${selectedPayment?.id}&amount=${paymentData.salary}&deposit=${paymentData.deposit}`);
   };
 
-  const handleManagePayments = (projectId: string) => {
+  const handleManagePayments = (payment: Payment) => {
     import('@/utils/navigationMemory').then(({ NavigationMemory }) => {
       NavigationMemory.saveBillingState(activeTab, window.scrollY, searchTerm);
     });
     
     const basePath = role === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
-    router.push(`${basePath}/projects/${projectId}`);
+    router.push(`${basePath}/projects/${payment.id}`);
+  };
+
+  const handlePaymentDetailsClick = (payment: Payment | BillingHistory) => {
+    setSelectedPaymentForDetails(payment);
+    setIsPaymentDetailsModalOpen(true);
   };
 
   const handleProjectClick = (projectId: string) => {
@@ -353,7 +481,7 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
               onActionClick={role === 'employer' ? handleCompletePayment : undefined}
               actionButtonText="Complete Payment"
               showActionButton={role === 'employer'}
-              onItemClick={handleProjectClick}
+              onItemClick={handlePaymentDetailsClick}
             />
           </Card>
         )}
@@ -377,7 +505,7 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
               actionButtonText="Manage Payments"
               actionButtonVariant="outline"
               showActionButton={role === 'employer'}
-              onItemClick={handleProjectClick}
+              onItemClick={handlePaymentDetailsClick}
             />
           </Card>
         )}
@@ -395,7 +523,7 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
             <BillingHistoryTable
               history={filteredBillingHistory}
               role={role}
-              onItemClick={handleProjectClick}
+              onItemClick={handlePaymentDetailsClick}
             />
           </Card>
         )}
@@ -411,6 +539,14 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
           studentName: selectedPayment.studentName || '',
           agreedSalary: selectedPayment.amount
         } : undefined}
+      />
+
+      {/* Payment Details Modal */}
+      <PaymentDetailsModal
+        isOpen={isPaymentDetailsModalOpen}
+        onClose={() => setIsPaymentDetailsModalOpen(false)}
+        payment={selectedPaymentForDetails}
+        role={role}
       />
     </div>
   );
