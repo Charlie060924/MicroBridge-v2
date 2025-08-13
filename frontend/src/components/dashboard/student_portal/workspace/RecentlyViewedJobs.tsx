@@ -107,9 +107,9 @@ const RecentlyViewedJobs: React.FC<RecentlyViewedJobsProps> = ({
 
   if (jobs.length === 0) {
     return (
-      <div className="py-8 px-4">
+      <div className="py-6 px-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <motion.h2 
               initial={{ opacity: 0, y: 10 }}
@@ -161,9 +161,9 @@ const RecentlyViewedJobs: React.FC<RecentlyViewedJobsProps> = ({
   }
 
   return (
-    <div className="py-8 px-4">
+    <div className="py-6 px-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <motion.h2 
             initial={{ opacity: 0, y: 10 }}
@@ -285,28 +285,7 @@ const RecentlyViewedJobs: React.FC<RecentlyViewedJobsProps> = ({
         )}
       </div>
 
-      {/* Scroll Indicator */}
-      <motion.div 
-        className="flex justify-center mt-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="flex space-x-3">
-          {Array.from({ length: Math.ceil(jobs.length / 3) }).map((_, index) => (
-            <motion.div
-              key={index}
-              className={`h-3 rounded-full transition-all duration-200 ${
-                index === Math.floor(scrollPosition / (window.innerWidth * 0.8))
-                  ? "bg-primary w-6"
-                  : "bg-gray-300 dark:bg-gray-600 w-3"
-              }`}
-              whileHover={{ scale: 1.5 }}
-              transition={{ type: "spring", stiffness: 500 }}
-            />
-          ))}
-        </div>
-      </motion.div>
+
     </div>
   );
 };

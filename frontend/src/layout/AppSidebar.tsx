@@ -4,20 +4,31 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { useLevel } from "@/hooks/useLevel";
-import { Star, CreditCard } from "lucide-react";
+import { 
+  Star, 
+  CreditCard, 
+  BarChart3, 
+  Search, 
+  FileText, 
+  User, 
+  Settings 
+} from "lucide-react";
 
 const navItems = [
   {
     name: "Dashboard",
     path: "/student_portal/workspace",
+    icon: BarChart3,
   },
   {
     name: "Browse Jobs",
     path: "/student_portal/workspace/jobs",
+    icon: Search,
   },
   {
-    name: "My Applications",
+    name: "Applications",
     path: "/student_portal/workspace/applications",
+    icon: FileText,
   },
   {
     name: "Billing",
@@ -31,12 +42,14 @@ const navItems = [
     showBadge: true,
   },
   {
-    name: "User Profile",
+    name: "Profile",
     path: "/student_portal/workspace/profile",
+    icon: User,
   },
   {
     name: "Settings",
     path: "/student_portal/workspace/settings",
+    icon: Settings,
   },
 ];
 

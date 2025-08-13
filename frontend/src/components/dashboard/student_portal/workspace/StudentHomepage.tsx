@@ -359,7 +359,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                 onClearFilters={handleClearFilters}
               />
             ) : (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {/* Step 2: Replace Featured Jobs with Recently Viewed Jobs */}
                 <RecentlyViewedJobs
                   jobs={recentlyViewedJobs}
@@ -367,7 +367,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                   onJobClick={handleJobClick}
                 />
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Step 2: Replace Ongoing Projects with Recommended Jobs */}
                   <div className="lg:col-span-2">
                     <Recommendations
