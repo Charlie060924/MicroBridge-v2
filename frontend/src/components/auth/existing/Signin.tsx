@@ -22,13 +22,15 @@ const Signin = () => {
       try {
         const result = await login(data.email, data.password);
         if (result.success) {
-          // Redirect based on user role
-          const userRole = localStorage.getItem('mock_user_role') || 'student';
-          if (userRole === 'employer') {
-            router.push("/employer_portal/workspace");
-          } else {
-            router.push("/student_portal/workspace");
-          }
+          // TEMPORARY: Always redirect to role selection for testing
+          router.push("/onboarding");
+          // Original code (commented out for testing):
+          // const userRole = localStorage.getItem('mock_user_role') || 'student';
+          // if (userRole === 'employer') {
+          //   router.push("/employer_portal/workspace");
+          // } else {
+          //   router.push("/student_portal/workspace");
+          // }
         } else {
           alert(result.error || "Login failed");
         }

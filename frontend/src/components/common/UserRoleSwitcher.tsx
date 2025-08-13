@@ -23,7 +23,7 @@ const UserRoleSwitcher: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-lg z-50">
+    <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-lg z-30">
       <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
         Current: {user?.role || 'None'}
       </div>

@@ -6,7 +6,7 @@ const RoleSelection = () => {
   const router = useRouter();
 
   const handleSelect = (role: "student" | "employer") => {
-    router.push(role === "student" ? "/students_info" : "/employer_portal/workspace/profile?fromRoleSelection=true");
+    router.push(role === "student" ? "/student_portal/workspace/profile?fromRoleSelection=true" : "/employer_portal/workspace/profile?fromRoleSelection=true");
   };
 
   return (

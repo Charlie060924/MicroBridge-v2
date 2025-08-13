@@ -14,6 +14,9 @@ interface ResumeSectionProps {
   resume: ResumeFile | null;
   onUpload: (file: File) => Promise<void>;
   onRemove: () => void;
+  isOnboarding?: boolean;
+  currentStep?: number;
+  errors?: Record<string, string>;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -32,7 +35,7 @@ const getFileIcon = (fileName: string) => {
   return extension === 'pdf' ? '📄' : '📝';
 };
 
-export default function ResumeSection({ resume, onUpload, onRemove }: ResumeSectionProps) {
+export default function ResumeSection({ resume, onUpload, onRemove, isOnboarding = false, currentStep = 1, errors = {} }: ResumeSectionProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -86,8 +89,14 @@ export default function ResumeSection({ resume, onUpload, onRemove }: ResumeSect
     }
   };
 
+  const isCurrentStep = isOnboarding && currentStep === 7;
+
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+    <div className={`bg-white dark:bg-gray-900 rounded-2xl shadow-sm border transition-all duration-300 ${
+      isCurrentStep 
+        ? "border-blue-300 dark:border-blue-700 shadow-blue-100 dark:shadow-blue-900/20" 
+        : "border-gray-200 dark:border-gray-800"
+    } p-8`}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
