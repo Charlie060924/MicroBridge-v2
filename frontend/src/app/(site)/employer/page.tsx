@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Suspense, lazy } from "react";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import PreviewBanner from "./PreviewBanner";
 
 export const metadata: Metadata = {
   title: "MicroBridge - For Employers",
@@ -56,6 +57,9 @@ const NonCriticalSection = ({ children }: { children: React.ReactNode }) => {
 export default function EmployerHomePage() {
   return (
     <main className="bg-white dark:bg-black">
+      {/* Preview Banner */}
+      <PreviewBanner />
+      
       {/* Above-the-fold components */}
       <LazyLoadComponent>
         <Hero variant="employer" />

@@ -75,7 +75,7 @@ const UnifiedEmployerProfile: React.FC = () => {
     
     const completedFields = requiredFields.filter(field => {
       const value = profileData[field as keyof UnifiedEmployerProfile];
-      return value && value.trim().length > 0;
+      return value && typeof value === 'string' && value.trim().length > 0;
     });
     
     return Math.round((completedFields.length / requiredFields.length) * 100);

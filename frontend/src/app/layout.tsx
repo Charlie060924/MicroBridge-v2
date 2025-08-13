@@ -8,6 +8,7 @@ import "./globals.css";
 import { usePathname } from "next/navigation";
 import { LevelProvider } from "./context/LevelContext";
 import AchievementPopup from "@/components/common/Level/AchievementPopup";
+import { useHeaderVisibility } from "@/hooks/useHeaderVisibility";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const isStudentPortal = pathname?.startsWith('/student_portal');
+  const shouldShowHeader = useHeaderVisibility();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -28,7 +30,7 @@ export default function RootLayout({
           defaultTheme="light"
         >
           <LevelProvider>
-            {!isStudentPortal && <Header />}
+            {!isStudentPortal && shouldShowHeader && <Header />}
             {children}
             <ScrollToTop />
             <AchievementPopup achievement={null} />

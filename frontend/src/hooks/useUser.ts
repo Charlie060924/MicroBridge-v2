@@ -25,6 +25,9 @@ export function useUser() {
 
   const updateUser = async (updates: Partial<User>) => {
     try {
+      if (!user) {
+        throw new Error('No user to update');
+      }
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
       return { success: true };

@@ -18,6 +18,7 @@ import {
   DollarSign,
   Clock
 } from "lucide-react";
+import { originTracking } from "@/utils/originTracking";
 
 interface Job {
   id: string;
@@ -197,11 +198,15 @@ const ManageJobs: React.FC = () => {
   };
 
   const handleEditJob = (jobId: string) => {
-    router.push(`/employer_portal/workspace/post-job/${jobId}`);
+    // Set origin context for edit navigation
+    originTracking.setOrigin('manage-jobs');
+    router.push(`/jobs/edit/${jobId}`);
   };
 
   const handleViewJob = (jobId: string) => {
-    router.push(`/employer_portal/workspace/manage-jobs/${jobId}`);
+    // Set origin context for view navigation
+    originTracking.setOrigin('manage-jobs');
+    router.push(`/jobs/${jobId}`);
   };
 
   const handleDeleteJob = (jobId: string) => {

@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User, FileText, Briefcase, Users, Clock, Plus, Eye, BarChart3 } from "lucide-react";
 import dynamic from 'next/dynamic';
+import { originTracking } from "@/utils/originTracking";
 
 // Import types
 interface Job {
@@ -398,8 +399,14 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
               subtitle="Your latest job listings and their performance"
               icon={Briefcase}
               jobs={recentJobs}
-              onViewJob={(jobId) => router.push(`/employer_portal/workspace/manage-jobs/${jobId}`)}
-              onEditJob={(jobId) => router.push(`/employer_portal/workspace/post-job/${jobId}`)}
+              onViewJob={(jobId) => {
+                originTracking.setOrigin('homepage');
+                router.push(`/jobs/${jobId}`);
+              }}
+              onEditJob={(jobId) => {
+                originTracking.setOrigin('homepage');
+                router.push(`/jobs/edit/${jobId}`);
+              }}
               onManageJobs={handleManageJobs}
             />
 

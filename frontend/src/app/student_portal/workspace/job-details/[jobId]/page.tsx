@@ -4,19 +4,16 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { 
   ArrowLeft, 
-  MapPin, 
-  DollarSign, 
-  Clock, 
-  Star, 
   Bookmark, 
   BookmarkPlus,
-  Calendar,
-  Users,
-  Globe,
   CheckCircle,
   ExternalLink
 } from "lucide-react";
 import { Job } from "@/components/dashboard/student_portal/workspace/JobCategoryCard";
+import JobHeader from "@/components/job-details/JobHeader";
+import JobDescription from "@/components/job-details/JobDescription";
+import JobSkills from "@/components/job-details/JobSkills";
+import JobSummary from "@/components/job-details/JobSummary";
 
 const JobDetailsPage: React.FC = () => {
   const params = useParams();
@@ -119,19 +116,6 @@ const JobDetailsPage: React.FC = () => {
     router.push(`/student_portal/workspace/apply/${jobId}`);
   };
 
-  const getExperienceColor = (level: string) => {
-    switch (level) {
-      case "Entry":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "Intermediate":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case "Advanced":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -194,105 +178,18 @@ const JobDetailsPage: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Job Header */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    {job.title}
-                  </h1>
-                  <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">
-                    {job.company}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.floor(job.rating)
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-gray-300 dark:text-gray-600"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {job.rating}
-                  </span>
-                </div>
-              </div>
-
-              {/* Job Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <MapPin className="h-5 w-5 mr-3" />
-                  <span>{job.location}</span>
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <DollarSign className="h-5 w-5 mr-3" />
-                  <span>{job.salary}</span>
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Clock className="h-5 w-5 mr-3" />
-                  <span>{job.duration}</span>
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Calendar className="h-5 w-5 mr-3" />
-                  <span>Posted {job.postedDate}</span>
-                </div>
-              </div>
-
-              {/* Experience Level */}
-              <div className="flex items-center justify-between">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${getExperienceColor(
-                    job.experienceLevel
-                  )}`}
-                >
-                  {job.experienceLevel} Level
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Deadline: {job.deadline}
-                </span>
-              </div>
-            </div>
+            <JobHeader job={job} showRating={true} />
 
             {/* Job Description */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Job Description
-              </h2>
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                {job.description}
-              </p>
-            </div>
+            <JobDescription description={job.description} />
 
             {/* Required Skills */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Required Skills
-              </h2>
-              <div className="flex flex-wrap gap-3">
-                {job.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <JobSkills skills={job.skills} />
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 sticky top-8">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Quick Actions
-              </h3>
-              
+            <JobSummary job={job}>
               <button
                 onClick={handleApply}
                 className="w-full bg-primary text-white font-semibold py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors mb-4 flex items-center justify-center"
@@ -305,27 +202,7 @@ const JobDetailsPage: React.FC = () => {
                 <ExternalLink className="h-5 w-5 mr-2" />
                 Visit Company
               </button>
-
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-                  Job Summary
-                </h4>
-                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span>Individual Project</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Globe className="h-4 w-4 mr-2" />
-                    <span>{job.isRemote ? "Remote" : "On-site"}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span>Start: Immediate</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </JobSummary>
           </div>
         </div>
       </div>

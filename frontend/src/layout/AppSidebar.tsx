@@ -47,7 +47,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 sidebar-layout
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 sidebar-layout overflow-hidden
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -61,35 +61,35 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex ${
+        className={`py-8 flex overflow-hidden ${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center overflow-hidden">
           {(isExpanded || isHovered || isMobileOpen) ? (
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
+            <span className="text-xl font-bold text-gray-900 dark:text-white truncate">
               MicroBridge
             </span>
           ) : (
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">M</span>
             </div>
           )}
         </Link>
       </div>
 
-      <div className="flex flex-col overflow-y-auto no-scrollbar">
-        <nav className="mb-6">
-          <ul className="flex flex-col gap-4">
+      <div className="flex flex-col overflow-y-auto no-scrollbar sidebar-overflow-fix">
+        <nav className="mb-6 overflow-hidden">
+          <ul className="flex flex-col gap-4 overflow-hidden">
             {navItems.map((nav) => {
               const IconComponent = nav.icon;
               const isCurrentActive = isActive(nav.path);
               
               return (
-                <li key={nav.name}>
+                <li key={nav.name} className="overflow-hidden">
                   <Link
                     href={nav.path}
-                    className={`menu-item group relative ${
+                    className={`menu-item group relative overflow-hidden ${
                       isCurrentActive
                         ? "menu-item-active"
                         : "menu-item-inactive"
@@ -97,18 +97,18 @@ const AppSidebar: React.FC = () => {
                   >
                     {/* Icon */}
                     {IconComponent && (
-                      <IconComponent className="w-5 h-5" />
+                      <IconComponent className="w-5 h-5 flex-shrink-0" />
                     )}
                     
                     {/* Text */}
                     {(isExpanded || isHovered || isMobileOpen) && (
-                      <span className="menu-item-text">{nav.name}</span>
+                      <span className="menu-item-text truncate">{nav.name}</span>
                     )}
                     
                     {/* Level Badge for Level System */}
                     {nav.showBadge && (isExpanded || isHovered || isMobileOpen) && (
-                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900">
-                        <span className="text-xs font-bold text-white">
+                      <div className="sidebar-badge w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500">
+                        <span className="text-xs font-bold text-white truncate">
                           {levelData.level}
                         </span>
                       </div>

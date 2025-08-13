@@ -23,7 +23,13 @@ export interface Job {
   deadline: string;
   status: 'active' | 'closed' | 'draft';
   applications: number;
-  isBookmarked?: boolean;
+  // Additional properties to match JobCategoryCard interface
+  duration: string;
+  category: string;
+  rating: number;
+  isRemote: boolean;
+  experienceLevel: "Entry" | "Intermediate" | "Advanced";
+  isBookmarked: boolean; // Make this required instead of optional
 }
 
 export interface Application {
@@ -93,7 +99,12 @@ export const mockJobs: Job[] = [
     deadline: '2024-02-15',
     status: 'active',
     applications: 45,
-    isBookmarked: false
+    isBookmarked: false,
+    duration: 'Full-time',
+    category: 'Development',
+    rating: 4.5,
+    isRemote: true,
+    experienceLevel: 'Intermediate'
   },
   {
     id: '2',
@@ -114,7 +125,12 @@ export const mockJobs: Job[] = [
     deadline: '2024-02-10',
     status: 'active',
     applications: 32,
-    isBookmarked: true
+    isBookmarked: true,
+    duration: 'Contract',
+    category: 'Design',
+    rating: 4.8,
+    isRemote: false,
+    experienceLevel: 'Advanced'
   },
   {
     id: '3',
@@ -135,7 +151,12 @@ export const mockJobs: Job[] = [
     deadline: '2024-02-05',
     status: 'active',
     applications: 28,
-    isBookmarked: false
+    isBookmarked: false,
+    duration: 'Full-time',
+    category: 'Data Science',
+    rating: 4.6,
+    isRemote: true,
+    experienceLevel: 'Advanced'
   },
   {
     id: '4',
@@ -156,7 +177,12 @@ export const mockJobs: Job[] = [
     deadline: '2024-02-12',
     status: 'active',
     applications: 56,
-    isBookmarked: false
+    isBookmarked: false,
+    duration: 'Full-time',
+    category: 'Product Management',
+    rating: 4.3,
+    isRemote: false,
+    experienceLevel: 'Intermediate'
   },
   {
     id: '5',
@@ -177,7 +203,12 @@ export const mockJobs: Job[] = [
     deadline: '2024-02-08',
     status: 'active',
     applications: 23,
-    isBookmarked: true
+    isBookmarked: true,
+    duration: 'Full-time',
+    category: 'DevOps',
+    rating: 4.7,
+    isRemote: false,
+    experienceLevel: 'Advanced'
   }
 ];
 

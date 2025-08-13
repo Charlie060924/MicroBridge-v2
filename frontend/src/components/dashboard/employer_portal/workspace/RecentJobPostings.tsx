@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Eye, Edit, MoreVertical, Users, Clock, MapPin, DollarSign, Calendar, Briefcase, Plus } from "lucide-react";
+import { originTracking } from "@/utils/originTracking";
 
 interface Job {
   id: string;
@@ -161,14 +162,20 @@ const RecentJobPostings: React.FC<RecentJobPostingsProps> = ({
 
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => onViewJob(job.id)}
+                          onClick={() => {
+                            originTracking.setOrigin('homepage');
+                            onViewJob(job.id);
+                          }}
                           className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           title="View Job"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => onEditJob(job.id)}
+                          onClick={() => {
+                            originTracking.setOrigin('homepage');
+                            onEditJob(job.id);
+                          }}
                           className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           title="Edit Job"
                         >
