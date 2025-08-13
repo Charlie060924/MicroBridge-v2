@@ -11,7 +11,8 @@ import {
   Search, 
   FileText, 
   User, 
-  Settings 
+  Settings,
+  FolderOpen
 } from "lucide-react";
 
 const navItems = [
@@ -29,6 +30,11 @@ const navItems = [
     name: "Applications",
     path: "/student_portal/workspace/applications",
     icon: FileText,
+  },
+  {
+    name: "Working Projects",
+    path: "/student_portal/workspace/working_projects",
+    icon: FolderOpen,
   },
   {
     name: "Billing",
