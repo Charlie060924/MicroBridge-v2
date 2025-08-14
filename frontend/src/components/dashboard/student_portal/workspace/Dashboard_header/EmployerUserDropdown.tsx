@@ -4,13 +4,13 @@ import React, { useState } from "react";
 import { User, Settings, LogOut, ChevronDown, HelpCircle, TrendingUp, Star, FileText } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useLevel } from "@/hooks/useLevel";
+import { useEmployerLevel } from "@/hooks/useEmployerLevel";
 import { useAuth } from "@/hooks/useAuth";
 import { usePreviewMode } from "@/context/PreviewModeContext";
 
 export default function EmployerUserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { levelData } = useLevel();
+  const { levelData } = useEmployerLevel();
   const router = useRouter();
   const { logout } = useAuth();
   const { enterPreviewMode } = usePreviewMode();

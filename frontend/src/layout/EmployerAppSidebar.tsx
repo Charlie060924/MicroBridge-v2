@@ -58,6 +58,12 @@ const navItems = [
     restricted: false,
   },
   {
+    name: "Level",
+    path: "/employer_portal/workspace/levels",
+    icon: Star,
+    restricted: false,
+  },
+  {
     name: "Billing",
     path: "/billing",
     icon: CreditCard,
