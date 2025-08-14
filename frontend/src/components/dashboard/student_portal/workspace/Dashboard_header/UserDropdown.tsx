@@ -3,11 +3,17 @@
 import React, { useState } from "react";
 import { User, Settings, LogOut, ChevronDown, HelpCircle, TrendingUp, Star } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLevel } from "@/hooks/useLevel";
+import { useAuth } from "@/hooks/useAuth";
+import { usePreviewMode } from "@/context/PreviewModeContext";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const { levelData } = useLevel();
+  const router = useRouter();
+  const { logout } = useAuth();
+  const { enterPreviewMode } = usePreviewMode();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -15,6 +21,13 @@ export default function UserDropdown() {
 
   const closeDropdown = () => {
     setIsOpen(false);
+  };
+
+  const handleSignOut = () => {
+    closeDropdown();
+    logout();
+    // Redirect to student preview mode homepage
+    enterPreviewMode("student");
   };
 
   // Calculate progress percentage
@@ -99,14 +112,13 @@ export default function UserDropdown() {
                 <HelpCircle className="h-4 w-4 mr-2" />
                 Help Center
               </Link>
-              <Link
-                href="/auth/signout"
-                className="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                onClick={closeDropdown}
+              <button
+                onClick={handleSignOut}
+                className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign out
-              </Link>
+              </button>
             </div>
           </div>
         </div>
