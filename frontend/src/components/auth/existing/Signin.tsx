@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { NavigationMemory } from "@/utils/navigationMemory";
+import toast from "react-hot-toast";
 
 const Signin = () => {
   const router = useRouter();
@@ -22,15 +24,34 @@ const Signin = () => {
       try {
         const result = await login(data.email, data.password);
         if (result.success) {
-          // TEMPORARY: Always redirect to role selection for testing
-          router.push("/onboarding");
-          // Original code (commented out for testing):
-          // const userRole = localStorage.getItem('mock_user_role') || 'student';
-          // if (userRole === 'employer') {
-          //   router.push("/employer_portal/workspace");
-          // } else {
-          //   router.push("/student_portal/workspace");
-          // }
+          // Check if we're returning from a specific location
+          const navigationState = NavigationMemory.getState();
+          const landingOrigin = NavigationMemory.getLandingOrigin();
+          
+          if (navigationState) {
+            // Show welcome back message
+            toast.success("Welcome back! Continue exploring where you left off.");
+            
+            // Restore the user to where they were
+            router.push(navigationState.origin);
+            // Restore scroll position after a short delay
+            setTimeout(() => {
+              NavigationMemory.restoreScrollPosition(navigationState.scrollPosition);
+            }, 100);
+          } else if (landingOrigin) {
+            // Route based on landing page origin
+            const basePath = landingOrigin === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
+            router.push(basePath);
+            toast.success(`Welcome! Redirecting you to your ${landingOrigin} dashboard.`);
+            // Clear the landing origin after use
+            NavigationMemory.clearLandingOrigin();
+          } else {
+            // Default behavior based on user role
+            const userRole = localStorage.getItem('mock_user_role') || 'student';
+            const basePath = userRole === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
+            router.push(basePath);
+            toast.success(`Welcome! Redirecting you to your ${userRole} dashboard.`);
+          }
         } else {
           alert(result.error || "Login failed");
         }
@@ -190,7 +211,7 @@ const Signin = () => {
 
             <div className="mt-12.5 border-t border-stroke py-5 text-center dark:border-strokedark">
               <p>
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <Link
                   href="/auth/signup"
                   className="text-black hover:text-primary dark:text-white dark:hover:text-primary"
@@ -205,7 +226,7 @@ const Signin = () => {
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-4 pt-4 border-t border-stroke dark:border-strokedark text-center">
               <p className="text-sm text-gray-500 mb-2">Quick Test (Dev Only):</p>
-              <div className="flex gap-2 justify-center">
+              <div className="flex gap-2 justify-center flex-wrap">
                 <button
                   onClick={() => {
                     localStorage.setItem('mock_user_role', 'student');
@@ -223,6 +244,15 @@ const Signin = () => {
                   className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
                 >
                   Set Employer
+                </button>
+                <button
+                  onClick={() => {
+                    localStorage.setItem('mock_user_role', 'none');
+                    setData({ email: '', password: '' });
+                  }}
+                  className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  Set None (Preview)
                 </button>
               </div>
             </div>

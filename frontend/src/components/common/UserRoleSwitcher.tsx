@@ -17,6 +17,12 @@ const UserRoleSwitcher: React.FC = () => {
     window.location.reload();
   };
 
+  const switchToNone = () => {
+    localStorage.setItem('mock_user_role', 'none');
+    // Force reload to update the user context
+    window.location.reload();
+  };
+
   // Only show in development mode
   if (process.env.NODE_ENV !== 'development') {
     return null;
@@ -27,7 +33,7 @@ const UserRoleSwitcher: React.FC = () => {
       <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
         Current: {user?.role || 'None'}
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-1 flex-wrap">
         <button
           onClick={switchToStudent}
           className={`px-2 py-1 text-xs rounded ${
@@ -42,11 +48,21 @@ const UserRoleSwitcher: React.FC = () => {
           onClick={switchToEmployer}
           className={`px-2 py-1 text-xs rounded ${
             user?.role === 'employer'
-              ? 'bg-blue-500 text-white'
+              ? 'bg-green-500 text-white'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
           }`}
         >
           Employer
+        </button>
+        <button
+          onClick={switchToNone}
+          className={`px-2 py-1 text-xs rounded ${
+            !user
+              ? 'bg-gray-500 text-white'
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+          }`}
+        >
+          None
         </button>
       </div>
     </div>

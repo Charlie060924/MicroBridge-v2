@@ -4,26 +4,26 @@ import LoadingSkeleton from "@/components/LoadingSkeleton";
 import LandingLayout from "../landing-layout";
 
 export const metadata: Metadata = {
-  title: "MicroBridge - For Employers",
-  description: "Hire Hong Kong's top student talent for your startup projects",
+  title: "MicroBridge - For Students",
+  description: "Connect with Hong Kong startups for real-world micro-internship opportunities",
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://microbridge.com/employer',
+    url: 'https://microbridge.com/student',
     siteName: 'MicroBridge',
     images: [
       {
         url: 'https://microbridge.com/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'MicroBridge for Employers',
+        alt: 'MicroBridge for Students',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MicroBridge - For Employers',
-    description: 'Hire Hong Kong\'s top student talent for your startup projects',
+    title: 'MicroBridge - For Students',
+    description: 'Connect with Hong Kong startups for real-world micro-internship opportunities',
     images: ['https://microbridge.com/og-image.jpg'],
   },
 };
@@ -33,6 +33,7 @@ const Hero = lazy(() => import("@/components/marketing/home/Hero/index").catch((
 const Brands = lazy(() => import("@/components/marketing/Brands/index").catch(() => ({ default: () => <div>Error loading Brands</div> })));
 const Features = lazy(() => import("@/components/marketing/home/Features/index").catch(() => ({ default: () => <div>Error loading Features</div> })));
 const FeaturesTab = lazy(() => import("@/components/marketing/home/FeaturesTab/index").catch(() => ({ default: () => <div>Error loading FeaturesTab</div> })));
+const Testimonial = lazy(() => import("@/components/marketing/Testimonial/index").catch(() => ({ default: () => <div>Error loading Testimonial</div> })));
 const Pricing = lazy(() => import("@/components/marketing/Pricing/index").catch(() => ({ default: () => <div>Error loading Pricing</div> })));
 const FAQ = lazy(() => import("@/components/marketing/FAQ/index").catch(() => ({ default: () => <div>Error loading FAQ</div> })));
 const Contact = lazy(() => import("@/components/marketing/Contact/index").catch(() => ({ default: () => <div>Error loading Contact</div> })));
@@ -55,13 +56,13 @@ const NonCriticalSection = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default function EmployerHomePage() {
+export default function StudentHomePage() {
   return (
     <LandingLayout>
       <main className="bg-white dark:bg-black">
         {/* Above-the-fold components */}
         <LazyLoadComponent>
-          <Hero variant="employer" />
+          <Hero variant="student" />
         </LazyLoadComponent>
         
         <LazyLoadComponent>
@@ -69,14 +70,18 @@ export default function EmployerHomePage() {
         </LazyLoadComponent>
         
         <LazyLoadComponent>
-          <Features variant="employer" />
+          <Features variant="student" />
         </LazyLoadComponent>
         
         <LazyLoadComponent>
-          <FeaturesTab variant="employer" />
+          <FeaturesTab variant="student" />
         </LazyLoadComponent>
         
         {/* Below-the-fold components (less critical) */}
+        <NonCriticalSection>
+          <Testimonial />
+        </NonCriticalSection>
+        
         <NonCriticalSection>
           <Pricing />
         </NonCriticalSection>

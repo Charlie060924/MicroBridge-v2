@@ -1,6 +1,10 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { usePreviewMode } from "@/context/PreviewModeContext";
+import { useAuth } from "@/hooks/useAuth";
+import { NavigationMemory } from "@/utils/navigationMemory";
+import { useEffect } from "react";
 
 interface HeroProps {
   variant?: "student" | "employer";
@@ -8,10 +12,36 @@ interface HeroProps {
 
 const Hero = ({ variant = "student" }: HeroProps) => {
   const router = useRouter();
+  const { enterPreviewMode, isPreviewMode } = usePreviewMode();
+  const { isAuthenticated } = useAuth();
   const isEmployer = variant === "employer";
 
+  // Set landing page origin based on variant when component mounts
+  useEffect(() => {
+    NavigationMemory.saveLandingOrigin(isEmployer ? "employer" : "student");
+  }, [isEmployer]);
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      // If user is authenticated, go directly to the appropriate portal
+      const basePath = isEmployer ? '/employer_portal/workspace' : '/student_portal/workspace';
+      router.push(basePath);
+    } else {
+      // If not authenticated, enter preview mode
+      enterPreviewMode(isEmployer ? "employer" : "student");
+    }
+  };
+
   const handleSignUp = () => {
+    // Ensure landing origin is saved before navigation
+    NavigationMemory.saveLandingOrigin(isEmployer ? "employer" : "student");
     router.push(isEmployer ? "/auth/employer-signup" : "/auth/signup");
+  };
+
+  const handleSignIn = () => {
+    // Ensure landing origin is saved before navigation
+    NavigationMemory.saveLandingOrigin(isEmployer ? "employer" : "student");
+    router.push(isEmployer ? "/auth/employer-signin" : "/auth/signin");
   };
 
   return (
@@ -52,21 +82,30 @@ const Hero = ({ variant = "student" }: HeroProps) => {
             <div className="mt-10 space-y-3">
               <div className="flex flex-col md:flex-row md:items-center md:gap-4">
                 <button
-                  onClick={handleSignUp}
+                  onClick={handleGetStarted}
                   className="rounded-full bg-black px-10.5 py-2.5 text-white text-xl duration-300 ease-in-out hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho"
                 >
-                  {isEmployer ? "Post a Project" : "Get Started"}
+                  {isAuthenticated 
+                    ? (isEmployer ? "Go to Dashboard" : "Go to Dashboard")
+                    : (isEmployer ? "Preview Platform" : "Get Started")
+                  }
                 </button>
                 
                 <p className="mt-3 text-black dark:text-white md:mt-0">
-                  {isEmployer
-                    ? "Sign up to start hiring students on demand."
-                    : "Create an account to see your personalized job recommendations."}
+                  {isAuthenticated
+                    ? "Access your personalized dashboard."
+                    : (isEmployer
+                        ? "Explore the platform without signing up."
+                        : "Preview the platform and explore opportunities."
+                      )
+                  }
                 </p>
               </div>
 
-              {!isEmployer && (
-                <p className="text-base mt-10">
+
+
+              {!isEmployer && !isAuthenticated && (
+                <p className="text-base mt-6">
                   <span
                     onClick={handleSignUp}
                     className="cursor-pointer text-primary underline underline-offset-4 hover:text-opacity-80"
@@ -74,6 +113,18 @@ const Hero = ({ variant = "student" }: HeroProps) => {
                     Upload your resume
                   </span>
                   <span className="text-black"> – it will only take a few seconds</span>
+                </p>
+              )}
+
+              {/* Employer-specific call-to-action */}
+              {isEmployer && !isAuthenticated && (
+                <p className="text-base mt-6 text-black dark:text-white">
+                  <span 
+                    onClick={handleSignUp}
+                    className="cursor-pointer text-blue-600 dark:text-blue-400 underline underline-offset-4 hover:text-opacity-80"
+                  >
+                    Post your job
+                  </span> – it only takes a few seconds
                 </p>
               )}
             </div>

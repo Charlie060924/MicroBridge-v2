@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { useLevel } from "@/hooks/useLevel";
+import { usePreviewMode } from "@/context/PreviewModeContext";
+import RestrictedPageModal from "@/components/common/RestrictedPageModal";
 import { 
   Star, 
   CreditCard, 
@@ -12,7 +14,8 @@ import {
   FileText, 
   User, 
   Settings,
-  FolderOpen
+  FolderOpen,
+  Lock
 } from "lucide-react";
 
 const navItems = [
@@ -20,49 +23,66 @@ const navItems = [
     name: "Dashboard",
     path: "/student_portal/workspace",
     icon: BarChart3,
+    restricted: false,
   },
   {
     name: "Browse Jobs",
     path: "/student_portal/workspace/jobs",
     icon: Search,
+    restricted: false,
   },
   {
     name: "Applications",
     path: "/student_portal/workspace/applications",
     icon: FileText,
+    restricted: true,
+    feature: "view_applications",
   },
   {
     name: "Working Projects",
     path: "/student_portal/workspace/working_projects",
     icon: FolderOpen,
+    restricted: true,
+    feature: "current_projects",
   },
   {
     name: "Billing",
     path: "/billing",
     icon: CreditCard,
+    restricted: true,
+    feature: "billing",
   },
   {
     name: "Level System",
     path: "/student_portal/workspace/levels",
     icon: Star,
     showBadge: true,
+    restricted: true,
+    feature: "level_system",
   },
   {
     name: "Profile",
     path: "/student_portal/workspace/profile",
     icon: User,
+    restricted: true,
+    feature: "profile",
   },
   {
     name: "Settings",
     path: "/student_portal/workspace/settings",
     icon: Settings,
+    restricted: true,
+    feature: "profile",
   },
 ];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const { levelData } = useLevel();
+  const { isPreviewMode, isFeatureLocked } = usePreviewMode();
   const pathname = usePathname();
+  const [showRestrictedModal, setShowRestrictedModal] = useState(false);
+  const [restrictedFeature, setRestrictedFeature] = useState<string>("");
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
 
   return (
@@ -104,21 +124,36 @@ const AppSidebar: React.FC = () => {
             {navItems.map((nav) => {
               const IconComponent = nav.icon;
               const isCurrentActive = isActive(nav.path);
+              const isRestricted = isPreviewMode && nav.restricted && isFeatureLocked(nav.feature || "");
+              
+              const handleClick = (e: React.MouseEvent) => {
+                if (isRestricted) {
+                  e.preventDefault();
+                  setRestrictedFeature(nav.feature || "");
+                  setShowRestrictedModal(true);
+                }
+              };
               
               return (
                 <li key={nav.name} className="overflow-hidden">
                   <Link
                     href={nav.path}
+                    onClick={handleClick}
                     className={`menu-item group relative overflow-hidden ${
                       isCurrentActive
                         ? "menu-item-active"
                         : "menu-item-inactive"
-                    }`}
+                    } ${isRestricted ? "opacity-60" : ""}`}
                   >
                     {/* Icon */}
-                    {IconComponent && (
-                      <IconComponent className="w-5 h-5 flex-shrink-0" />
-                    )}
+                    <div className="relative">
+                      {IconComponent && (
+                        <IconComponent className="w-5 h-5 flex-shrink-0" />
+                      )}
+                      {isRestricted && (
+                        <Lock className="w-3 h-3 absolute -top-1 -right-1 text-gray-400" />
+                      )}
+                    </div>
                     
                     {/* Text */}
                     {(isExpanded || isHovered || isMobileOpen) && (
@@ -140,6 +175,12 @@ const AppSidebar: React.FC = () => {
           </ul>
         </nav>
       </div>
+      
+      <RestrictedPageModal
+        isOpen={showRestrictedModal}
+        onClose={() => setShowRestrictedModal(false)}
+        feature={restrictedFeature}
+      />
     </aside>
   );
 };

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { useLevel } from "@/hooks/useLevel";
+import { usePreviewMode } from "@/context/PreviewModeContext";
+import RestrictedPageModal from "@/components/common/RestrictedPageModal";
 import { 
   Star, 
   Briefcase, 
@@ -15,7 +17,8 @@ import {
   FileText,
   Plus,
   Building,
-  CreditCard
+  CreditCard,
+  Lock
 } from "lucide-react";
 
 const navItems = [
@@ -23,16 +26,20 @@ const navItems = [
     name: "Dashboard",
     path: "/employer_portal/workspace",
     icon: BarChart3,
+    restricted: false,
   },
   {
     name: "Post Job",
     path: "/employer_portal/workspace/post-job",
     icon: Plus,
+    restricted: true,
+    feature: "post_job",
   },
   {
     name: "Manage Jobs",
     path: "/employer_portal/workspace/manage-jobs",
     icon: Briefcase,
+    restricted: false,
   },
   {
     name: "Applications",
@@ -41,38 +48,52 @@ const navItems = [
     showBadge: true,
     badgeText: "12",
     badgeColor: "bg-green-500",
+    restricted: true,
+    feature: "view_applications_employer",
   },
   {
     name: "Candidates",
     path: "/employer_portal/workspace/candidates",
     icon: Users,
+    restricted: false,
   },
   {
     name: "Billing",
     path: "/billing",
     icon: CreditCard,
+    restricted: true,
+    feature: "billing",
   },
   {
     name: "Reports",
     path: "/employer_portal/workspace/reports",
     icon: BarChart3,
+    restricted: true,
+    feature: "access_analytics",
   },
   {
     name: "Profile",
     path: "/employer_portal/workspace/profile",
     icon: User,
+    restricted: true,
+    feature: "update_company_profile",
   },
   {
     name: "Settings",
     path: "/employer_portal/workspace/settings",
     icon: Settings,
+    restricted: true,
+    feature: "update_company_profile",
   },
 ];
 
 const EmployerAppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const { levelData } = useLevel();
+  const { isPreviewMode, isFeatureLocked } = usePreviewMode();
   const pathname = usePathname();
+  const [showRestrictedModal, setShowRestrictedModal] = useState(false);
+  const [restrictedFeature, setRestrictedFeature] = useState<string>("");
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
 
   return (
@@ -114,21 +135,36 @@ const EmployerAppSidebar: React.FC = () => {
             {navItems.map((nav) => {
               const IconComponent = nav.icon;
               const isCurrentActive = isActive(nav.path);
+              const isRestricted = isPreviewMode && nav.restricted && isFeatureLocked(nav.feature || "");
+              
+              const handleClick = (e: React.MouseEvent) => {
+                if (isRestricted) {
+                  e.preventDefault();
+                  setRestrictedFeature(nav.feature || "");
+                  setShowRestrictedModal(true);
+                }
+              };
               
               return (
                 <li key={nav.name} className="overflow-hidden">
                   <Link
                     href={nav.path}
+                    onClick={handleClick}
                     className={`menu-item group relative overflow-hidden ${
                       isCurrentActive
                         ? "menu-item-active"
                         : "menu-item-inactive"
-                    }`}
+                    } ${isRestricted ? "opacity-60" : ""}`}
                   >
                     {/* Icon */}
-                    {IconComponent && (
-                      <IconComponent className="w-5 h-5 flex-shrink-0" />
-                    )}
+                    <div className="relative">
+                      {IconComponent && (
+                        <IconComponent className="w-5 h-5 flex-shrink-0" />
+                      )}
+                      {isRestricted && (
+                        <Lock className="w-3 h-3 absolute -top-1 -right-1 text-gray-400" />
+                      )}
+                    </div>
                     
                     {/* Text */}
                     {(isExpanded || isHovered || isMobileOpen) && (
@@ -150,6 +186,12 @@ const EmployerAppSidebar: React.FC = () => {
           </ul>
         </nav>
       </div>
+      
+      <RestrictedPageModal
+        isOpen={showRestrictedModal}
+        onClose={() => setShowRestrictedModal(false)}
+        feature={restrictedFeature}
+      />
     </aside>
   );
 };

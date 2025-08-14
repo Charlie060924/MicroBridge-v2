@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Clock, MapPin, DollarSign, Star, Bookmark, BookmarkPlus } from "lucide-react";
+import { usePreviewMode } from "@/context/PreviewModeContext";
 
 export interface Job {
   id: string;
@@ -28,8 +29,13 @@ interface JobCategoryCardProps {
 }
 
 const JobCategoryCard: React.FC<JobCategoryCardProps> = ({ job, onBookmark, onClick }) => {
+  const { isFeatureLocked } = usePreviewMode();
+  
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isFeatureLocked('bookmark_job')) {
+      return; // Don't allow bookmarking in preview mode
+    }
     onBookmark(job.id);
   };
 

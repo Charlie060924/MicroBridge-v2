@@ -14,10 +14,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useOriginTracking } from "@/utils/originTracking";
+import { usePreviewMode } from "@/context/PreviewModeContext";
 import JobHeader from "@/components/job-details/JobHeader";
 import JobDescription from "@/components/job-details/JobDescription";
 import JobSkills from "@/components/job-details/JobSkills";
 import JobSummary from "@/components/job-details/JobSummary";
+import LockedFeature from "@/components/common/LockedFeature";
 
 interface Job {
   id: string;
@@ -45,6 +47,7 @@ const PublicJobPage: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { getReturnUrl, getReturnText } = useOriginTracking();
+  const { isFeatureLocked } = usePreviewMode();
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -202,26 +205,28 @@ const PublicJobPage: React.FC = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1 min-w-0 overflow-hidden">
             <JobSummary job={job}>
-              {/* Apply Now Button (Preview Mode) */}
-              <div className="relative mb-4 w-full max-w-full">
-                <button
-                  onClick={handleApplyClick}
-                  className="w-full bg-primary text-white font-semibold py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center cursor-pointer whitespace-nowrap max-w-full"
-                >
-                  <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0" />
-                  <span className="truncate">Apply Now</span>
-                </button>
-                
-                {/* Tooltip */}
-                {showApplyTooltip && (
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg animate-tooltip-fade-in animate-tooltip-bounce">
-                    <div className="relative">
-                      Visible to students only
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+              {/* Apply Now Button */}
+              <LockedFeature feature="apply_job" showOverlay={false}>
+                <div className="relative mb-4 w-full max-w-full">
+                  <button
+                    onClick={handleApplyClick}
+                    className="w-full bg-primary text-white font-semibold py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center cursor-pointer whitespace-nowrap max-w-full"
+                  >
+                    <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+                    <span className="truncate">Apply Now</span>
+                  </button>
+                  
+                  {/* Tooltip */}
+                  {showApplyTooltip && (
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg animate-tooltip-fade-in animate-tooltip-bounce">
+                      <div className="relative">
+                        Visible to students only
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              </LockedFeature>
 
               {/* Visit Company Button */}
               <button

@@ -3,16 +3,20 @@
 import React, { useEffect, useState } from "react";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { PreviewModeProvider } from "@/context/PreviewModeContext";
 import AppSidebar from "@/layout/AppSidebar";
 import AppHeader from "@/layout/AppHeader";
 import Backdrop from "@/layout/Backdrop";
+import PreviewBanner from "@/components/common/PreviewBanner";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <SidebarProvider>
-        <AdminLayoutContent>{children}</AdminLayoutContent>
-      </SidebarProvider>
+      <PreviewModeProvider>
+        <SidebarProvider>
+          <AdminLayoutContent>{children}</AdminLayoutContent>
+        </SidebarProvider>
+      </PreviewModeProvider>
     </ThemeProvider>
   );
 }
@@ -58,6 +62,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           maxWidth: isMobile ? '100vw' : `calc(100vw - ${sidebarWidth}px)`
         }}
       >
+        {/* Preview Banner */}
+        <PreviewBanner />
+
         {/* Header */}
         <AppHeader />
 

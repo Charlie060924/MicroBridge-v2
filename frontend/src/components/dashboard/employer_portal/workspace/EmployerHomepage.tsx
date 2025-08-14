@@ -2,9 +2,12 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, FileText, Briefcase, Users, Clock, Plus, Eye, BarChart3 } from "lucide-react";
+import { User, FileText, Briefcase, Users, Clock, Plus, Eye, BarChart3, Lock } from "lucide-react";
 import dynamic from 'next/dynamic';
 import { originTracking } from "@/utils/originTracking";
+import { usePreviewMode } from "@/context/PreviewModeContext";
+import LockedFeature from "@/components/common/LockedFeature";
+import PreviewBanner from "@/components/common/PreviewBanner";
 
 // Import types
 interface Job {
@@ -58,8 +61,6 @@ const StatCard = dynamic(() => import("./StatCard"), {
   loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
 });
 
-
-
 const JobListCard = dynamic(() => import("./JobListCard"), {
   loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
 });
@@ -99,6 +100,7 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
   });
 
   const router = useRouter();
+  const { isPreviewMode, isFeatureLocked } = usePreviewMode();
 
   // Replace the useEffect with temporary mock data to avoid API errors
   useEffect(() => {
@@ -168,7 +170,7 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
           }
         ];
 
-        const mockApplications: Application[] = [
+        const mockApplications: Application[] = isPreviewMode ? [] : [
           {
             id: "1",
             jobTitle: "Frontend Developer",
@@ -201,7 +203,7 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
           }
         ];
 
-        const mockCandidates: Candidate[] = [
+        const mockCandidates: Candidate[] = isPreviewMode ? [] : [
           {
             id: "1",
             name: "Sarah Wilson",
@@ -230,7 +232,16 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
           }
         ];
 
-        const mockStats = {
+        const mockStats = isPreviewMode ? {
+          totalJobs: 0,
+          activeJobs: 0,
+          totalApplications: 0,
+          pendingApplications: 0,
+          averageTimeToFill: 0,
+          totalViews: 0,
+          shortlistedCandidates: 0,
+          savedCandidates: 0
+        } : {
           totalJobs: 15,
           activeJobs: 8,
           totalApplications: 45,
@@ -269,7 +280,7 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
     };
 
     fetchData();
-  }, []);
+  }, [isPreviewMode]);
 
   // Memoized greeting
   const greeting = useMemo(() => {
@@ -330,6 +341,9 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Preview Banner */}
+      <PreviewBanner />
+      
       {/* Welcome Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -346,13 +360,15 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
               </div>
             </div>
             {/* Primary Action - Post a Job */}
-            <button
-              onClick={handlePostJob}
-              className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Post a Job
-            </button>
+            <LockedFeature feature="post_job" showOverlay={false}>
+              <button
+                onClick={handlePostJob}
+                className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Post a Job
+              </button>
+            </LockedFeature>
           </div>
         </div>
       </div>
@@ -365,21 +381,21 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
             icon={Eye}
             value={stats.totalViews}
             label="Total Views"
-            change="+15% this week"
+            change={isPreviewMode ? undefined : "+15% this week"}
             changeType="positive"
           />
           <StatCard
             icon={Users}
             value={stats.totalApplications}
             label="Total Applications"
-            change={`+${stats.pendingApplications} today`}
+            change={isPreviewMode ? undefined : `+${stats.pendingApplications} today`}
             changeType="positive"
           />
           <StatCard
             icon={FileText}
             value={stats.pendingApplications}
             label="Pending Review"
-            change={`+${stats.pendingApplications} today`}
+            change={isPreviewMode ? undefined : `+${stats.pendingApplications} today`}
             changeType="positive"
           />
           <StatCard
@@ -420,10 +436,24 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
 
           {/* Right Column - Recommended Candidates */}
           <div>
-            <RecommendedCandidates 
-              candidates={recommendedCandidates}
-              onViewCandidate={(candidateId) => router.push(`/employer_portal/workspace/candidates/${candidateId}`)}
-            />
+            {isPreviewMode ? (
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Candidate Recommendations
+                  </h3>
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Sign in to view personalized candidate recommendations based on your job requirements.
+                </p>
+              </div>
+            ) : (
+              <RecommendedCandidates 
+                candidates={recommendedCandidates}
+                onViewCandidate={(candidateId) => router.push(`/employer_portal/workspace/candidates/${candidateId}`)}
+              />
+            )}
           </div>
         </div>
       </div>

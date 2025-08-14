@@ -2,14 +2,64 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { NavigationMemory } from "@/utils/navigationMemory";
+import toast from "react-hot-toast";
 
 const Signup = () => {
+  const router = useRouter();
+  const { register } = useAuth();
   const [data, setData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (data.firstName && data.lastName && data.email && data.password) {
+      setIsLoading(true);
+      try {
+        const result = await register({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password,
+        });
+        
+        if (result.success) {
+          // Check landing page origin for proper routing
+          const landingOrigin = NavigationMemory.getLandingOrigin();
+          
+          if (landingOrigin) {
+            // Route based on landing page origin
+            const basePath = landingOrigin === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
+            router.push(basePath);
+            toast.success(`Welcome! Redirecting you to your ${landingOrigin} dashboard.`);
+            // Clear the landing origin after use
+            NavigationMemory.clearLandingOrigin();
+          } else {
+            // Default behavior based on user role
+            const userRole = localStorage.getItem('mock_user_role') || 'student';
+            const basePath = userRole === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
+            router.push(basePath);
+            toast.success(`Welcome! Redirecting you to your ${userRole} dashboard.`);
+          }
+        } else {
+          alert(result.error || "Registration failed");
+        }
+      } catch (error) {
+        alert("Registration failed. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      alert("Please fill in all fields.");
+    }
+  };
 
   return (
     <>
@@ -109,7 +159,7 @@ const Signup = () => {
               <span className="dark:bg-stroke-dark hidden h-[1px] w-full max-w-[200px] bg-stroke dark:bg-strokedark sm:block"></span>
             </div>
 
-            <form>
+            <form onSubmit={handleSubmit}>
               {/* Name Fields */}
               <div className="mb-7.5 flex flex-col gap-7.5 lg:mb-12.5 lg:flex-row lg:justify-between lg:gap-14">
                 <input
@@ -185,24 +235,28 @@ const Signup = () => {
                 </div>
 
                 <button
+                  type="submit"
+                  disabled={isLoading}
                   aria-label="signup with email and password"
-                  className="inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho"
+                  className="inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Create Account
+                  {isLoading ? "Creating Account..." : "Create Account"}
                   {/* Login Arrow */}
-                  <svg
-                    className="fill-white"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
-                      fill=""
-                    />
-                  </svg>
+                  {!isLoading && (
+                    <svg
+                      className="fill-white"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10.4767 6.16664L6.00668 1.69664L7.18501 0.518311L13.6667 6.99998L7.18501 13.4816L6.00668 12.3033L10.4767 7.83331H0.333344V6.16664H10.4767Z"
+                        fill=""
+                      />
+                    </svg>
+                  )}
                 </button>
               </div>
 

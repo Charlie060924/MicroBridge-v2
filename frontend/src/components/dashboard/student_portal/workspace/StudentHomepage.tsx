@@ -2,8 +2,11 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, Calendar, TrendingUp } from "lucide-react";
+import { User, Calendar, TrendingUp, Lock, Sparkles, MapPin, DollarSign, Clock } from "lucide-react";
 import dynamic from 'next/dynamic';
+import LockedFeature from "@/components/common/LockedFeature";
+import { usePreviewMode } from "@/context/PreviewModeContext";
+import PreviewBanner from "@/components/common/PreviewBanner";
 
 // Import types from the components that define them
 import { Job } from "./JobCategoryCard";
@@ -63,6 +66,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   const router = useRouter();
+  const { isPreviewMode, isFeatureLocked } = usePreviewMode();
 
   // Replace the useEffect with temporary mock data to avoid API errors
   useEffect(() => {
@@ -103,10 +107,27 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
             deadline: "2024-02-10",
             isRemote: false,
             experienceLevel: "Entry"
+          },
+          {
+            id: "3",
+            title: "Data Analyst",
+            company: "DataCorp",
+            location: "San Francisco, CA",
+            salary: "$35-50/hr",
+            duration: "4 months",
+            category: "Analytics",
+            description: "Analyze data and create insights for business decisions",
+            skills: ["Python", "SQL", "Tableau"],
+            rating: 4.2,
+            isBookmarked: false,
+            postedDate: "2024-01-20",
+            deadline: "2024-02-20",
+            isRemote: true,
+            experienceLevel: "Intermediate"
           }
         ];
 
-        const mockProjects: Project[] = [
+        const mockProjects: Project[] = isPreviewMode ? [] : [
           {
             id: "1",
             title: "E-commerce Website",
@@ -133,7 +154,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
           }
         ];
 
-        const mockSkills = ["React", "TypeScript", "Node.js", "Python"];
+        const mockSkills = isPreviewMode ? [] : ["React", "TypeScript", "Node.js", "Python"];
 
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -163,7 +184,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
     };
 
     fetchData();
-  }, []);
+  }, [isPreviewMode]);
 
   // Update the filtered jobs to use real data
   const filteredJobs = useMemo(() => {
@@ -249,32 +270,63 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   }, []);
 
   // Update the stats cards to use real data
-  const statsCards = useMemo(() => [
-    {
-      icon: <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
-      bg: "bg-blue-100 dark:bg-blue-900",
-      label: "Active Projects",
-      value: ongoingProjects.length
-    },
-    {
-      icon: <Calendar className="h-6 w-6 text-green-600 dark:text-green-400" />,
-      bg: "bg-green-100 dark:bg-green-900",
-      label: "Completed",
-      value: 12 // This could also come from API
-    },
-    {
-      icon: <User className="h-6 w-6 text-purple-600 dark:text-purple-400" />,
-      bg: "bg-purple-100 dark:bg-purple-900",
-      label: "Skills",
-      value: userSkills.length
-    },
-    {
-      icon: <TrendingUp className="h-6 w-6 text-orange-600 dark:text-orange-400" />,
-      bg: "bg-orange-100 dark:bg-orange-900",
-      label: "Earnings",
-      value: "$2.4k" // This could also come from API
+  const statsCards = useMemo(() => {
+    if (isPreviewMode) {
+      return [
+        {
+          icon: <TrendingUp className="h-6 w-6 text-gray-400" />,
+          bg: "bg-gray-100 dark:bg-gray-800",
+          label: "Active Projects",
+          value: "—"
+        },
+        {
+          icon: <Calendar className="h-6 w-6 text-gray-400" />,
+          bg: "bg-gray-100 dark:bg-gray-800",
+          label: "Completed",
+          value: "—"
+        },
+        {
+          icon: <User className="h-6 w-6 text-gray-400" />,
+          bg: "bg-gray-100 dark:bg-gray-800",
+          label: "Skills",
+          value: "—"
+        },
+        {
+          icon: <TrendingUp className="h-6 w-6 text-gray-400" />,
+          bg: "bg-gray-100 dark:bg-gray-800",
+          label: "Earnings",
+          value: "—"
+        }
+      ];
     }
-  ], [ongoingProjects, userSkills]);
+    
+    return [
+      {
+        icon: <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
+        bg: "bg-blue-100 dark:bg-blue-900",
+        label: "Active Projects",
+        value: ongoingProjects.length
+      },
+      {
+        icon: <Calendar className="h-6 w-6 text-green-600 dark:text-green-400" />,
+        bg: "bg-green-100 dark:bg-green-900",
+        label: "Completed",
+        value: 12 // This could also come from API
+      },
+      {
+        icon: <User className="h-6 w-6 text-purple-600 dark:text-purple-400" />,
+        bg: "bg-purple-100 dark:bg-purple-900",
+        label: "Skills",
+        value: userSkills.length
+      },
+      {
+        icon: <TrendingUp className="h-6 w-6 text-orange-600 dark:text-orange-400" />,
+        bg: "bg-orange-100 dark:bg-orange-900",
+        label: "Earnings",
+        value: "$2.4k" // This could also come from API
+      }
+    ];
+  }, [ongoingProjects, userSkills, isPreviewMode]);
 
   // Show loading state while fetching data
   if (isDataLoading) {
@@ -290,6 +342,9 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Preview Banner */}
+      <PreviewBanner />
+      
       {/* Welcome Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -300,11 +355,11 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {greeting}, {user?.name || "Student"}! 👋
                 </h1>
-                                 <p className="text-gray-600 dark:text-gray-400">
-                   Ready to explore new micro-internship opportunities?
-                 </p>
-                 <div className="mt-4">
-                 </div>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Ready to explore new micro-internship opportunities?
+                </p>
+                <div className="mt-4">
+                </div>
               </div>
             </div>
           </div>
@@ -344,11 +399,13 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredJobs.map(job => (
                     <div key={job.id} className="w-full">
-                      <JobCategoryCard
-                        job={job}
-                        onBookmark={handleBookmark}
-                        onClick={handleJobClick}
-                      />
+                      <LockedFeature feature="bookmark_job" showOverlay={false}>
+                        <JobCategoryCard
+                          job={job}
+                          onBookmark={handleBookmark}
+                          onClick={handleJobClick}
+                        />
+                      </LockedFeature>
                     </div>
                   ))}
                 </div>
@@ -360,7 +417,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
               />
             ) : (
               <div className="space-y-6">
-                {/* Step 2: Replace Featured Jobs with Recently Viewed Jobs */}
+                {/* Recently Viewed Jobs - Always show */}
                 <RecentlyViewedJobs
                   jobs={recentlyViewedJobs}
                   onBookmark={handleBookmark}
@@ -368,25 +425,104 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Step 2: Replace Ongoing Projects with Recommended Jobs */}
+                  {/* Featured Jobs in Preview Mode, Recommendations in Full Mode */}
                   <div className="lg:col-span-2">
-                    <Recommendations
-                      jobs={featuredJobs.slice(0, 3)}
-                      onBookmark={handleBookmark}
-                      onJobClick={handleJobClick}
-                      userSkills={userSkills}
-                    />
+                    {isPreviewMode ? (
+                      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900 rounded-full flex items-center justify-center">
+                              <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                                Featured Jobs
+                              </h2>
+                              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                Popular opportunities on our platform
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          {featuredJobs.slice(0, 3).map((job) => (
+                            <div
+                              key={job.id}
+                              onClick={() => handleJobClick(job)}
+                              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-150 cursor-pointer group"
+                            >
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-primary transition-colors duration-150">
+                                    {job.title}
+                                  </h3>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    {job.company}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-3">
+                                <div className="flex items-center text-gray-600 dark:text-gray-400">
+                                  <MapPin className="h-4 w-4 mr-2" />
+                                  <span>{job.location}</span>
+                                </div>
+                                <div className="flex items-center text-gray-600 dark:text-gray-400">
+                                  <DollarSign className="h-4 w-4 mr-2" />
+                                  <span>{job.salary}</span>
+                                </div>
+                                <div className="flex items-center text-gray-600 dark:text-gray-400">
+                                  <Clock className="h-4 w-4 mr-2" />
+                                  <span>{job.duration}</span>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {job.skills.slice(0, 3).map((skill, skillIndex) => (
+                                  <span
+                                    key={skillIndex}
+                                    className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full"
+                                  >
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <Recommendations
+                        jobs={featuredJobs.slice(0, 3)}
+                        onBookmark={handleBookmark}
+                        onJobClick={handleJobClick}
+                        userSkills={userSkills}
+                      />
+                    )}
                   </div>
 
-                  {/* Step 2: Replace Recommended Jobs with Ongoing Projects */}
+                  {/* Current Projects - Locked in Preview Mode */}
                   <div>
-                    <OngoingProjects
-                      projects={ongoingProjects}
-                      onProjectClick={handleProjectClick}
-                    />
+                    {isPreviewMode ? (
+                      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            Current Projects
+                          </h3>
+                          <Lock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          Sign in to view your current projects and track progress.
+                        </p>
+                      </div>
+                    ) : (
+                      <OngoingProjects
+                        projects={ongoingProjects}
+                        onProjectClick={handleProjectClick}
+                      />
+                    )}
                   </div>
                 </div>
 
+                {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {statsCards.map((stat, index) => (
                     <div key={`stat-${stat.label}-${index}`} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">

@@ -347,16 +347,39 @@ export const mockApi = {
   // User
   getCurrentUser: async (): Promise<User> => {
     await new Promise(resolve => setTimeout(resolve, 100));
-    // For testing: check if we want to simulate an employer user
-    const isEmployer = localStorage.getItem('mock_user_role') === 'employer';
-    return isEmployer ? mockUsers[1] : mockUsers[0]; // Return employer or student
+    // For testing: check if we want to simulate different user types
+    const mockUserRole = localStorage.getItem('mock_user_role');
+    
+    if (mockUserRole === 'employer') {
+      return mockUsers[1]; // Jane Smith (employer)
+    } else if (mockUserRole === 'student') {
+      return mockUsers[0]; // John Doe (student)
+    } else {
+      // Return null for 'none' role (preview mode)
+      throw new Error('No authenticated user');
+    }
   },
   
   // Authentication (mock)
   login: async (email: string, password: string): Promise<{ user: User; token: string }> => {
     await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Mock authentication logic for different test accounts
+    const mockUserRole = localStorage.getItem('mock_user_role');
+    
+    let user: User;
+    
+    if (mockUserRole === 'employer') {
+      user = mockUsers[1]; // Jane Smith (employer)
+    } else if (mockUserRole === 'student') {
+      user = mockUsers[0]; // John Doe (student)
+    } else {
+      // Default to student if no role is set
+      user = mockUsers[0];
+    }
+    
     return {
-      user: mockUsers[0],
+      user,
       token: 'mock-jwt-token-12345'
     };
   },

@@ -3,17 +3,21 @@
 import React, { useEffect, useState } from "react";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { PreviewModeProvider } from "@/context/PreviewModeContext";
 import EmployerAppSidebar from "@/layout/EmployerAppSidebar";
 import EmployerAppHeader from "@/layout/EmployerAppHeader";
 import Backdrop from "@/layout/Backdrop";
+import PreviewBanner from "@/components/common/PreviewBanner";
 import { useEmployerOnboarding } from "@/hooks/useEmployerOnboarding";
 
 export default function EmployerRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <SidebarProvider>
-        <EmployerLayoutContent>{children}</EmployerLayoutContent>
-      </SidebarProvider>
+      <PreviewModeProvider>
+        <SidebarProvider>
+          <EmployerLayoutContent>{children}</EmployerLayoutContent>
+        </SidebarProvider>
+      </PreviewModeProvider>
     </ThemeProvider>
   );
 }
@@ -72,6 +76,9 @@ function EmployerLayoutContent({ children }: { children: React.ReactNode }) {
           maxWidth: isMobile ? '100vw' : `calc(100vw - ${sidebarWidth}px)`
         }}
       >
+        {/* Preview Banner */}
+        <PreviewBanner />
+
         {/* Header */}
         <EmployerAppHeader />
 
