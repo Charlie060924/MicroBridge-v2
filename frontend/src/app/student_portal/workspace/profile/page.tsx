@@ -132,7 +132,6 @@ const getExtendedUserData = (): ExtendedUserData => ({
     { skill: "HTML/CSS", proficiency: 92, level: "Expert" }
   ],
   careerGoals: ["Lead a development team", "Contribute to open source", "Build scalable applications"],
-  careerGoals: ["Lead a development team", "Contribute to open source", "Build scalable applications"],
   experience: [
     {
       title: "Senior Frontend Developer",
@@ -193,6 +192,57 @@ const StudentProfilePage: React.FC = () => {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [profileCompleteness, setProfileCompleteness] = useState(0);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [isFromRoleSelection, setIsFromRoleSelection] = useState(false);
+
+  // Check if coming from role selection
+  useEffect(() => {
+    const fromRoleSelection = searchParams.get('fromRoleSelection') === 'true';
+    setIsFromRoleSelection(fromRoleSelection);
+    
+    if (fromRoleSelection) {
+      // Initialize with empty profile data for onboarding
+      setProfileData({
+        firstName: "",
+        lastName: "",
+        preferredName: "",
+        username: "",
+        email: user?.email || "",
+        phone: "",
+        bio: "",
+        location: "",
+        profilePicture: "",
+        educationLevel: "",
+        major: "",
+        university: "",
+        degree: "",
+        graduationDate: "",
+        careerGoal: "",
+        industry: "",
+        headline: "",
+        careerGoals: [],
+        skills: [],
+        experience: [],
+        availability: "",
+        projectDuration: "",
+        paymentType: "",
+        salaryRange: "",
+        customAmount: "",
+        flexibleNegotiation: false,
+        currency: "USD",
+        expectedSalary: {
+          min: 0,
+          max: 0,
+          currency: "USD"
+        },
+        portfolioUrl: "",
+        linkedinUrl: "",
+        githubUrl: "",
+        resume: null,
+        languages: [],
+        matchScore: 0
+      });
+    }
+  }, [searchParams, user]);
 
   // Calculate profile completeness
   useEffect(() => {
@@ -634,13 +684,32 @@ const StudentProfilePage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
+          {isFromRoleSelection && (
+            <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+                    Complete Your Profile
+                  </h4>
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    Please complete your profile to start using the student portal. This information helps employers understand your skills and match you with relevant opportunities.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                My Profile
+                {isFromRoleSelection ? "Complete Your Profile" : "My Profile"}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Manage your professional profile and showcase your skills
+                {isFromRoleSelection 
+                  ? "Let's get you set up with your student profile" 
+                  : "Manage your professional profile and showcase your skills"
+                }
               </p>
             </div>
             <div className="flex items-center space-x-3">
