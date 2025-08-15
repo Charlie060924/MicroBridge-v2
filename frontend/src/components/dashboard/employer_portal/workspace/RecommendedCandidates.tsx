@@ -1,18 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { User, Star, MapPin, Clock, MessageCircle, Eye, ChevronRight } from "lucide-react";
-
-interface Candidate {
-  id: string;
-  name: string;
-  title: string;
-  skills: string[];
-  experience: string;
-  matchScore: number;
-  avatar?: string;
-}
+import { Candidate } from "@/data/mockCandidates";
+import Link from "next/link";
 
 interface RecommendedCandidatesProps {
   candidates: Candidate[];
@@ -81,12 +72,7 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
               Top matches for your job requirements
             </p>
           </div>
-          <Link
-            href="/employer_portal/workspace/candidates"
-            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-            role="link"
-            tabIndex={0}
-          >
+          <Link href="/employer_portal/workspace/candidates" className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
             View All
           </Link>
         </div>
@@ -117,17 +103,17 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
                   <div className="flex items-start space-x-3 flex-1">
                     {/* Avatar */}
                     <div className="flex-shrink-0">
-                      {candidate.avatar ? (
-                        <img
-                          src={candidate.avatar}
-                          alt={candidate.name}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                          <User className="h-6 w-6 text-white" />
-                        </div>
-                      )}
+                                          {candidate.profilePicture ? (
+                      <img
+                        src={candidate.profilePicture}
+                        alt={candidate.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <User className="h-6 w-6 text-white" />
+                      </div>
+                    )}
                     </div>
 
                     {/* Candidate Info */}
@@ -175,12 +161,12 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
                       </div>
 
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        {candidate.title}
+                        {candidate.headline}
                       </p>
 
                       <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-3">
                         <Clock className="h-3 w-3 mr-1" />
-                        {candidate.experience} experience
+                        {candidate.experience.length} position{candidate.experience.length !== 1 ? 's' : ''} experience
                       </div>
 
                       {/* Top 3 Skills - Prioritized */}
@@ -196,7 +182,7 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
                                 : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
                             }`}
                           >
-                            {skill}
+                            {skill.name}
                           </span>
                         ))}
                         {candidate.skills.length > 3 && (
@@ -254,12 +240,7 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
         {/* Sticky Bottom Button */}
         {candidates.length > 0 && (
           <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-            <Link
-              href="/employer_portal/workspace/candidates"
-              className="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-sm"
-              role="link"
-              tabIndex={0}
-            >
+            <Link href="/employer_portal/workspace/candidates" className="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-sm">
               <User className="h-4 w-4 mr-2" />
               Browse All Candidates
               <ChevronRight className="h-4 w-4 ml-2" />

@@ -42,15 +42,7 @@ interface Application {
   skills: string[];
 }
 
-interface Candidate {
-  id: string;
-  name: string;
-  title: string;
-  skills: string[];
-  experience: string;
-  matchScore: number;
-  avatar?: string;
-}
+import { Candidate } from '@/data/mockCandidates';
 
 // Dynamic imports for components
 const RecommendedCandidates = dynamic(() => import("./RecommendedCandidates"), {
@@ -207,27 +199,127 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
           {
             id: "1",
             name: "Sarah Wilson",
-            title: "Senior Frontend Developer",
-            skills: ["React", "TypeScript", "Next.js", "Tailwind CSS"],
-            experience: "5 years",
-            matchScore: 95,
-            avatar: "/images/user/user-01.png"
+            headline: "Senior Frontend Developer",
+            location: "San Francisco, CA",
+            availability: "Available immediately",
+            contact: {
+              email: "sarah.wilson@email.com",
+              phone: "+1 (415) 555-0123"
+            },
+            education: {
+              degree: "Bachelor of Science in Computer Science",
+              institution: "Stanford University",
+              graduationYear: 2019
+            },
+            experience: [
+              {
+                title: "Senior Frontend Developer",
+                company: "TechCorp Inc.",
+                duration: "2021 - Present",
+                bulletPoints: [
+                  "Led development of responsive web applications using React and TypeScript",
+                  "Improved application performance by 40% through code optimization",
+                  "Mentored 3 junior developers and conducted code reviews"
+                ]
+              }
+            ],
+            skills: [
+              { name: "React", level: "Expert" },
+              { name: "TypeScript", level: "Advanced" },
+              { name: "Next.js", level: "Advanced" }
+            ],
+            languages: ["English", "Spanish"],
+            expectedSalary: {
+              min: 120000,
+              max: 150000,
+              currency: "USD"
+            },
+            bio: "Passionate frontend developer with 5+ years of experience building scalable web applications.",
+            profilePicture: "/images/user/user-01.png",
+            matchScore: 95
           },
           {
             id: "2",
             name: "Alex Chen",
-            title: "UI/UX Designer",
-            skills: ["Figma", "Adobe XD", "Prototyping", "User Research"],
-            experience: "3 years",
-            matchScore: 88,
-            avatar: "/images/user/user-02.png"
+            headline: "UI/UX Designer",
+            location: "New York, NY",
+            availability: "Available in 2 weeks",
+            contact: {
+              email: "alex.chen@email.com",
+              phone: "+1 (212) 555-0456"
+            },
+            education: {
+              degree: "Bachelor of Fine Arts in Design",
+              institution: "Parsons School of Design",
+              graduationYear: 2020
+            },
+            experience: [
+              {
+                title: "UI/UX Designer",
+                company: "Design Studio Pro",
+                duration: "2020 - Present",
+                bulletPoints: [
+                  "Designed user interfaces for mobile and web applications",
+                  "Conducted user research and usability testing",
+                  "Created design systems and component libraries"
+                ]
+              }
+            ],
+            skills: [
+              { name: "Figma", level: "Expert" },
+              { name: "Adobe XD", level: "Advanced" },
+              { name: "Prototyping", level: "Expert" }
+            ],
+            languages: ["English", "Mandarin"],
+            expectedSalary: {
+              min: 80000,
+              max: 110000,
+              currency: "USD"
+            },
+            bio: "Creative UI/UX designer focused on creating meaningful user experiences.",
+            profilePicture: "/images/user/user-02.png",
+            matchScore: 88
           },
           {
             id: "3",
             name: "David Brown",
-            title: "Full Stack Developer",
-            skills: ["React", "Node.js", "Python", "PostgreSQL"],
-            experience: "4 years",
+            headline: "Full Stack Developer",
+            location: "Austin, TX",
+            availability: "Available immediately",
+            contact: {
+              email: "david.brown@email.com",
+              phone: "+1 (512) 555-0789"
+            },
+            education: {
+              degree: "Master of Science in Software Engineering",
+              institution: "University of Texas",
+              graduationYear: 2018
+            },
+            experience: [
+              {
+                title: "Full Stack Developer",
+                company: "Innovation Labs",
+                duration: "2018 - Present",
+                bulletPoints: [
+                  "Developed full-stack applications using React, Node.js, and PostgreSQL",
+                  "Implemented CI/CD pipelines and automated testing",
+                  "Led technical architecture decisions for new features"
+                ]
+              }
+            ],
+            skills: [
+              { name: "React", level: "Advanced" },
+              { name: "Node.js", level: "Expert" },
+              { name: "Python", level: "Advanced" }
+            ],
+            languages: ["English", "French"],
+            expectedSalary: {
+              min: 100000,
+              max: 130000,
+              currency: "USD"
+            },
+            bio: "Full stack developer with expertise in modern web technologies.",
+            profilePicture: "/images/user/user-03.png",
             matchScore: 82
           }
         ];

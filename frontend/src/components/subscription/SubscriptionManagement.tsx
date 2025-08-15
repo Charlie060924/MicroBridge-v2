@@ -9,7 +9,8 @@ import {
   CreditCard,
   Calendar,
   AlertTriangle,
-  ChevronRight
+  ChevronRight,
+  LucideIcon
 } from 'lucide-react';
 import Card from '@/components/common/ui/Card';
 import Badge from '@/components/common/ui/Badge';
@@ -128,16 +129,16 @@ const SubscriptionManagement: React.FC = () => {
     setSelectedPlan(null);
   };
 
-  const getPlanIcon = (planName: string) => {
+  const getPlanIcon = (planName: string): LucideIcon => {
     switch (planName.toLowerCase()) {
       case 'starter':
-        return <Zap className="h-6 w-6" />;
+        return Zap;
       case 'growth':
-        return <Star className="h-6 w-6" />;
+        return Star;
       case 'pro':
-        return <Crown className="h-6 w-6" />;
+        return Crown;
       default:
-        return <Star className="h-6 w-6" />;
+        return Star;
     }
   };
 
@@ -236,7 +237,10 @@ const SubscriptionManagement: React.FC = () => {
 
               <div className="text-center mb-6">
                 <div className="flex justify-center mb-3">
-                  {getPlanIcon(plan.name)}
+                  {(() => {
+                    const IconComponent = getPlanIcon(plan.name);
+                    return <IconComponent className="h-6 w-6" />;
+                  })()}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   {plan.name}
@@ -361,7 +365,7 @@ const SubscriptionManagement: React.FC = () => {
             <div className="flex items-center mb-4">
               <AlertTriangle className="h-6 w-6 text-yellow-500 mr-3" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Confirm {selectedAction?.charAt(0).toUpperCase() + selectedAction?.slice(1)}
+                Confirm {selectedAction ? selectedAction.charAt(0).toUpperCase() + selectedAction.slice(1) : ''}
               </h3>
             </div>
             
