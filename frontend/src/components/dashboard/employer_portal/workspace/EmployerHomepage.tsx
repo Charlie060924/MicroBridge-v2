@@ -543,7 +543,6 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
             ) : (
               <RecommendedCandidates 
                 candidates={recommendedCandidates}
-                onViewCandidate={(candidateId) => router.push(`/employer_portal/workspace/candidates/${candidateId}`)}
               />
             )}
           </div>

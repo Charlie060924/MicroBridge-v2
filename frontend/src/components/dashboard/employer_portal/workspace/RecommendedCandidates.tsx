@@ -7,12 +7,10 @@ import Link from "next/link";
 
 interface RecommendedCandidatesProps {
   candidates: Candidate[];
-  onViewCandidate: (candidateId: string) => void;
 }
 
 const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
   candidates,
-  onViewCandidate,
 }) => {
   const [shortlistedCandidates, setShortlistedCandidates] = useState<Set<string>>(new Set());
 
@@ -48,10 +46,6 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
       }
       return newSet;
     });
-  };
-
-  const handleCardClick = (candidateId: string) => {
-    onViewCandidate(candidateId);
   };
 
   const handleMessageClick = (candidateId: string, e: React.MouseEvent) => {
@@ -97,8 +91,7 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
               {candidates.map((candidate) => (
                 <div
                   key={candidate.id}
-                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-all duration-200 cursor-pointer group min-h-[140px] flex flex-col"
-                  onClick={() => handleCardClick(candidate.id)}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-all duration-200 group min-h-[140px] flex flex-col"
                 >
                   <div className="flex items-start space-x-3 flex-1">
                     {/* Avatar */}
@@ -199,9 +192,6 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
                     <Link
                       href={`/employer_portal/workspace/candidates/${candidate.id}`}
                       className="flex items-center px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
-                      role="link"
-                      tabIndex={0}
-                      onClick={(e) => e.stopPropagation()} // Prevent card click
                     >
                       <Eye className="h-3 w-3 mr-1" />
                       View Profile
