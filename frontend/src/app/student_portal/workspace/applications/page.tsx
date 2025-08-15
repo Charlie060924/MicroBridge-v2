@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Clock, CheckCircle, XCircle, Eye } from "lucide-react";
 
 interface Application {
@@ -116,13 +117,22 @@ const ApplicationsPage: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {applications.map((application) => (
-              <div
+              <Link
                 key={application.id}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
+                href={`/student_portal/workspace/job-details/${application.jobId}`}
+                className="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer group"
+                role="link"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    router.push(`/student_portal/workspace/job-details/${application.jobId}`);
+                  }
+                }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-primary transition-colors duration-200">
                       {application.jobTitle}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-2">
@@ -141,15 +151,12 @@ const ApplicationsPage: React.FC = () => {
                       {getStatusIcon(application.status)}
                       <span className="ml-1 capitalize">{application.status}</span>
                     </span>
-                    <button
-                      onClick={() => router.push(`/student_portal/workspace/job-details/${application.jobId}`)}
-                      className="text-primary hover:text-primary/80 text-sm font-medium transition-colors"
-                    >
+                    <span className="text-primary group-hover:text-primary/80 text-sm font-medium transition-colors">
                       View Job
-                    </button>
+                    </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
