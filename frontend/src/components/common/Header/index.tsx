@@ -4,8 +4,6 @@ import { useEffect, useState, useCallback, memo } from "react";
 import ThemeToggler from "./ThemeToggler";
 import menuData from "./menuData";
 import Link from "next/link";
-import { useLevel } from "@/hooks/useLevel";
-import LevelBadge from "@/components/common/Level/LevelBadge";
 
 const HamburgerToggle = memo(({ 
   navigationOpen,
@@ -121,7 +119,6 @@ const Header = () => {
 
   const pathUrl = usePathname();
   const isEmployer = pathUrl.startsWith("/employer");
-  const { levelData } = useLevel();
 
   const handleStickyMenu = useCallback(() => {
     setStickyMenu(window.scrollY >= 80);
@@ -171,9 +168,6 @@ const Header = () => {
 
           <div className="flex items-center gap-6 2xsm:gap-8">
             <ThemeToggler />
-
-            {/* Level Badge */}
-            <LevelBadge showXP={true} size="md" variant="default" />
 
             <div className="flex items-center gap-5 2xsm:gap-6">
               <Link
