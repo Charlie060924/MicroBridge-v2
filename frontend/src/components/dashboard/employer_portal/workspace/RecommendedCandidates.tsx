@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { User, Star, MapPin, Clock, MessageCircle, Eye, ChevronRight } from "lucide-react";
 
 interface Candidate {
@@ -68,11 +69,6 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
     console.log('Message candidate:', candidateId);
   };
 
-  const handleViewProfileClick = (candidateId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    onViewCandidate(candidateId);
-  };
-
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 relative">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -85,9 +81,14 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
               Top matches for your job requirements
             </p>
           </div>
-          <button className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+          <Link
+            href="/employer_portal/workspace/candidates"
+            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+            role="link"
+            tabIndex={0}
+          >
             View All
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -209,13 +210,16 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
 
                   {/* Actions - Fixed at bottom, evenly spaced */}
                   <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <button
-                      onClick={(e) => handleViewProfileClick(candidate.id, e)}
+                    <Link
+                      href={`/employer_portal/workspace/candidates/${candidate.id}`}
                       className="flex items-center px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                      role="link"
+                      tabIndex={0}
+                      onClick={(e) => e.stopPropagation()} // Prevent card click
                     >
                       <Eye className="h-3 w-3 mr-1" />
                       View Profile
-                    </button>
+                    </Link>
                     
                     <button
                       onClick={(e) => handleMessageClick(candidate.id, e)}
@@ -250,11 +254,16 @@ const RecommendedCandidates: React.FC<RecommendedCandidatesProps> = ({
         {/* Sticky Bottom Button */}
         {candidates.length > 0 && (
           <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-            <button className="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-sm">
+            <Link
+              href="/employer_portal/workspace/candidates"
+              className="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-sm"
+              role="link"
+              tabIndex={0}
+            >
               <User className="h-4 w-4 mr-2" />
               Browse All Candidates
               <ChevronRight className="h-4 w-4 ml-2" />
-            </button>
+            </Link>
           </div>
         )}
       </div>

@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { usePathname } from "next/navigation";
 import { LevelProvider } from "./context/LevelContext";
+import { MockAccountProvider } from "@/context/MockAccountContext";
 import AchievementPopup from "@/components/common/Level/AchievementPopup";
 import UserRoleSwitcher from "@/components/common/UserRoleSwitcher";
 
@@ -24,12 +25,14 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="light"
         >
-          <LevelProvider>
-            {children}
-            <ScrollToTop />
-            <AchievementPopup achievement={null} />
-            <UserRoleSwitcher />
-          </LevelProvider>
+          <MockAccountProvider>
+            <LevelProvider>
+              {children}
+              <ScrollToTop />
+              <AchievementPopup achievement={null} />
+              <UserRoleSwitcher />
+            </LevelProvider>
+          </MockAccountProvider>
         </ThemeProvider>
       </body>
     </html>
