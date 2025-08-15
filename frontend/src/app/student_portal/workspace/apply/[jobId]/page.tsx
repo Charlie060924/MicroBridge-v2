@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle, FileText, Edit3 } from "lucide-react";
 import { Job } from "@/components/dashboard/student_portal/workspace/JobCategoryCard";
 import JobActionModal, { ModalType } from "@/components/common/JobActionModal";
+import StartDateCalendar from "@/components/dashboard/student_portal/workspace/StartDateCalendar";
 
 interface ApplicationForm {
   fullName: string;
@@ -124,6 +125,27 @@ const ApplicationPage: React.FC = () => {
     availability: "",
     startDate: ""
   });
+
+  // Add state for the new calendar component
+  const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+
+  // Handle date selection from the new calendar component
+  const handleDateSelect = (date: Date | null) => {
+    setSelectedStartDate(date);
+    if (date) {
+      // Convert Date to ISO string format for the form
+      const dateString = date.toISOString().split('T')[0];
+      setFormData(prev => ({
+        ...prev,
+        startDate: dateString
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        startDate: ""
+      }));
+    }
+  };
 
   const jobId = params.jobId as string;
 
@@ -437,14 +459,33 @@ const ApplicationPage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Preferred Start Date *
                 </label>
-                <input
-                  type="date"
-                  required
-                  value={formData.startDate}
-                  onChange={(e) => handleInputChange('startDate', e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                <StartDateCalendar
+                  onDateSelect={handleDateSelect}
+                  selectedDate={selectedStartDate}
+                  minDate={new Date()}
+                  maxDate={(() => {
+                    const maxDate = new Date();
+                    maxDate.setMonth(maxDate.getMonth() + 6); // 6 months from now
+                    return maxDate;
+                  })()}
+                  unavailableDates={[
+                    // Example unavailable dates (holidays, etc.)
+                    new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+                    new Date(Date.now() + 12 * 24 * 60 * 60 * 1000), // 12 days from now
+                  ]}
+                  placeholder="Select your preferred start date"
+                  disabled={false}
                 />
+                {selectedStartDate && (
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                    ✓ Selected: {selectedStartDate.toLocaleDateString('en-US', { 
+                      weekday: 'long',
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                )}
               </div>
             </div>
           </section>
@@ -460,7 +501,7 @@ const ApplicationPage: React.FC = () => {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !mockUserResume.isAvailable}
+              disabled={isSubmitting || !mockUserResume.isAvailable || !selectedStartDate}
               className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
