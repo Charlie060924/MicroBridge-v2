@@ -73,6 +73,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       case 'portfolio':
         // Portfolio fields are optional
         break;
+      
+      case 'careerGoals':
+        if (!formData.careerGoal?.trim()) newErrors.careerGoal = 'Career goal is required';
+        if (!formData.industry?.trim()) newErrors.industry = 'Industry is required';
+        break;
+      
+      case 'availability':
+        if (!formData.availability?.trim()) newErrors.availability = 'Availability is required';
+        if (!formData.projectDuration?.trim()) newErrors.projectDuration = 'Project duration is required';
+        if (!formData.paymentType?.trim()) newErrors.paymentType = 'Payment type is required';
+        break;
     }
 
     setErrors(newErrors);
@@ -146,6 +157,29 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         i === expIndex 
           ? { ...exp, bulletPoints: [...exp.bulletPoints, ''] }
           : exp
+      )
+    }));
+  };
+
+  const addCareerGoal = () => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: [...(prev.careerGoals || []), '']
+    }));
+  };
+
+  const removeCareerGoal = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: prev.careerGoals.filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  const updateCareerGoal = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: prev.careerGoals.map((goal: any, i: number) => 
+        i === index ? value : goal
       )
     }));
   };
@@ -515,6 +549,210 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     </div>
   );
 
+  const renderCareerGoalsForm = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Career Goal *
+          </label>
+          <input
+            type="text"
+            value={formData.careerGoal || ''}
+            onChange={(e) => handleInputChange('careerGoal', e.target.value)}
+            placeholder="e.g., Senior Developer"
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+              errors.careerGoal ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+          />
+          {errors.careerGoal && <p className="text-sm text-red-600 mt-1">{errors.careerGoal}</p>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Industry *
+          </label>
+          <input
+            type="text"
+            value={formData.industry || ''}
+            onChange={(e) => handleInputChange('industry', e.target.value)}
+            placeholder="e.g., Technology"
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+              errors.industry ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+          />
+          {errors.industry && <p className="text-sm text-red-600 mt-1">{errors.industry}</p>}
+        </div>
+      </div>
+      
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Career Objectives
+          </label>
+          <button
+            onClick={addCareerGoal}
+            className="flex items-center px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add Goal
+          </button>
+        </div>
+        <div className="space-y-2">
+          {formData.careerGoals?.map((goal: string, index: number) => (
+            <div key={index} className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={goal || ''}
+                onChange={(e) => updateCareerGoal(index, e.target.value)}
+                placeholder="Describe a career objective..."
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              />
+              <button
+                onClick={() => removeCareerGoal(index)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAvailabilityForm = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Availability *
+          </label>
+          <select
+            value={formData.availability || ''}
+            onChange={(e) => handleInputChange('availability', e.target.value)}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+              errors.availability ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            <option value="">Select availability</option>
+            <option value="Available immediately">Available immediately</option>
+            <option value="Available in 1 week">Available in 1 week</option>
+            <option value="Available in 2 weeks">Available in 2 weeks</option>
+            <option value="Available in 1 month">Available in 1 month</option>
+            <option value="Available in 2 months">Available in 2 months</option>
+            <option value="Available in 3 months">Available in 3 months</option>
+          </select>
+          {errors.availability && <p className="text-sm text-red-600 mt-1">{errors.availability}</p>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Project Duration *
+          </label>
+          <select
+            value={formData.projectDuration || ''}
+            onChange={(e) => handleInputChange('projectDuration', e.target.value)}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+              errors.projectDuration ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            <option value="">Select duration</option>
+            <option value="1-3 months">1-3 months</option>
+            <option value="3-6 months">3-6 months</option>
+            <option value="6-12 months">6-12 months</option>
+            <option value="1+ years">1+ years</option>
+            <option value="Flexible">Flexible</option>
+          </select>
+          {errors.projectDuration && <p className="text-sm text-red-600 mt-1">{errors.projectDuration}</p>}
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Payment Type *
+          </label>
+          <select
+            value={formData.paymentType || ''}
+            onChange={(e) => handleInputChange('paymentType', e.target.value)}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+              errors.paymentType ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            <option value="">Select payment type</option>
+            <option value="Salary">Salary</option>
+            <option value="Hourly">Hourly</option>
+            <option value="Project-based">Project-based</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Contract">Contract</option>
+          </select>
+          {errors.paymentType && <p className="text-sm text-red-600 mt-1">{errors.paymentType}</p>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Currency
+          </label>
+          <select
+            value={formData.currency || 'USD'}
+            onChange={(e) => handleInputChange('currency', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          >
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="CAD">CAD (C$)</option>
+            <option value="AUD">AUD (A$)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Minimum Salary
+          </label>
+          <input
+            type="number"
+            value={formData.expectedSalary?.min || ''}
+            onChange={(e) => handleInputChange('expectedSalary', {
+              ...formData.expectedSalary,
+              min: parseInt(e.target.value) || 0
+            })}
+            placeholder="e.g., 80000"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Maximum Salary
+          </label>
+          <input
+            type="number"
+            value={formData.expectedSalary?.max || ''}
+            onChange={(e) => handleInputChange('expectedSalary', {
+              ...formData.expectedSalary,
+              max: parseInt(e.target.value) || 0
+            })}
+            placeholder="e.g., 120000"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="flexibleNegotiation"
+          checked={formData.flexibleNegotiation || false}
+          onChange={(e) => handleInputChange('flexibleNegotiation', e.target.checked)}
+          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <label htmlFor="flexibleNegotiation" className="text-sm text-gray-700 dark:text-gray-300">
+          I'm flexible with salary negotiation
+        </label>
+      </div>
+    </div>
+  );
+
   const renderPortfolioForm = () => (
     <div className="space-y-4">
       <div>
@@ -579,6 +817,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       case 'skills': return 'Skills & Expertise';
       case 'experience': return 'Work Experience';
       case 'education': return 'Education';
+      case 'careerGoals': return 'Career Goals';
+      case 'availability': return 'Availability & Preferences';
       case 'portfolio': return 'Portfolio & Links';
       default: return 'Edit Profile';
     }
@@ -590,6 +830,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       case 'skills': return renderSkillsForm();
       case 'experience': return renderExperienceForm();
       case 'education': return renderEducationForm();
+      case 'careerGoals': return renderCareerGoalsForm();
+      case 'availability': return renderAvailabilityForm();
       case 'portfolio': return renderPortfolioForm();
       default: return null;
     }

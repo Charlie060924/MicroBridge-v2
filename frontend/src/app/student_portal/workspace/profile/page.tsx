@@ -57,10 +57,10 @@ interface ExtendedUserData {
   careerGoal: string;
   industry: string;
   headline: string;
+  careerGoals: string[];
   
   // Skills
   skills: Array<{ skill: string; proficiency: number; level: string }>;
-  careerGoals: string[];
   
   // Experience
   experience: Array<{
@@ -132,6 +132,7 @@ const getExtendedUserData = (): ExtendedUserData => ({
     { skill: "HTML/CSS", proficiency: 92, level: "Expert" }
   ],
   careerGoals: ["Lead a development team", "Contribute to open source", "Build scalable applications"],
+  careerGoals: ["Lead a development team", "Contribute to open source", "Build scalable applications"],
   experience: [
     {
       title: "Senior Frontend Developer",
@@ -198,8 +199,11 @@ const StudentProfilePage: React.FC = () => {
     const requiredFields = [
       profileData.firstName, profileData.lastName, profileData.email,
       profileData.bio, profileData.location, profileData.headline,
-      profileData.educationLevel, profileData.major, profileData.university,
-      profileData.skills.length > 0, profileData.experience.length > 0
+      profileData.degree, profileData.university, profileData.graduationDate,
+      profileData.careerGoal, profileData.industry,
+      profileData.availability, profileData.projectDuration, profileData.paymentType,
+      profileData.skills.length > 0, profileData.experience.length > 0,
+      profileData.careerGoals.length > 0
     ];
     
     const completedFields = requiredFields.filter(Boolean).length;
@@ -429,6 +433,83 @@ const StudentProfilePage: React.FC = () => {
                     </p>
                     <p className="text-gray-600 dark:text-gray-400">
                       Graduated {profileData.graduationDate}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Career Goals Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Career Goals
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {profileData.careerGoal}
+                    </h3>
+                    <p className="text-blue-600 dark:text-blue-400 font-medium">
+                      {profileData.industry}
+                    </p>
+                  </div>
+                  {profileData.careerGoals && profileData.careerGoals.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                        Career Objectives
+                      </h4>
+                      <ul className="space-y-2">
+                        {profileData.careerGoals.map((goal, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700 dark:text-gray-300">{goal}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Availability Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Availability & Preferences
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      Availability
+                    </h4>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {profileData.availability}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      Project Duration
+                    </h4>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {profileData.projectDuration}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      Payment Type
+                    </h4>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {profileData.paymentType}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      Expected Salary
+                    </h4>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {formatSalary(profileData.expectedSalary)}
                     </p>
                   </div>
                 </div>
@@ -773,6 +854,113 @@ const StudentProfilePage: React.FC = () => {
                   </p>
                   <p className="text-gray-600 dark:text-gray-400">
                     Graduated {profileData.graduationDate}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Career Goals Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Career Goals
+                </h2>
+                <button
+                  onClick={() => handleEdit('careerGoals')}
+                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Edit
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Career Goal
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {profileData.careerGoal || 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Industry
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {profileData.industry || 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Career Objectives
+                  </label>
+                  <div className="space-y-2">
+                    {profileData.careerGoals && profileData.careerGoals.length > 0 ? (
+                      profileData.careerGoals.map((goal, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <p className="text-gray-900 dark:text-white">{goal}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400">No career objectives specified</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Availability Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Availability & Preferences
+                </h2>
+                <button
+                  onClick={() => handleEdit('availability')}
+                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Edit
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Availability
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {profileData.availability || 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Project Duration
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {profileData.projectDuration || 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Payment Type
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {profileData.paymentType || 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Expected Salary
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {profileData.expectedSalary ? formatSalary(profileData.expectedSalary) : 'Not specified'}
                   </p>
                 </div>
               </div>
