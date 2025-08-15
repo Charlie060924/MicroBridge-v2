@@ -26,185 +26,227 @@ import {
   Plus,
   Trash2,
   ChevronLeft,
-  MessageCircle
+  MessageCircle,
+  Calendar,
+  Target,
+  Trophy,
+  Zap,
+  School,
+  CalendarDays
 } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { useLevel } from "@/hooks/useLevel";
 import Link from "next/link";
 import EditProfileModal from "./EditProfileModal";
 
-// Extended user data structure for profile
-interface ExtendedUserData {
+// Extended user data structure for student profile
+interface StudentProfileData {
   // Basic Info
   firstName: string;
   lastName: string;
-  preferredName: string;
-  username: string;
   email: string;
   phone: string;
   bio: string;
-  location: string;
   profilePicture: string;
   
-  // Education
-  educationLevel: string;
+  // School Info (Hong Kong focused)
+  school: string;
   major: string;
-  university: string;
-  degree: string;
-  graduationDate: string;
+  yearOfStudy: string;
   
-  // Career
-  careerGoal: string;
-  industry: string;
-  headline: string;
+  // Gamification
+  level: number;
+  xp: number;
+  careerCoins: number;
   
-  // Skills
-  skills: Array<{ skill: string; proficiency: number; level: string }>;
-  careerGoals: string[];
-  
-  // Experience
-  experience: Array<{
-    title: string;
-    company: string;
-    duration: string;
-    bulletPoints: string[];
-  }>;
-  
-  // Availability
-  availability: string;
-  projectDuration: string;
-  
-  // Compensation
-  paymentType: string;
-  salaryRange?: string;
-  customAmount?: string;
-  flexibleNegotiation: boolean;
-  currency: string;
-  expectedSalary: {
-    min: number;
-    max: number;
-    currency: string;
+  // Availability & Micro-Internships
+  availability: {
+    preferredStartDate: string;
+    availableDates: string[];
+    unavailableDates: string[];
+    flexibleTiming: boolean;
   };
   
-  // Portfolio & Resume
-  portfolioUrl: string;
+  // Skills & Interests (for job matching)
+  skills: Array<{
+    skill: string;
+    category: string; // e.g., "software", "design", "marketing"
+    proficiency: 'Beginner' | 'Intermediate' | 'Advanced';
+    xpValue: number;
+  }>;
+  
+  // Projects & Experience (student-focused)
+  projects: Array<{
+    title: string;
+    description: string;
+    type: 'academic' | 'competition' | 'volunteer' | 'personal' | 'research';
+    duration: string;
+    xpEarned: number;
+    skills: string[];
+  }>;
+  
+  // Career Goals (for job recommendations)
+  careerGoals: {
+    statement: string;
+    interests: string[];
+    targetIndustries: string[];
+  };
+  
+  // Links
   linkedinUrl: string;
+  portfolioUrl: string;
   githubUrl: string;
-  resume: {
-    name: string;
-    url: string;
-    size: number;
-    type: string;
-  } | null;
   
-  // Languages
-  languages: string[];
-  
-  // Match Score (for preview)
-  matchScore: number;
+  // Profile Completion
+  completionPercentage: number;
 }
 
-// Mock extended user data
-const getExtendedUserData = (): ExtendedUserData => ({
+// Mock student data with platform-specific features
+const getStudentProfileData = (): StudentProfileData => ({
   firstName: "Sarah",
   lastName: "Wilson",
-  preferredName: "Sarah",
-  username: "sarahwilson",
   email: "sarah.wilson@email.com",
-  phone: "+1 (415) 555-0123",
-  bio: "Passionate frontend developer with 5+ years of experience building scalable web applications. I specialize in React ecosystem and modern JavaScript frameworks. I love creating intuitive user experiences and mentoring junior developers.",
-  location: "San Francisco, CA",
+  phone: "+852 5555 1234",
+  bio: "Passionate computer science student at HKU, interested in software development and AI. Looking for micro-internships to gain real-world experience.",
   profilePicture: "/images/user/user-01.png",
-  educationLevel: "Bachelor's",
+  
+  // School Info (Hong Kong focused)
+  school: "The University of Hong Kong",
   major: "Computer Science",
-  university: "Stanford University",
-  degree: "Bachelor of Science in Computer Science",
-  graduationDate: "2019",
-  careerGoal: "Senior Developer",
-  industry: "Technology",
-  headline: "Senior Frontend Developer",
+  yearOfStudy: "Year 3",
+  
+  // Gamification
+  level: 8,
+  xp: 2450,
+  careerCoins: 1250,
+  
+  // Availability & Micro-Internships
+  availability: {
+    preferredStartDate: "2024-01-15",
+    availableDates: ["2024-01-15", "2024-01-16", "2024-01-17", "2024-01-22", "2024-01-23"],
+    unavailableDates: ["2024-01-18", "2024-01-19", "2024-01-20", "2024-01-21"],
+    flexibleTiming: true
+  },
+  
+  // Skills & Interests (for job matching)
   skills: [
-    { skill: "React", proficiency: 95, level: "Expert" },
-    { skill: "TypeScript", proficiency: 90, level: "Advanced" },
-    { skill: "Next.js", proficiency: 85, level: "Advanced" },
-    { skill: "Tailwind CSS", proficiency: 88, level: "Advanced" },
-    { skill: "JavaScript", proficiency: 95, level: "Expert" },
-    { skill: "HTML/CSS", proficiency: 92, level: "Expert" }
+    { skill: "Python", category: "software", proficiency: "Advanced", xpValue: 150 },
+    { skill: "React", category: "software", proficiency: "Intermediate", xpValue: 100 },
+    { skill: "UI/UX Design", category: "design", proficiency: "Beginner", xpValue: 50 },
+    { skill: "Data Analysis", category: "analytics", proficiency: "Intermediate", xpValue: 75 },
+    { skill: "Project Management", category: "business", proficiency: "Beginner", xpValue: 25 }
   ],
-  careerGoals: ["Lead a development team", "Contribute to open source", "Build scalable applications"],
-  experience: [
+  
+  // Projects & Experience (student-focused)
+  projects: [
     {
-      title: "Senior Frontend Developer",
-      company: "TechCorp Inc.",
-      duration: "2021 - Present",
-      bulletPoints: [
-        "Led development of responsive web applications using React and TypeScript",
-        "Improved application performance by 40% through code optimization",
-        "Mentored 3 junior developers and conducted code reviews"
-      ]
+      title: "AI Chatbot for Student Services",
+      description: "Developed a Python-based chatbot to help students navigate university services",
+      type: "academic",
+      duration: "3 months",
+      xpEarned: 200,
+      skills: ["Python", "NLP", "Machine Learning"]
     },
     {
-      title: "Frontend Developer",
-      company: "StartupXYZ",
-      duration: "2019 - 2021",
-      bulletPoints: [
-        "Built user interfaces for mobile and web applications",
-        "Collaborated with UX designers to implement pixel-perfect designs",
-        "Participated in agile development processes"
-      ]
+      title: "Hackathon Winner - Sustainability App",
+      description: "Won first place in HKU's annual hackathon with a sustainability tracking app",
+      type: "competition",
+      duration: "48 hours",
+      xpEarned: 150,
+      skills: ["React", "Mobile Development", "UI/UX Design"]
+    },
+    {
+      title: "Volunteer Web Developer",
+      description: "Built website for local NGO helping underprivileged students",
+      type: "volunteer",
+      duration: "2 months",
+      xpEarned: 100,
+      skills: ["HTML/CSS", "JavaScript", "WordPress"]
     }
   ],
-  availability: "Available immediately",
-  projectDuration: "3-6 months",
-  paymentType: "Salary",
-  salaryRange: "120000-150000",
-  customAmount: "",
-  flexibleNegotiation: true,
-  currency: "USD",
-  expectedSalary: {
-    min: 120000,
-    max: 150000,
-    currency: "USD"
+  
+  // Career Goals (for job recommendations)
+  careerGoals: {
+    statement: "I want to work on meaningful software projects that solve real-world problems, particularly in the areas of education technology and sustainability.",
+    interests: ["Software Development", "AI/ML", "Education Technology", "Sustainability"],
+    targetIndustries: ["Technology", "Education", "Non-profit"]
   },
-  portfolioUrl: "https://sarahwilson.dev",
+  
+  // Links
   linkedinUrl: "https://linkedin.com/in/sarahwilson",
+  portfolioUrl: "https://sarahwilson.dev",
   githubUrl: "https://github.com/sarahwilson",
-  resume: {
-    name: "Sarah_Wilson_Resume.pdf",
-    url: "/resumes/Sarah_Wilson_Resume.pdf",
-    size: 245760,
-    type: "application/pdf"
-  },
-  languages: ["English", "Spanish"],
-  matchScore: 95
+  
+  // Profile Completion
+  completionPercentage: 85
 });
 
 const StudentProfilePage: React.FC = () => {
   const searchParams = useSearchParams();
   const { user } = useUser();
-  const { level } = useLevel();
+  const { level, gainXP, unlockAchievement } = useLevel();
   
-  const [profileData, setProfileData] = useState<ExtendedUserData>(getExtendedUserData());
+  const [profileData, setProfileData] = useState<StudentProfileData>(getStudentProfileData());
   const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingSection, setEditingSection] = useState<string | null>(null);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showSaveModal, setShowSaveModal] = useState(false);
-  const [profileCompleteness, setProfileCompleteness] = useState(0);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSection, setEditingSection] = useState<string | null>(null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [isFromRoleSelection, setIsFromRoleSelection] = useState(false);
 
-  // Calculate profile completeness
+  // Check if coming from role selection
+  useEffect(() => {
+    const fromRoleSelection = searchParams.get('fromRoleSelection') === 'true';
+    setIsFromRoleSelection(fromRoleSelection);
+    
+    if (fromRoleSelection) {
+      // Initialize with empty profile data for onboarding
+      setProfileData({
+        firstName: "",
+        lastName: "",
+        email: user?.email || "",
+        phone: "",
+        bio: "",
+        profilePicture: "",
+        school: "",
+        major: "",
+        yearOfStudy: "",
+        level: 1,
+        xp: 0,
+        careerCoins: 0,
+        availability: {
+          preferredStartDate: "",
+          availableDates: [],
+          unavailableDates: [],
+          flexibleTiming: false
+        },
+        skills: [],
+        projects: [],
+        careerGoals: {
+          statement: "",
+          interests: [],
+          targetIndustries: []
+        },
+        linkedinUrl: "",
+        portfolioUrl: "",
+        githubUrl: "",
+        completionPercentage: 0
+      });
+    }
+  }, [searchParams, user]);
+
+  // Calculate profile completion
   useEffect(() => {
     const requiredFields = [
       profileData.firstName, profileData.lastName, profileData.email,
-      profileData.bio, profileData.location, profileData.headline,
-      profileData.educationLevel, profileData.major, profileData.university,
-      profileData.skills.length > 0, profileData.experience.length > 0
+      profileData.bio, profileData.school, profileData.major,
+      profileData.yearOfStudy, profileData.skills.length > 0,
+      profileData.projects.length > 0, profileData.careerGoals.statement
     ];
     
     const completedFields = requiredFields.filter(Boolean).length;
-    const completeness = Math.round((completedFields / requiredFields.length) * 100);
-    setProfileCompleteness(completeness);
+    const completion = Math.round((completedFields / requiredFields.length) * 100);
+    
+    setProfileData(prev => ({ ...prev, completionPercentage: completion }));
   }, [profileData]);
 
   const handleEdit = (section: string) => {
@@ -214,365 +256,98 @@ const StudentProfilePage: React.FC = () => {
 
   const handleSave = (updatedData: any) => {
     setProfileData(prev => ({ ...prev, ...updatedData }));
-    setHasUnsavedChanges(false);
     setShowSaveModal(true);
     setTimeout(() => setShowSaveModal(false), 2000);
+    
+    // Award XP for completing sections
+    if (updatedData.skills && updatedData.skills.length > 0) {
+      gainXP(50);
+    }
+    if (updatedData.projects && updatedData.projects.length > 0) {
+      gainXP(75);
+    }
   };
 
-  const handleCancel = () => {
-    setShowEditModal(false);
-    setEditingSection(null);
-    setHasUnsavedChanges(false);
+  const getLevelColor = (level: number) => {
+    if (level >= 10) return 'text-purple-600 dark:text-purple-400';
+    if (level >= 7) return 'text-blue-600 dark:text-blue-400';
+    if (level >= 4) return 'text-green-600 dark:text-green-400';
+    return 'text-yellow-600 dark:text-yellow-400';
   };
 
-  const handleFieldChange = (field: keyof ExtendedUserData, value: any) => {
-    setProfileData(prev => ({ ...prev, [field]: value }));
-    setHasUnsavedChanges(true);
+  const getLevelBg = (level: number) => {
+    if (level >= 10) return 'bg-purple-100 dark:bg-purple-900/20';
+    if (level >= 7) return 'bg-blue-100 dark:bg-blue-900/20';
+    if (level >= 4) return 'bg-green-100 dark:bg-green-900/20';
+    return 'bg-yellow-100 dark:bg-yellow-900/20';
   };
 
-  const getMatchScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-600 dark:text-green-400';
-    if (score >= 80) return 'text-blue-600 dark:text-blue-400';
-    if (score >= 70) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
-  };
-
-  const getMatchScoreBg = (score: number) => {
-    if (score >= 90) return 'bg-green-100 dark:bg-green-900/20';
-    if (score >= 80) return 'bg-blue-100 dark:bg-blue-900/20';
-    if (score >= 70) return 'bg-yellow-100 dark:bg-yellow-900/20';
-    return 'bg-red-100 dark:bg-red-900/20';
-  };
-
-  const getSkillLevelColor = (level: string) => {
-    switch (level) {
-      case 'Expert': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
-      case 'Advanced': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300';
-      case 'Intermediate': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300';
-      case 'Beginner': return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+  const getSkillCategoryColor = (category: string) => {
+    switch (category) {
+      case 'software': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300';
+      case 'design': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300';
+      case 'analytics': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
+      case 'business': return 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300';
       default: return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
     }
   };
 
-  const formatSalary = (salary: { min: number; max: number; currency: string }) => {
-    return `${salary.currency} ${salary.min.toLocaleString()} - ${salary.max.toLocaleString()}`;
+  const getProjectTypeColor = (type: string) => {
+    switch (type) {
+      case 'academic': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300';
+      case 'competition': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300';
+      case 'volunteer': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
+      case 'personal': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300';
+      case 'research': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+      default: return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+    }
   };
 
-  // Profile Preview Component (mirrors Employer Candidate View)
-  const ProfilePreview = () => (
+  // Student Profile Edit Mode
+  const StudentEditMode = () => (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header with Gamification */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center mb-4">
-              <button 
-                onClick={() => setIsPreviewMode(false)}
-                className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mr-4"
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back to Edit Mode
-              </button>
-            </div>
-            <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Preview Mode - How employers see your profile
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Header Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-8">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center space-x-6">
-                    {profileData.profilePicture ? (
-                      <img
-                        src={profileData.profilePicture}
-                        alt={`${profileData.firstName} ${profileData.lastName}`}
-                        className="w-24 h-24 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <User className="h-12 w-12 text-white" />
-                      </div>
-                    )}
-                    <div>
-                      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        {profileData.firstName} {profileData.lastName}
-                      </h1>
-                      <p className="text-xl text-gray-600 dark:text-gray-400 mb-3">
-                        {profileData.headline}
-                      </p>
-                      <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2" />
-                          {profileData.location}
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2" />
-                          {profileData.availability}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <button
-                      disabled
-                      className="flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg cursor-not-allowed"
-                      title="Coming Soon"
-                    >
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Message
-                    </button>
-                  </div>
-                </div>
-
-                {/* Match Score */}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Match Score</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getMatchScoreBg(profileData.matchScore)} ${getMatchScoreColor(profileData.matchScore)}`}>
-                    {profileData.matchScore}% Match
-                  </span>
+          {isFromRoleSelection && (
+            <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+                    Complete Your Student Profile
+                  </h4>
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    Set up your profile to discover micro-internships and start earning XP and Career Coins!
+                  </p>
                 </div>
               </div>
             </div>
-
-            {/* Bio Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  About Me
-                </h2>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {profileData.bio}
-                </p>
-              </div>
-            </div>
-
-            {/* Skills Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Skills & Expertise
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {profileData.skills.map((skill, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {skill.skill}
-                      </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSkillLevelColor(skill.level)}`}>
-                        {skill.level}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Experience Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Work Experience
-                </h2>
-                <div className="space-y-6">
-                  {profileData.experience.map((exp, index) => (
-                    <div key={index} className="border-l-4 border-blue-500 pl-6">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {exp.title}
-                          </h3>
-                          <p className="text-blue-600 dark:text-blue-400 font-medium">
-                            {exp.company}
-                          </p>
-                        </div>
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {exp.duration}
-                        </span>
-                      </div>
-                      <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                        {exp.bulletPoints.map((point, pointIndex) => (
-                          <li key={pointIndex}>{point}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Education Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Education
-                </h2>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                      <GraduationCap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {profileData.degree}
-                    </h3>
-                    <p className="text-blue-600 dark:text-blue-400 font-medium">
-                      {profileData.university}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Graduated {profileData.graduationDate}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Info */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Quick Info
-                </h3>
-                <div className="space-y-4">
-                  {/* Contact Info */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                      Contact Information
-                    </h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Mail className="h-4 w-4 mr-2" />
-                        {profileData.email}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Phone className="h-4 w-4 mr-2" />
-                        {profileData.phone}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Expected Salary */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                      Expected Salary
-                    </h4>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <DollarSign className="h-4 w-4 mr-2" />
-                      {formatSalary(profileData.expectedSalary)}
-                    </div>
-                  </div>
-
-                  {/* Languages */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                      Languages
-                    </h4>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <Languages className="h-4 w-4 mr-2" />
-                      {profileData.languages.join(', ')}
-                    </div>
-                  </div>
-
-                  {/* Years of Experience */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                      Experience
-                    </h4>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <Briefcase className="h-4 w-4 mr-2" />
-                      {profileData.experience.length} position{profileData.experience.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Portfolio */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Portfolio & Links
-                </h3>
-                <div className="space-y-3">
-                  {profileData.portfolioUrl && (
-                    <a 
-                      href={profileData.portfolioUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Portfolio
-                    </a>
-                  )}
-                  {profileData.linkedinUrl && (
-                    <a 
-                      href={profileData.linkedinUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      LinkedIn
-                    </a>
-                  )}
-                  {profileData.githubUrl && (
-                    <a 
-                      href={profileData.githubUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      GitHub
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Edit Mode Component
-  const EditMode = () => (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
+          )}
+          
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                My Profile
+                {isFromRoleSelection ? "Complete Your Profile" : "My Student Profile"}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Manage your professional profile and showcase your skills
+                {isFromRoleSelection 
+                  ? "Let's get you set up for micro-internships" 
+                  : "Manage your profile and track your progress"
+                }
               </p>
             </div>
             <div className="flex items-center space-x-3">
-              {/* Profile Completeness */}
+              {/* Profile Completion */}
               <div className="flex items-center space-x-2">
                 <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div 
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${profileCompleteness}%` }}
+                    style={{ width: `${profileData.completionPercentage}%` }}
                   ></div>
                 </div>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {profileCompleteness}% Complete
+                  {profileData.completionPercentage}% Complete
                 </span>
               </div>
               
@@ -590,7 +365,7 @@ const StudentProfilePage: React.FC = () => {
 
         {/* Profile Sections */}
         <div className="space-y-6">
-          {/* Basic Information Section */}
+          {/* Header Section with Gamification */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -606,23 +381,307 @@ const StudentProfilePage: React.FC = () => {
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-start space-x-6">
+                {/* Profile Photo */}
+                <div className="flex-shrink-0">
+                  {profileData.profilePicture ? (
+                    <img
+                      src={profileData.profilePicture}
+                      alt={`${profileData.firstName} ${profileData.lastName}`}
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <User className="h-10 w-10 text-white" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Name and School Info */}
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {profileData.firstName} {profileData.lastName}
+                    </h3>
+                    {/* Level Badge */}
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getLevelBg(profileData.level)} ${getLevelColor(profileData.level)}`}>
+                      Level {profileData.level}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4 text-gray-600 dark:text-gray-400 mb-3">
+                    <div className="flex items-center">
+                      <School className="h-4 w-4 mr-1" />
+                      {profileData.school || 'School not specified'}
+                    </div>
+                    <div className="flex items-center">
+                      <BookOpen className="h-4 w-4 mr-1" />
+                      {profileData.major || 'Major not specified'}
+                    </div>
+                    <div className="flex items-center">
+                      <GraduationCap className="h-4 w-4 mr-1" />
+                      {profileData.yearOfStudy || 'Year not specified'}
+                    </div>
+                  </div>
+                  
+                  {/* XP and Career Coins */}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center text-sm">
+                      <Zap className="h-4 w-4 mr-1 text-yellow-500" />
+                      <span className="text-gray-600 dark:text-gray-400">{profileData.xp} XP</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
+                      <span className="text-gray-600 dark:text-gray-400">{profileData.careerCoins} CC</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Bio */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Bio
+                </label>
+                <p className="text-gray-900 dark:text-white">
+                  {profileData.bio || 'No bio added yet'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Availability Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Availability & Preferred Start Date
+                </h2>
+                <button
+                  onClick={() => handleEdit('availability')}
+                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Edit
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Full Name
+                    Preferred Start Date
                   </label>
                   <p className="text-gray-900 dark:text-white">
-                    {profileData.firstName} {profileData.lastName}
+                    {profileData.availability.preferredStartDate ? 
+                      new Date(profileData.availability.preferredStartDate).toLocaleDateString() : 
+                      'Not specified'
+                    }
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Professional Headline
+                    Flexible Timing
                   </label>
                   <p className="text-gray-900 dark:text-white">
-                    {profileData.headline}
+                    {profileData.availability.flexibleTiming ? 'Yes' : 'No'}
                   </p>
                 </div>
+              </div>
+              
+              {/* Calendar Preview */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Available Dates
+                </label>
+                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  {profileData.availability.availableDates.length > 0 ? 
+                    `${profileData.availability.availableDates.length} dates selected` : 
+                    'No dates selected'
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Skills & Interests Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Skills & Interests
+                </h2>
+                <button
+                  onClick={() => handleEdit('skills')}
+                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Edit
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                {profileData.skills.map((skill, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {skill.skill}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSkillCategoryColor(skill.category)}`}>
+                        {skill.category}
+                      </span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {skill.proficiency}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                      <Zap className="h-3 w-3 mr-1 text-yellow-500" />
+                      {skill.xpValue} XP
+                    </div>
+                  </div>
+                ))}
+                
+                {profileData.skills.length === 0 && (
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                    No skills added yet. Add your skills to get matched with relevant micro-internships!
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Projects & Experience Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Projects & Experience
+                </h2>
+                <button
+                  onClick={() => handleEdit('projects')}
+                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Edit
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {profileData.projects.map((project, index) => (
+                  <div key={index} className="border-l-4 border-blue-500 pl-6">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {project.title}
+                        </h3>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getProjectTypeColor(project.type)}`}>
+                            {project.type}
+                          </span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {project.duration}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <Zap className="h-3 w-3 mr-1 text-yellow-500" />
+                        {project.xpEarned} XP
+                      </div>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 mb-2">
+                      {project.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.skills.map((skill, skillIndex) => (
+                        <span key={skillIndex} className="px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                
+                {profileData.projects.length === 0 && (
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                    No projects added yet. Add your academic projects, competitions, and volunteer work!
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Career Goals Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Career Goals
+                </h2>
+                <button
+                  onClick={() => handleEdit('careerGoals')}
+                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Edit
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Career Statement
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {profileData.careerGoals.statement || 'No career statement added yet'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Interests
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {profileData.careerGoals.interests.map((interest, index) => (
+                      <span key={index} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm">
+                        {interest}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Target Industries
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {profileData.careerGoals.targetIndustries.map((industry, index) => (
+                      <span key={index} className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm">
+                        {industry}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact & Links Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Contact & Links
+                </h2>
+                <button
+                  onClick={() => handleEdit('contact')}
+                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Edit
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Email
@@ -636,177 +695,12 @@ const StudentProfilePage: React.FC = () => {
                     Phone
                   </label>
                   <p className="text-gray-900 dark:text-white">
-                    {profileData.phone}
+                    {profileData.phone || 'Not provided'}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Location
-                  </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {profileData.location}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Availability
-                  </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {profileData.availability}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Bio
-                </label>
-                <p className="text-gray-900 dark:text-white">
-                  {profileData.bio}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Skills Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Skills & Expertise
-                </h2>
-                <button
-                  onClick={() => handleEdit('skills')}
-                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
-                >
-                  <Edit2 className="h-4 w-4 mr-1" />
-                  Edit
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {profileData.skills.map((skill, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {skill.skill}
-                    </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSkillLevelColor(skill.level)}`}>
-                      {skill.level}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Experience Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Work Experience
-                </h2>
-                <button
-                  onClick={() => handleEdit('experience')}
-                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
-                >
-                  <Edit2 className="h-4 w-4 mr-1" />
-                  Edit
-                </button>
-              </div>
-              
-              <div className="space-y-6">
-                {profileData.experience.map((exp, index) => (
-                  <div key={index} className="border-l-4 border-blue-500 pl-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {exp.title}
-                        </h3>
-                        <p className="text-blue-600 dark:text-blue-400 font-medium">
-                          {exp.company}
-                        </p>
-                      </div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {exp.duration}
-                      </span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                      {exp.bulletPoints.map((point, pointIndex) => (
-                        <li key={pointIndex}>{point}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Education Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Education
-                </h2>
-                <button
-                  onClick={() => handleEdit('education')}
-                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
-                >
-                  <Edit2 className="h-4 w-4 mr-1" />
-                  Edit
-                </button>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                    <GraduationCap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {profileData.degree}
-                  </h3>
-                  <p className="text-blue-600 dark:text-blue-400 font-medium">
-                    {profileData.university}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Graduated {profileData.graduationDate}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Portfolio & Links Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Portfolio & Links
-                </h2>
-                <button
-                  onClick={() => handleEdit('portfolio')}
-                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
-                >
-                  <Edit2 className="h-4 w-4 mr-1" />
-                  Edit
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Portfolio URL
-                  </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {profileData.portfolioUrl || 'Not provided'}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    LinkedIn URL
+                    LinkedIn
                   </label>
                   <p className="text-gray-900 dark:text-white">
                     {profileData.linkedinUrl || 'Not provided'}
@@ -814,18 +708,10 @@ const StudentProfilePage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    GitHub URL
+                    Portfolio
                   </label>
                   <p className="text-gray-900 dark:text-white">
-                    {profileData.githubUrl || 'Not provided'}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Resume
-                  </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {profileData.resume?.name || 'Not uploaded'}
+                    {profileData.portfolioUrl || 'Not provided'}
                   </p>
                 </div>
               </div>
@@ -855,7 +741,7 @@ const StudentProfilePage: React.FC = () => {
 
   return (
     <>
-      {isPreviewMode ? <ProfilePreview /> : <EditMode />}
+      {isPreviewMode ? <div>Preview Mode (to be implemented)</div> : <StudentEditMode />}
       <SaveModal />
       <EditProfileModal
         isOpen={showEditModal}
