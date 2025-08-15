@@ -1,476 +1,112 @@
-# UI Components & Features Documentation
+# Help Center Components
 
-This document outlines the enhanced UI components, animations, and features implemented to improve the user experience across the MicroBridge application.
+This directory contains reusable components for the help center and FAQ functionality.
 
-## 🎨 Design System
+## Components
 
-### Animation Guidelines
-- **Duration**: Keep animations under 200ms for responsiveness
-- **Easing**: Use `easeOut` for most interactions
-- **Stagger**: 0.08s delay between staggered elements
-- **Scale**: Subtle hover effects (1.01-1.02 scale)
+### FAQAccordion
+A reusable accordion component for displaying FAQ items with expand/collapse functionality.
 
-### Color Palette
-- **Primary**: Blue (#3B82F6)
-- **Secondary**: Gray scale with dark mode support
-- **Success**: Green (#10B981)
-- **Warning**: Yellow (#F59E0B)
-- **Error**: Red (#EF4444)
+**Props:**
+- `items: FAQItem[]` - Array of FAQ items to display
+- `className?: string` - Additional CSS classes
+- `defaultExpanded?: string[]` - Array of FAQ IDs to expand by default
 
-### Typography
-- **Headings**: Inter font family
-- **Body**: Inter font family
-- **Consistent spacing**: 4px multiples
-
-## 🧩 Core Components
-
-### Button Component
+**Usage:**
 ```tsx
-import Button from '@/components/common/ui/Button';
+import FAQAccordion, { FAQItem } from '@/components/common/FAQAccordion';
 
-<Button
-  variant="primary" // primary | secondary | ghost | danger | outline
-  size="md" // sm | md | lg
-  icon={Save}
-  iconPosition="left" // left | right
-  loading={false}
-  disabled={false}
-  onClick={handleClick}
->
-  Save Changes
-</Button>
-```
-
-**Features:**
-- Micro-animations on hover/tap
-- Loading states with spinner
-- Icon support (left/right positioning)
-- Multiple variants and sizes
-- Accessibility compliant
-
-### Input Component
-```tsx
-import Input from '@/components/common/ui/Input';
-
-<Input
-  label="Email Address"
-  type="email"
-  icon={Mail}
-  iconPosition="left"
-  error="Invalid email format"
-  success="Email is valid"
-  helperText="We'll never share your email"
-  disabled={false}
-/>
-```
-
-**Features:**
-- Built-in label and validation states
-- Icon support
-- Error/success states with animations
-- Helper text
-- Focus animations
-
-### Modal Component
-```tsx
-import Modal from '@/components/common/ui/Modal';
-
-<Modal
-  isOpen={isVisible}
-  onClose={handleClose}
-  title="Edit Profile"
-  size="lg" // sm | md | lg | xl
-  closeOnOverlayClick={true}
-  showCloseButton={true}
-  footer={
-    <div className="flex space-x-3">
-      <Button onClick={handleSave}>Save</Button>
-      <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
-    </div>
-  }
->
-  <p>Modal content goes here</p>
-</Modal>
-```
-
-**Features:**
-- Smooth enter/exit animations
-- Backdrop blur effect
-- Keyboard support (Escape to close)
-- Multiple sizes
-- Customizable footer
-
-## 🎭 Animation System
-
-### Centralized Animations
-```tsx
-import { animations } from '@/components/common/ui/Animations';
-
-// Page transitions
-<motion.div variants={animations.page}>
-
-// Card animations
-<motion.div variants={animations.card}>
-
-// Staggered lists
-<motion.div variants={animations.stagger.container}>
-  {items.map(item => (
-    <motion.div key={item.id} variants={animations.stagger.item}>
-      {item.content}
-    </motion.div>
-  ))}
-</motion.div>
-```
-
-### Available Animation Presets
-- `animations.page` - Page transitions
-- `animations.card` - Card entrance animations
-- `animations.stagger` - Staggered children animations
-- `animations.button` - Button interactions
-- `animations.input` - Input focus effects
-- `animations.modal` - Modal animations
-- `animations.fade` - Fade in/out
-- `animations.slide` - Slide animations (up, down, left, right)
-- `animations.scale` - Scale animations
-- `animations.notification` - Notification entrance
-- `animations.listItem` - List item animations
-
-## 📱 Loading States
-
-### Skeleton Loaders
-```tsx
-import Skeleton, { 
-  JobCardSkeleton, 
-  ProfileSkeleton, 
-  DashboardCardSkeleton,
-  TableSkeleton 
-} from '@/components/common/SkeletonLoader';
-
-// Basic skeleton
-<Skeleton variant="text" width="70%" />
-
-// Predefined skeletons
-<JobCardSkeleton />
-<ProfileSkeleton />
-<DashboardCardSkeleton />
-<TableSkeleton rows={5} columns={4} />
-```
-
-**Features:**
-- Animated gradient effect
-- Multiple variants (text, circular, rectangular, card, avatar, button)
-- Predefined layouts for common components
-- Responsive design
-
-## 🎯 Empty States
-
-### Empty State Component
-```tsx
-import EmptyState, {
-  NoJobsEmptyState,
-  NoApplicationsEmptyState,
-  NoNotificationsEmptyState,
-  NoResultsEmptyState
-} from '@/components/common/EmptyState';
-
-// Custom empty state
-<EmptyState
-  icon={Search}
-  title="No results found"
-  description="Try adjusting your search criteria"
-  action={{
-    label: "Clear Filters",
-    onClick: handleClearFilters,
-    variant: "secondary"
-  }}
-  illustration={<CustomIllustration />}
-/>
-
-// Predefined empty states
-<NoJobsEmptyState onBrowseJobs={handleBrowseJobs} />
-<NoApplicationsEmptyState onBrowseJobs={handleBrowseJobs} />
-<NoNotificationsEmptyState />
-<NoResultsEmptyState onClearFilters={handleClearFilters} />
-```
-
-**Features:**
-- Friendly illustrations
-- Action buttons
-- Consistent messaging
-- Predefined states for common scenarios
-
-## 🎹 Keyboard Shortcuts
-
-### Keyboard Shortcuts Hook
-```tsx
-import { 
-  useKeyboardShortcuts,
-  useJobShortcuts,
-  useProfileShortcuts,
-  useSettingsShortcuts 
-} from '@/hooks/useKeyboardShortcuts';
-
-// Custom shortcuts
-const shortcuts = [
+const faqItems: FAQItem[] = [
   {
-    key: '/',
-    action: () => focusSearch(),
-    description: 'Focus search'
-  },
-  {
-    key: 's',
-    ctrl: true,
-    action: () => saveChanges(),
-    description: 'Save changes'
+    id: 'example',
+    question: 'How do I create an account?',
+    answer: 'Click the Sign Up button and follow the instructions.',
+    category: 'account',
+    tags: ['signup', 'registration']
   }
 ];
 
-useKeyboardShortcuts({ shortcuts });
-
-// Predefined shortcuts
-useJobShortcuts({
-  onSearch: focusSearch,
-  onApply: applyToJob,
-  onSave: saveJob,
-  onClose: closeModal
-});
-
-useProfileShortcuts({
-  onSave: saveProfile,
-  onCancel: cancelEditing,
-  onPreview: showPreview
-});
-
-useSettingsShortcuts({
-  onSave: saveSettings,
-  onReset: resetSettings,
-  onClose: closeSettings
-});
+<FAQAccordion items={faqItems} />
 ```
 
-### Common Shortcuts
-- `/` - Focus search
-- `Ctrl+E` - Edit profile
-- `?` - Open help
-- `Ctrl+S` - Save changes
-- `Escape` - Close/cancel
-- `Ctrl+R` - Refresh page
-- `Ctrl+T` - Open new tab
+### HelpSearch
+A search component with debounced input for help center articles.
 
-## 🎬 Sticky Action Bar
+**Props:**
+- `placeholder?: string` - Placeholder text for the search input
+- `onSearch: (query: string) => void` - Callback function when search query changes
+- `className?: string` - Additional CSS classes
+- `initialValue?: string` - Initial search query value
 
-### Sticky Action Bar Component
+**Usage:**
 ```tsx
-import StickyActionBar, {
-  EditProfileActionBar,
-  JobApplicationActionBar,
-  SettingsActionBar
-} from '@/components/common/StickyActionBar';
+import HelpSearch from '@/components/common/HelpSearch';
 
-// Custom action bar
-<StickyActionBar
-  isVisible={hasChanges}
-  title="Unsaved Changes"
-  actions={[
-    {
-      label: "Save",
-      onClick: handleSave,
-      variant: "primary",
-      icon: Save,
-      loading: isSaving
-    },
-    {
-      label: "Cancel",
-      onClick: handleCancel,
-      variant: "secondary",
-      icon: X
-    }
-  ]}
-/>
-
-// Predefined action bars
-<EditProfileActionBar
-  isVisible={isEditing}
-  onSave={handleSave}
-  onCancel={handleCancel}
-  onPreview={handlePreview}
-  isSaving={isSaving}
-/>
-
-<JobApplicationActionBar
-  isVisible={isApplying}
-  onSubmit={handleSubmit}
-  onSaveDraft={handleSaveDraft}
-  onCancel={handleCancel}
-  isSubmitting={isSubmitting}
-/>
-
-<SettingsActionBar
-  isVisible={hasChanges}
-  onSave={handleSave}
-  onReset={handleReset}
-  isSaving={isSaving}
-  hasChanges={hasChanges}
+<HelpSearch
+  placeholder="Search help articles..."
+  onSearch={(query) => console.log('Searching for:', query)}
 />
 ```
 
-**Features:**
-- Smooth slide-up animation
-- Context-aware actions
-- Loading states
-- Responsive design
-- Predefined configurations
+### ContactSupportForm
+A form component for users to contact support.
 
-## 👤 Profile Preview
+**Props:**
+- `userRole?: 'student' | 'employer'` - User role for role-specific form fields
+- `onClose?: () => void` - Callback function when form should be closed
+- `className?: string` - Additional CSS classes
 
-### Profile Preview Component
+**Usage:**
 ```tsx
-import ProfilePreview from '@/components/common/ProfilePreview';
+import ContactSupportForm from '@/components/common/ContactSupportForm';
 
-<ProfilePreview
-  profileData={{
-    name: "John Doe",
-    email: "john@example.com",
-    bio: "Passionate developer...",
-    location: "San Francisco, CA",
-    experience: "5 years",
-    education: "BS Computer Science",
-    skills: ["React", "Node.js", "TypeScript"],
-    profilePicture: "/avatar.jpg",
-    linkedin: "https://linkedin.com/in/johndoe",
-    github: "https://github.com/johndoe",
-    portfolio: "https://johndoe.dev"
-  }}
-  isVisible={showPreview}
-  onClose={() => setShowPreview(false)}
-  onEdit={() => {
-    setShowPreview(false);
-    setIsEditing(true);
-  }}
+<ContactSupportForm
+  userRole="student"
+  onClose={() => setShowForm(false)}
 />
 ```
 
-**Features:**
-- Professional profile layout
-- Full-screen modal option
-- Social links
-- Skills display
-- Responsive design
-- Smooth animations
+### ContactSupportModal
+A modal wrapper for the contact support form.
 
-## 🎨 Theme Integration
+**Props:**
+- `isOpen: boolean` - Whether the modal is open
+- `onClose: () => void` - Callback function to close the modal
+- `userRole?: 'student' | 'employer'` - User role for the form
 
-### Dark Mode Support
-All components automatically support dark mode through Tailwind CSS classes:
-- `dark:bg-gray-900` - Dark backgrounds
-- `dark:text-white` - Dark text
-- `dark:border-gray-700` - Dark borders
-- `dark:hover:bg-gray-800` - Dark hover states
-
-### Theme Context
+**Usage:**
 ```tsx
-import { useTheme } from '@/context/ThemeContext';
+import ContactSupportModal from '@/components/common/ContactSupportModal';
 
-const { theme, toggleTheme, isInitialized } = useTheme();
+<ContactSupportModal
+  isOpen={showModal}
+  onClose={() => setShowModal(false)}
+  userRole="student"
+/>
 ```
 
-**Features:**
-- localStorage persistence
-- System preference detection
-- Smooth theme transitions
-- CSS custom properties
+## Types
 
-## 📱 Responsive Design
-
-### Breakpoint Strategy
-- **Mobile**: < 768px
-- **Tablet**: 768px - 1024px
-- **Desktop**: > 1024px
-
-### Responsive Patterns
-- Stack elements vertically on mobile
-- Use grid layouts for larger screens
-- Adjust spacing and typography
-- Optimize touch targets (44px minimum)
-
-## ♿ Accessibility
-
-### WCAG AA Compliance
-- **Color Contrast**: Minimum 4.5:1 ratio
-- **Focus Indicators**: Visible focus rings
-- **Keyboard Navigation**: Full keyboard support
-- **Screen Readers**: Proper ARIA labels
-- **Motion**: Respect `prefers-reduced-motion`
-
-### Accessibility Features
-- Semantic HTML structure
-- ARIA labels and descriptions
-- Focus management
-- Keyboard shortcuts
-- Screen reader announcements
-
-## 🚀 Performance
-
-### Optimization Strategies
-- **Lazy Loading**: Non-critical components
-- **Code Splitting**: Route-based splitting
-- **Memoization**: React.memo for expensive components
-- **Debouncing**: Input handlers
-- **Virtualization**: Large lists
-
-### Performance Monitoring
-```tsx
-import PerformanceMonitor from '@/components/common/PerformanceMonitor';
-
-<PerformanceMonitor />
+### FAQItem
+```typescript
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  category?: string;
+  tags?: string[];
+}
 ```
 
-## 📋 Usage Guidelines
+## Features
 
-### Component Best Practices
-1. **Consistency**: Use predefined variants and sizes
-2. **Accessibility**: Always include proper labels and ARIA attributes
-3. **Performance**: Lazy load when possible
-4. **Testing**: Test on multiple devices and screen sizes
-5. **Documentation**: Update this guide when adding new components
+- **Accessibility**: All components include proper ARIA attributes and keyboard navigation
+- **Dark Mode**: Full support for dark mode with appropriate color schemes
+- **Responsive**: Mobile-friendly design with responsive layouts
+- **Debounced Search**: Search input includes debouncing to prevent excessive API calls
+- **Modal Management**: Contact modal includes proper focus management and escape key handling
+- **Loading States**: Form submission includes loading states and success/error feedback
 
-### Animation Best Practices
-1. **Subtle**: Keep animations under 200ms
-2. **Purposeful**: Every animation should serve a purpose
-3. **Consistent**: Use centralized animation presets
-4. **Accessible**: Respect `prefers-reduced-motion`
-5. **Performance**: Use transform and opacity for animations
+## Integration
 
-### State Management
-1. **Local State**: Use React hooks for component state
-2. **Global State**: Use context for theme and user preferences
-3. **Persistence**: Use localStorage for user preferences
-4. **Validation**: Client-side validation with error states
-
-## 🔧 Development
-
-### Adding New Components
-1. Create component in appropriate directory
-2. Add TypeScript interfaces
-3. Include accessibility features
-4. Add dark mode support
-5. Create documentation
-6. Add to this guide
-
-### Testing Components
-1. Unit tests for logic
-2. Integration tests for interactions
-3. Visual regression tests
-4. Accessibility tests
-5. Performance tests
-
-### Contributing
-1. Follow existing patterns
-2. Maintain consistency
-3. Add proper documentation
-4. Test thoroughly
-5. Update this guide
-
----
-
-For questions or contributions, please refer to the project's contributing guidelines.
+These components are designed to work together in the help center page (`/help`) but can also be used independently throughout the application for FAQ sections, search functionality, or contact forms.
