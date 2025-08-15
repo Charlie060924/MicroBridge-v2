@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import ScheduleModal from "./ScheduleModal";
 
 interface CalendarEvent {
   id: string;
@@ -39,85 +40,101 @@ const EmployerCalendar: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
-  // Mock data
+  // Load events from localStorage or use mock data
   useEffect(() => {
-    const mockEvents: CalendarEvent[] = [
-      {
-        id: "1",
-        title: "Interview with John Doe",
-        type: 'interview',
-        date: "2024-01-20",
-        time: "10:00",
-        duration: 60,
-        candidateName: "John Doe",
-        candidateEmail: "john.doe@email.com",
-        jobTitle: "Frontend Developer",
-        location: "Conference Room A",
-        isVirtual: false,
-        status: 'scheduled',
-        notes: "Technical interview focusing on React and TypeScript"
-      },
-      {
-        id: "2",
-        title: "Virtual Interview with Jane Smith",
-        type: 'interview',
-        date: "2024-01-20",
-        time: "14:00",
-        duration: 45,
-        candidateName: "Jane Smith",
-        candidateEmail: "jane.smith@email.com",
-        jobTitle: "UI/UX Designer",
-        location: "Zoom Meeting",
-        isVirtual: true,
-        status: 'scheduled',
-        notes: "Portfolio review and design discussion"
-      },
-      {
-        id: "3",
-        title: "Hiring Team Meeting",
-        type: 'meeting',
-        date: "2024-01-21",
-        time: "09:00",
-        duration: 30,
-        location: "Board Room",
-        isVirtual: false,
-        status: 'scheduled',
-        notes: "Review candidates for Frontend Developer position"
-      },
-      {
-        id: "4",
-        title: "Application Deadline - Data Analyst",
-        type: 'deadline',
-        date: "2024-01-22",
-        time: "17:00",
-        duration: 0,
-        jobTitle: "Data Analyst",
-        location: "Online",
-        isVirtual: true,
-        status: 'scheduled'
-      },
-      {
-        id: "5",
-        title: "Follow-up with Mike Johnson",
-        type: 'reminder',
-        date: "2024-01-23",
-        time: "11:00",
-        duration: 15,
-        candidateName: "Mike Johnson",
-        candidateEmail: "mike.johnson@email.com",
-        jobTitle: "Frontend Developer",
-        location: "Phone Call",
-        isVirtual: true,
-        status: 'scheduled',
-        notes: "Call to discuss next steps in hiring process"
+    const loadEvents = () => {
+      try {
+        const savedEvents = localStorage.getItem('employerCalendarEvents');
+        if (savedEvents) {
+          const parsedEvents = JSON.parse(savedEvents);
+          setEvents(parsedEvents);
+        } else {
+          // Initial mock data
+          const mockEvents: CalendarEvent[] = [
+            {
+              id: "1",
+              title: "Interview with John Doe",
+              type: 'interview',
+              date: "2024-01-20",
+              time: "10:00",
+              duration: 60,
+              candidateName: "John Doe",
+              candidateEmail: "john.doe@email.com",
+              jobTitle: "Frontend Developer",
+              location: "Conference Room A",
+              isVirtual: false,
+              status: 'scheduled',
+              notes: "Technical interview focusing on React and TypeScript"
+            },
+            {
+              id: "2",
+              title: "Virtual Interview with Jane Smith",
+              type: 'interview',
+              date: "2024-01-20",
+              time: "14:00",
+              duration: 45,
+              candidateName: "Jane Smith",
+              candidateEmail: "jane.smith@email.com",
+              jobTitle: "UI/UX Designer",
+              location: "Zoom Meeting",
+              isVirtual: true,
+              status: 'scheduled',
+              notes: "Portfolio review and design discussion"
+            },
+            {
+              id: "3",
+              title: "Hiring Team Meeting",
+              type: 'meeting',
+              date: "2024-01-21",
+              time: "09:00",
+              duration: 30,
+              location: "Board Room",
+              isVirtual: false,
+              status: 'scheduled',
+              notes: "Review candidates for Frontend Developer position"
+            },
+            {
+              id: "4",
+              title: "Application Deadline - Data Analyst",
+              type: 'deadline',
+              date: "2024-01-22",
+              time: "17:00",
+              duration: 0,
+              jobTitle: "Data Analyst",
+              location: "Online",
+              isVirtual: true,
+              status: 'scheduled'
+            },
+            {
+              id: "5",
+              title: "Follow-up with Mike Johnson",
+              type: 'reminder',
+              date: "2024-01-23",
+              time: "11:00",
+              duration: 15,
+              candidateName: "Mike Johnson",
+              candidateEmail: "mike.johnson@email.com",
+              jobTitle: "Frontend Developer",
+              location: "Phone Call",
+              isVirtual: true,
+              status: 'scheduled',
+              notes: "Call to discuss next steps in hiring process"
+            }
+          ];
+          setEvents(mockEvents);
+          localStorage.setItem('employerCalendarEvents', JSON.stringify(mockEvents));
+        }
+      } catch (error) {
+        console.error('Error loading events:', error);
+        setEvents([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
+    };
 
-    setTimeout(() => {
-      setEvents(mockEvents);
-      setIsLoading(false);
-    }, 500);
+    setTimeout(loadEvents, 500);
   }, []);
 
   const getDaysInMonth = (date: Date) => {
@@ -207,6 +224,9 @@ const EmployerCalendar: React.FC = () => {
 
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
+    // Optionally open schedule modal when clicking on a date
+    // Uncomment the line below if you want this behavior
+    // setShowScheduleModal(true);
   };
 
   const handleEventClick = (event: CalendarEvent) => {
@@ -217,6 +237,26 @@ const EmployerCalendar: React.FC = () => {
   const closeEventModal = () => {
     setShowEventModal(false);
     setSelectedEvent(null);
+  };
+
+  const handleScheduleClick = () => {
+    setShowScheduleModal(true);
+  };
+
+  const handleScheduleClose = () => {
+    setShowScheduleModal(false);
+  };
+
+  const handleScheduleSave = (newEvent: CalendarEvent) => {
+    const updatedEvents = [...events, newEvent];
+    setEvents(updatedEvents);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('employerCalendarEvents', JSON.stringify(updatedEvents));
+    } catch (error) {
+      console.error('Error saving events to localStorage:', error);
+    }
   };
 
   const days = getDaysInMonth(currentDate);
@@ -244,7 +284,10 @@ const EmployerCalendar: React.FC = () => {
                 Manage interviews and hiring events
               </p>
             </div>
-            <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={handleScheduleClick}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Schedule Event
             </button>
@@ -303,10 +346,11 @@ const EmployerCalendar: React.FC = () => {
                 <div
                   key={index}
                   className={`min-h-[120px] p-2 border border-gray-200 dark:border-gray-700 ${
-                    day ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
+                    day ? 'bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : 'bg-gray-50 dark:bg-gray-900'
                   } ${isToday ? 'ring-2 ring-blue-500' : ''} ${
                     isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                   }`}
+                  onClick={day ? () => handleDateClick(day) : undefined}
                 >
                   {day && (
                     <>
@@ -510,6 +554,14 @@ const EmployerCalendar: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Schedule Modal */}
+      <ScheduleModal
+        isOpen={showScheduleModal}
+        onClose={handleScheduleClose}
+        onSave={handleScheduleSave}
+        selectedDate={selectedDate || undefined}
+      />
     </div>
   );
 };
