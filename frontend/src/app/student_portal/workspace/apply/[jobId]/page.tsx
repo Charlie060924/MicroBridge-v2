@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle, FileText, Edit3 } from "lucide-react";
 import { Job } from "@/components/dashboard/student_portal/workspace/JobCategoryCard";
+import JobActionModal, { ModalType } from "@/components/common/JobActionModal";
 
 interface ApplicationForm {
   fullName: string;
@@ -13,6 +14,14 @@ interface ApplicationForm {
   coverLetter: string;
   availability: string;
   startDate: string;
+}
+
+interface ModalState {
+  isOpen: boolean;
+  type: ModalType;
+  title: string;
+  message: string;
+  actionLabel?: string;
 }
 
 // Mock user resume data - replace with actual user context/API
@@ -99,6 +108,13 @@ const ApplicationPage: React.FC = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+    actionLabel: ''
+  });
   const [formData, setFormData] = useState<ApplicationForm>({
     fullName: "",
     email: "",
@@ -134,7 +150,35 @@ const ApplicationPage: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  // Optimized submit handler
+  // Show modal function
+  const showModal = useCallback((type: ModalType, title: string, message: string, actionLabel?: string) => {
+    setModalState({
+      isOpen: true,
+      type,
+      title,
+      message,
+      actionLabel
+    });
+  }, []);
+
+  // Close modal function
+  const closeModal = useCallback(() => {
+    setModalState(prev => ({ ...prev, isOpen: false }));
+  }, []);
+
+  // Handle modal action (navigate to applications page)
+  const handleModalAction = useCallback(() => {
+    closeModal();
+    router.push('/student_portal/workspace/applications');
+  }, [closeModal, router]);
+
+  // Handle retry submission
+  const handleRetry = useCallback(() => {
+    closeModal();
+    // Reset form or allow user to try again
+  }, [closeModal]);
+
+  // Optimized submit handler with modal integration
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -143,15 +187,31 @@ const ApplicationPage: React.FC = () => {
       // Simulate API call with shorter delay for better UX
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Show success and redirect
-      router.push(`/student_portal/workspace/applications?submitted=${jobId}`);
-    } catch {
-      // Better error handling - could use toast instead of alert
-      alert("Failed to submit application. Please try again.");
+      // Simulate success (you can toggle this to test error case)
+      const shouldSucceed = Math.random() > 0.3; // 70% success rate for testing
+      
+      if (shouldSucceed) {
+        showModal(
+          'success',
+          'Application Submitted Successfully!',
+          'Your application has been submitted successfully. The employer will review your application and get back to you soon.',
+          'View My Applications'
+        );
+      } else {
+        // Simulate error
+        throw new Error('Network error occurred');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      showModal(
+        'error',
+        'Application Failed',
+        `Failed to submit application: ${errorMessage}. Please check your internet connection and try again.`
+      );
     } finally {
       setIsSubmitting(false);
     }
-  }, [jobId, router]);
+  }, [showModal]);
 
   // Optimized loading state
   if (isLoading) {
@@ -340,7 +400,7 @@ const ApplicationPage: React.FC = () => {
                 value={formData.coverLetter}
                 onChange={(e) => handleInputChange('coverLetter', e.target.value)}
                 rows={8}
-                placeholder={`Dear ${job.company} Hiring Team,\n\nI am excited to apply for the ${job.title} position. Here&apos;s why I believe I would be a great fit for this role...\n\n- Relevant experience with: ${job.skills.slice(0, 3).join(', ')}\n- My passion for ${job.category.toLowerCase()}\n- How I can contribute to your team\n\nI look forward to discussing this opportunity further.\n\nBest regards,\n[Your Name]`}
+                placeholder={`Dear ${job.company} Hiring Team,\n\nI am excited to apply for the ${job.title} position. Here's why I believe I would be a great fit for this role...\n\n- Relevant experience with: ${job.skills.slice(0, 3).join(', ')}\n- My passion for ${job.category.toLowerCase()}\n- How I can contribute to your team\n\nI look forward to discussing this opportunity further.\n\nBest regards,\n[Your Name]`}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-colors"
                 style={{ minHeight: '200px' }}
               />
@@ -375,10 +435,11 @@ const ApplicationPage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Preferred Start Date
+                  Preferred Start Date *
                 </label>
                 <input
                   type="date"
+                  required
                   value={formData.startDate}
                   onChange={(e) => handleInputChange('startDate', e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
@@ -417,6 +478,19 @@ const ApplicationPage: React.FC = () => {
           </div>
         </form>
       </main>
+
+      {/* Job Action Modal */}
+      <JobActionModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        actionLabel={modalState.actionLabel}
+        onAction={handleModalAction}
+        onRetry={handleRetry}
+        isLoading={isSubmitting}
+      />
     </div>
   );
 };

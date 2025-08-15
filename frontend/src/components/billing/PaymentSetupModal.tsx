@@ -50,7 +50,7 @@ const PaymentSetupModal: React.FC<PaymentSetupModalProps> = ({
     }));
   };
 
-  const handleCardDetailChange = (field: keyof PaymentData['cardDetails'], value: string) => {
+  const handleCardDetailChange = (field: 'number' | 'expiry' | 'cvv', value: string) => {
     setPaymentData(prev => ({
       ...prev,
       cardDetails: {

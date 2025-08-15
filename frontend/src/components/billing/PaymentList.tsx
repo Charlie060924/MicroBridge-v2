@@ -138,8 +138,7 @@ const PaymentList: React.FC<PaymentListProps> = ({
                   <Button
                     variant={actionButtonVariant}
                     size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       onActionClick?.(payment);
                     }}
                   >

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Briefcase, 
@@ -14,6 +14,7 @@ import {
   Plus,
   X
 } from "lucide-react";
+import JobActionModal, { ModalType } from "@/components/common/JobActionModal";
 
 interface JobFormData {
   title: string;
@@ -30,11 +31,26 @@ interface JobFormData {
   deadline: string;
 }
 
+interface ModalState {
+  isOpen: boolean;
+  type: ModalType;
+  title: string;
+  message: string;
+  actionLabel?: string;
+}
+
 const PostJobForm: React.FC = () => {
   const router = useRouter();
   const [isPreview, setIsPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [currentSkill, setCurrentSkill] = useState("");
+  const [modalState, setModalState] = useState<ModalState>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+    actionLabel: ''
+  });
 
   const [formData, setFormData] = useState<JobFormData>({
     title: "",
@@ -69,14 +85,14 @@ const PostJobForm: React.FC = () => {
     "Expert"
   ];
 
-  const handleInputChange = (field: keyof JobFormData, value: any) => {
+  const handleInputChange = useCallback((field: keyof JobFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, []);
 
-  const handleAddSkill = () => {
+  const handleAddSkill = useCallback(() => {
     if (currentSkill.trim() && !formData.skills.includes(currentSkill.trim())) {
       setFormData(prev => ({
         ...prev,
@@ -84,44 +100,108 @@ const PostJobForm: React.FC = () => {
       }));
       setCurrentSkill("");
     }
-  };
+  }, [currentSkill, formData.skills]);
 
-  const handleRemoveSkill = (skillToRemove: string) => {
+  const handleRemoveSkill = useCallback((skillToRemove: string) => {
     setFormData(prev => ({
       ...prev,
       skills: prev.skills.filter(skill => skill !== skillToRemove)
     }));
-  };
+  }, []);
 
-  const handleSaveDraft = async () => {
+  // Show modal function
+  const showModal = useCallback((type: ModalType, title: string, message: string, actionLabel?: string) => {
+    setModalState({
+      isOpen: true,
+      type,
+      title,
+      message,
+      actionLabel
+    });
+  }, []);
+
+  // Close modal function
+  const closeModal = useCallback(() => {
+    setModalState(prev => ({ ...prev, isOpen: false }));
+  }, []);
+
+  // Handle modal action (navigate to manage jobs page)
+  const handleModalAction = useCallback(() => {
+    closeModal();
+    router.push('/employer_portal/workspace/manage-jobs');
+  }, [closeModal, router]);
+
+  // Handle retry submission
+  const handleRetry = useCallback(() => {
+    closeModal();
+    // Reset form or allow user to try again
+  }, [closeModal]);
+
+  const handleSaveDraft = useCallback(async () => {
     setIsSaving(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Draft saved:", formData);
-      // Show success message
+      
+      // Simulate success (you can toggle this to test error case)
+      const shouldSucceed = Math.random() > 0.2; // 80% success rate for testing
+      
+      if (shouldSucceed) {
+        showModal(
+          'success',
+          'Draft Saved Successfully!',
+          'Your job draft has been saved successfully. You can continue editing or publish it later.',
+          'Manage My Jobs'
+        );
+      } else {
+        // Simulate error
+        throw new Error('Failed to save draft');
+      }
     } catch (error) {
-      console.error("Error saving draft:", error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      showModal(
+        'error',
+        'Draft Save Failed',
+        `Failed to save draft: ${errorMessage}. Please try again.`
+      );
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [showModal]);
 
-  const handlePublish = async () => {
+  const handlePublish = useCallback(async () => {
     setIsSaving(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log("Job published:", formData);
-      router.push('/employer_portal/workspace/manage-jobs');
+      
+      // Simulate success (you can toggle this to test error case)
+      const shouldSucceed = Math.random() > 0.3; // 70% success rate for testing
+      
+      if (shouldSucceed) {
+        showModal(
+          'success',
+          'Job Posted Successfully!',
+          'Your job has been posted successfully and is now visible to candidates. You can manage your job postings from the employer portal.',
+          'Manage My Jobs'
+        );
+      } else {
+        // Simulate error
+        throw new Error('Failed to publish job');
+      }
     } catch (error) {
-      console.error("Error publishing job:", error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      showModal(
+        'error',
+        'Job Posting Failed',
+        `Failed to publish job: ${errorMessage}. Please check your information and try again.`
+      );
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [showModal]);
 
-  const isFormValid = () => {
+  const isFormValid = useCallback(() => {
     return (
       formData.title &&
       formData.company &&
@@ -135,7 +215,7 @@ const PostJobForm: React.FC = () => {
       formData.experienceLevel &&
       formData.deadline
     );
-  };
+  }, [formData]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -460,6 +540,19 @@ const PostJobForm: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Job Action Modal */}
+      <JobActionModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        actionLabel={modalState.actionLabel}
+        onAction={handleModalAction}
+        onRetry={handleRetry}
+        isLoading={isSaving}
+      />
     </div>
   );
 };
