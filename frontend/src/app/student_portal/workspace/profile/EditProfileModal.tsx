@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Plus, Trash2, Upload, ExternalLink } from 'lucide-react';
+import { X, Save, Plus, Trash2, Upload, ExternalLink, Calendar, Target, Zap, Trophy, School, BookOpen, GraduationCap } from 'lucide-react';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -48,8 +48,14 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
           newErrors.email = 'Invalid email format';
         }
-        if (!formData.headline?.trim()) newErrors.headline = 'Professional headline is required';
+        if (!formData.school?.trim()) newErrors.school = 'School is required';
+        if (!formData.major?.trim()) newErrors.major = 'Major is required';
+        if (!formData.yearOfStudy?.trim()) newErrors.yearOfStudy = 'Year of study is required';
         if (!formData.bio?.trim()) newErrors.bio = 'Bio is required';
+        break;
+      
+      case 'availability':
+        if (!formData.availability?.preferredStartDate) newErrors.preferredStartDate = 'Preferred start date is required';
         break;
       
       case 'skills':
@@ -58,31 +64,18 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         }
         break;
       
-      case 'experience':
-        if (!formData.experience || formData.experience.length === 0) {
-          newErrors.experience = 'At least one experience entry is required';
+      case 'projects':
+        if (!formData.projects || formData.projects.length === 0) {
+          newErrors.projects = 'At least one project is required';
         }
         break;
       
-      case 'education':
-        if (!formData.degree?.trim()) newErrors.degree = 'Degree is required';
-        if (!formData.university?.trim()) newErrors.university = 'University is required';
-        if (!formData.graduationDate?.trim()) newErrors.graduationDate = 'Graduation date is required';
-        break;
-      
-      case 'portfolio':
-        // Portfolio fields are optional
-        break;
-      
       case 'careerGoals':
-        if (!formData.careerGoal?.trim()) newErrors.careerGoal = 'Career goal is required';
-        if (!formData.industry?.trim()) newErrors.industry = 'Industry is required';
+        if (!formData.careerGoals?.statement?.trim()) newErrors.statement = 'Career statement is required';
         break;
       
-      case 'availability':
-        if (!formData.availability?.trim()) newErrors.availability = 'Availability is required';
-        if (!formData.projectDuration?.trim()) newErrors.projectDuration = 'Project duration is required';
-        if (!formData.paymentType?.trim()) newErrors.paymentType = 'Payment type is required';
+      case 'contact':
+        // Contact fields are optional
         break;
     }
 
@@ -98,7 +91,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   };
 
   const addSkill = () => {
-    const newSkill = { skill: '', proficiency: 50, level: 'Intermediate' };
+    const newSkill = { 
+      skill: '', 
+      category: 'software', 
+      proficiency: 'Beginner' as const, 
+      xpValue: 25 
+    };
     setFormData(prev => ({
       ...prev,
       skills: [...(prev.skills || []), newSkill]
@@ -121,93 +119,136 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }));
   };
 
-  const addExperience = () => {
-    const newExperience = {
+  const addProject = () => {
+    const newProject = {
       title: '',
-      company: '',
+      description: '',
+      type: 'academic' as const,
       duration: '',
-      bulletPoints: ['']
+      xpEarned: 50,
+      skills: []
     };
     setFormData(prev => ({
       ...prev,
-      experience: [...(prev.experience || []), newExperience]
+      projects: [...(prev.projects || []), newProject]
     }));
   };
 
-  const removeExperience = (index: number) => {
+  const removeProject = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      experience: prev.experience.filter((_: any, i: number) => i !== index)
+      projects: prev.projects.filter((_: any, i: number) => i !== index)
     }));
   };
 
-  const updateExperience = (index: number, field: string, value: any) => {
+  const updateProject = (index: number, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
-      experience: prev.experience.map((exp: any, i: number) => 
-        i === index ? { ...exp, [field]: value } : exp
+      projects: prev.projects.map((project: any, i: number) => 
+        i === index ? { ...project, [field]: value } : project
       )
     }));
   };
 
-  const addBulletPoint = (expIndex: number) => {
+  const addProjectSkill = (projectIndex: number) => {
     setFormData(prev => ({
       ...prev,
-      experience: prev.experience.map((exp: any, i: number) => 
-        i === expIndex 
-          ? { ...exp, bulletPoints: [...exp.bulletPoints, ''] }
-          : exp
+      projects: prev.projects.map((project: any, i: number) => 
+        i === projectIndex 
+          ? { ...project, skills: [...project.skills, ''] }
+          : project
       )
     }));
   };
 
-  const addCareerGoal = () => {
+  const removeProjectSkill = (projectIndex: number, skillIndex: number) => {
     setFormData(prev => ({
       ...prev,
-      careerGoals: [...(prev.careerGoals || []), '']
-    }));
-  };
-
-  const removeCareerGoal = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      careerGoals: prev.careerGoals.filter((_: any, i: number) => i !== index)
-    }));
-  };
-
-  const updateCareerGoal = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      careerGoals: prev.careerGoals.map((goal: any, i: number) => 
-        i === index ? value : goal
+      projects: prev.projects.map((project: any, i: number) => 
+        i === projectIndex 
+          ? { ...project, skills: project.skills.filter((_: any, si: number) => si !== skillIndex) }
+          : project
       )
     }));
   };
 
-  const removeBulletPoint = (expIndex: number, bulletIndex: number) => {
+  const updateProjectSkill = (projectIndex: number, skillIndex: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      experience: prev.experience.map((exp: any, i: number) => 
-        i === expIndex 
-          ? { ...exp, bulletPoints: exp.bulletPoints.filter((_: any, bi: number) => bi !== bulletIndex) }
-          : exp
-      )
-    }));
-  };
-
-  const updateBulletPoint = (expIndex: number, bulletIndex: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      experience: prev.experience.map((exp: any, i: number) => 
-        i === expIndex 
+      projects: prev.projects.map((project: any, i: number) => 
+        i === projectIndex 
           ? { 
-              ...exp, 
-              bulletPoints: exp.bulletPoints.map((bp: any, bi: number) => 
-                bi === bulletIndex ? value : bp
+              ...project, 
+              skills: project.skills.map((skill: any, si: number) => 
+                si === skillIndex ? value : skill
               )
             }
-          : exp
+          : project
       )
+    }));
+  };
+
+  const addCareerInterest = () => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: {
+        ...prev.careerGoals,
+        interests: [...(prev.careerGoals?.interests || []), '']
+      }
+    }));
+  };
+
+  const removeCareerInterest = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: {
+        ...prev.careerGoals,
+        interests: prev.careerGoals.interests.filter((_: any, i: number) => i !== index)
+      }
+    }));
+  };
+
+  const updateCareerInterest = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: {
+        ...prev.careerGoals,
+        interests: prev.careerGoals.interests.map((interest: any, i: number) => 
+          i === index ? value : interest
+        )
+      }
+    }));
+  };
+
+  const addTargetIndustry = () => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: {
+        ...prev.careerGoals,
+        targetIndustries: [...(prev.careerGoals?.targetIndustries || []), '']
+      }
+    }));
+  };
+
+  const removeTargetIndustry = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: {
+        ...prev.careerGoals,
+        targetIndustries: prev.careerGoals.targetIndustries.filter((_: any, i: number) => i !== index)
+      }
+    }));
+  };
+
+  const updateTargetIndustry = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      careerGoals: {
+        ...prev.careerGoals,
+        targetIndustries: prev.careerGoals.targetIndustries.map((industry: any, i: number) => 
+          i === index ? value : industry
+        )
+      }
     }));
   };
 
@@ -246,59 +287,103 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Professional Headline *
+          Email *
         </label>
         <input
-          type="text"
-          value={formData.headline || ''}
-          onChange={(e) => handleInputChange('headline', e.target.value)}
-          placeholder="e.g., Senior Frontend Developer"
+          type="email"
+          value={formData.email || ''}
+          onChange={(e) => handleInputChange('email', e.target.value)}
           className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-            errors.headline ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
         />
-        {errors.headline && <p className="text-sm text-red-600 mt-1">{errors.headline}</p>}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Email *
-          </label>
-          <input
-            type="email"
-            value={formData.email || ''}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-              errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
-          />
-          {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Phone
-          </label>
-          <input
-            type="tel"
-            value={formData.phone || ''}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          />
-        </div>
+        {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Location
+          Phone
         </label>
         <input
-          type="text"
-          value={formData.location || ''}
-          onChange={(e) => handleInputChange('location', e.target.value)}
-          placeholder="e.g., San Francisco, CA"
+          type="tel"
+          value={formData.phone || ''}
+          onChange={(e) => handleInputChange('phone', e.target.value)}
+          placeholder="+852 5555 1234"
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
         />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            School *
+          </label>
+          <select
+            value={formData.school || ''}
+            onChange={(e) => handleInputChange('school', e.target.value)}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+              errors.school ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            <option value="">Select school</option>
+            <option value="The University of Hong Kong">The University of Hong Kong</option>
+            <option value="The Chinese University of Hong Kong">The Chinese University of Hong Kong</option>
+            <option value="The Hong Kong University of Science and Technology">The Hong Kong University of Science and Technology</option>
+            <option value="City University of Hong Kong">City University of Hong Kong</option>
+            <option value="The Hong Kong Polytechnic University">The Hong Kong Polytechnic University</option>
+            <option value="Hong Kong Baptist University">Hong Kong Baptist University</option>
+            <option value="Lingnan University">Lingnan University</option>
+            <option value="The Education University of Hong Kong">The Education University of Hong Kong</option>
+            <option value="Other">Other</option>
+          </select>
+          {errors.school && <p className="text-sm text-red-600 mt-1">{errors.school}</p>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Major *
+          </label>
+          <select
+            value={formData.major || ''}
+            onChange={(e) => handleInputChange('major', e.target.value)}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+              errors.major ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            <option value="">Select major</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Information Technology">Information Technology</option>
+            <option value="Business Administration">Business Administration</option>
+            <option value="Finance">Finance</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Design">Design</option>
+            <option value="Media and Communication">Media and Communication</option>
+            <option value="Psychology">Psychology</option>
+            <option value="Economics">Economics</option>
+            <option value="Other">Other</option>
+          </select>
+          {errors.major && <p className="text-sm text-red-600 mt-1">{errors.major}</p>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Year of Study *
+          </label>
+          <select
+            value={formData.yearOfStudy || ''}
+            onChange={(e) => handleInputChange('yearOfStudy', e.target.value)}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+              errors.yearOfStudy ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            <option value="">Select year</option>
+            <option value="Year 1">Year 1</option>
+            <option value="Year 2">Year 2</option>
+            <option value="Year 3">Year 3</option>
+            <option value="Year 4">Year 4</option>
+            <option value="Graduate">Graduate</option>
+          </select>
+          {errors.yearOfStudy && <p className="text-sm text-red-600 mt-1">{errors.yearOfStudy}</p>}
+        </div>
       </div>
 
       <div>
@@ -309,7 +394,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           value={formData.bio || ''}
           onChange={(e) => handleInputChange('bio', e.target.value)}
           rows={4}
-          placeholder="Tell us about yourself, your experience, and what you're passionate about..."
+          placeholder="Tell us about yourself, your interests, and what you're looking for in micro-internships..."
           className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
             errors.bio ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
@@ -319,10 +404,66 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     </div>
   );
 
+  const renderAvailabilityForm = () => (
+    <div className="space-y-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Preferred Start Date *
+        </label>
+        <input
+          type="date"
+          value={formData.availability?.preferredStartDate || ''}
+          onChange={(e) => handleInputChange('availability', {
+            ...formData.availability,
+            preferredStartDate: e.target.value
+          })}
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+            errors.preferredStartDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+          }`}
+        />
+        {errors.preferredStartDate && <p className="text-sm text-red-600 mt-1">{errors.preferredStartDate}</p>}
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="flexibleTiming"
+          checked={formData.availability?.flexibleTiming || false}
+          onChange={(e) => handleInputChange('availability', {
+            ...formData.availability,
+            flexibleTiming: e.target.checked
+          })}
+          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <label htmlFor="flexibleTiming" className="text-sm text-gray-700 dark:text-gray-300">
+          I'm flexible with timing and can work around my schedule
+        </label>
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Available Dates (Optional)
+        </label>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+          Select specific dates when you're available for micro-internships
+        </p>
+        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+          <Calendar className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Calendar selection coming soon
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+            You'll be able to select available dates for micro-internships
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderSkillsForm = () => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Skills & Expertise</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Skills & Interests</h3>
         <button
           onClick={addSkill}
           className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
@@ -344,7 +485,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                 Skill Name
@@ -353,36 +494,50 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 type="text"
                 value={skill.skill || ''}
                 onChange={(e) => updateSkill(index, 'skill', e.target.value)}
-                placeholder="e.g., React"
+                placeholder="e.g., Python"
                 className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Proficiency Level
+                Category
               </label>
               <select
-                value={skill.level || 'Intermediate'}
-                onChange={(e) => updateSkill(index, 'level', e.target.value)}
+                value={skill.category || 'software'}
+                onChange={(e) => updateSkill(index, 'category', e.target.value)}
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              >
+                <option value="software">Software</option>
+                <option value="design">Design</option>
+                <option value="analytics">Analytics</option>
+                <option value="business">Business</option>
+                <option value="marketing">Marketing</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                Proficiency
+              </label>
+              <select
+                value={skill.proficiency || 'Beginner'}
+                onChange={(e) => updateSkill(index, 'proficiency', e.target.value)}
                 className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               >
                 <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>
                 <option value="Advanced">Advanced</option>
-                <option value="Expert">Expert</option>
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Proficiency % ({skill.proficiency || 50}%)
+                XP Value
               </label>
               <input
-                type="range"
-                min="0"
-                max="100"
-                value={skill.proficiency || 50}
-                onChange={(e) => updateSkill(index, 'proficiency', parseInt(e.target.value))}
-                className="w-full"
+                type="number"
+                value={skill.xpValue || 25}
+                onChange={(e) => updateSkill(index, 'xpValue', parseInt(e.target.value) || 25)}
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
@@ -393,25 +548,25 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     </div>
   );
 
-  const renderExperienceForm = () => (
+  const renderProjectsForm = () => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Work Experience</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Projects & Experience</h3>
         <button
-          onClick={addExperience}
+          onClick={addProject}
           className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
         >
           <Plus className="h-4 w-4 mr-1" />
-          Add Experience
+          Add Project
         </button>
       </div>
       
-      {formData.experience?.map((exp: any, index: number) => (
+      {formData.projects?.map((project: any, index: number) => (
         <div key={index} className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Experience {index + 1}</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Project {index + 1}</span>
             <button
-              onClick={() => removeExperience(index)}
+              onClick={() => removeProject(index)}
               className="text-red-500 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4" />
@@ -421,67 +576,97 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Job Title
+                Project Title
               </label>
               <input
                 type="text"
-                value={exp.title || ''}
-                onChange={(e) => updateExperience(index, 'title', e.target.value)}
-                placeholder="e.g., Senior Frontend Developer"
+                value={project.title || ''}
+                onChange={(e) => updateProject(index, 'title', e.target.value)}
+                placeholder="e.g., AI Chatbot for Student Services"
                 className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Company
+                Project Type
               </label>
-              <input
-                type="text"
-                value={exp.company || ''}
-                onChange={(e) => updateExperience(index, 'company', e.target.value)}
-                placeholder="e.g., TechCorp Inc."
+              <select
+                value={project.type || 'academic'}
+                onChange={(e) => updateProject(index, 'type', e.target.value)}
                 className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              />
+              >
+                <option value="academic">Academic</option>
+                <option value="competition">Competition</option>
+                <option value="volunteer">Volunteer</option>
+                <option value="personal">Personal</option>
+                <option value="research">Research</option>
+              </select>
             </div>
           </div>
           
           <div className="mb-3">
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Duration
+              Description
             </label>
-            <input
-              type="text"
-              value={exp.duration || ''}
-              onChange={(e) => updateExperience(index, 'duration', e.target.value)}
-              placeholder="e.g., 2021 - Present"
+            <textarea
+              value={project.description || ''}
+              onChange={(e) => updateProject(index, 'description', e.target.value)}
+              rows={3}
+              placeholder="Describe your project and what you accomplished..."
               className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                Duration
+              </label>
+              <input
+                type="text"
+                value={project.duration || ''}
+                onChange={(e) => updateProject(index, 'duration', e.target.value)}
+                placeholder="e.g., 3 months"
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                XP Earned
+              </label>
+              <input
+                type="number"
+                value={project.xpEarned || 50}
+                onChange={(e) => updateProject(index, 'xpEarned', parseInt(e.target.value) || 50)}
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              />
+            </div>
           </div>
           
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
-                Key Achievements
+                Skills Used
               </label>
               <button
-                onClick={() => addBulletPoint(index)}
+                onClick={() => addProjectSkill(index)}
                 className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
                 <Plus className="h-3 w-3 mr-1" />
-                Add Point
+                Add Skill
               </button>
             </div>
-            {exp.bulletPoints?.map((point: string, bulletIndex: number) => (
-              <div key={bulletIndex} className="flex items-center space-x-2 mb-2">
+            {project.skills?.map((skill: string, skillIndex: number) => (
+              <div key={skillIndex} className="flex items-center space-x-2 mb-2">
                 <input
                   type="text"
-                  value={point || ''}
-                  onChange={(e) => updateBulletPoint(index, bulletIndex, e.target.value)}
-                  placeholder="Describe a key achievement or responsibility..."
+                  value={skill || ''}
+                  onChange={(e) => updateProjectSkill(index, skillIndex, e.target.value)}
+                  placeholder="e.g., Python"
                   className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 />
                 <button
-                  onClick={() => removeBulletPoint(index, bulletIndex)}
+                  onClick={() => removeProjectSkill(index, skillIndex)}
                   className="text-red-500 hover:text-red-700"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -492,123 +677,90 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         </div>
       ))}
       
-      {errors.experience && <p className="text-sm text-red-600">{errors.experience}</p>}
-    </div>
-  );
-
-  const renderEducationForm = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Degree *
-          </label>
-          <input
-            type="text"
-            value={formData.degree || ''}
-            onChange={(e) => handleInputChange('degree', e.target.value)}
-            placeholder="e.g., Bachelor of Science in Computer Science"
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-              errors.degree ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
-          />
-          {errors.degree && <p className="text-sm text-red-600 mt-1">{errors.degree}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            University *
-          </label>
-          <input
-            type="text"
-            value={formData.university || ''}
-            onChange={(e) => handleInputChange('university', e.target.value)}
-            placeholder="e.g., Stanford University"
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-              errors.university ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
-          />
-          {errors.university && <p className="text-sm text-red-600 mt-1">{errors.university}</p>}
-        </div>
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Graduation Date *
-        </label>
-        <input
-          type="text"
-          value={formData.graduationDate || ''}
-          onChange={(e) => handleInputChange('graduationDate', e.target.value)}
-          placeholder="e.g., 2019"
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-            errors.graduationDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-          }`}
-        />
-        {errors.graduationDate && <p className="text-sm text-red-600 mt-1">{errors.graduationDate}</p>}
-      </div>
+      {errors.projects && <p className="text-sm text-red-600">{errors.projects}</p>}
     </div>
   );
 
   const renderCareerGoalsForm = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Career Goal *
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Career Statement *
+        </label>
+        <textarea
+          value={formData.careerGoals?.statement || ''}
+          onChange={(e) => handleInputChange('careerGoals', {
+            ...formData.careerGoals,
+            statement: e.target.value
+          })}
+          rows={4}
+          placeholder="Describe your career goals and what you hope to achieve through micro-internships..."
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
+            errors.statement ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+          }`}
+        />
+        {errors.statement && <p className="text-sm text-red-600 mt-1">{errors.statement}</p>}
+      </div>
+      
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Interests
           </label>
-          <input
-            type="text"
-            value={formData.careerGoal || ''}
-            onChange={(e) => handleInputChange('careerGoal', e.target.value)}
-            placeholder="e.g., Senior Developer"
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-              errors.careerGoal ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
-          />
-          {errors.careerGoal && <p className="text-sm text-red-600 mt-1">{errors.careerGoal}</p>}
+          <button
+            onClick={addCareerInterest}
+            className="flex items-center px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add Interest
+          </button>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Industry *
-          </label>
-          <input
-            type="text"
-            value={formData.industry || ''}
-            onChange={(e) => handleInputChange('industry', e.target.value)}
-            placeholder="e.g., Technology"
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-              errors.industry ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
-          />
-          {errors.industry && <p className="text-sm text-red-600 mt-1">{errors.industry}</p>}
+        <div className="space-y-2">
+          {formData.careerGoals?.interests?.map((interest: string, index: number) => (
+            <div key={index} className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={interest || ''}
+                onChange={(e) => updateCareerInterest(index, e.target.value)}
+                placeholder="e.g., Software Development"
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              />
+              <button
+                onClick={() => removeCareerInterest(index)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
         </div>
       </div>
       
       <div>
         <div className="flex items-center justify-between mb-3">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Career Objectives
+            Target Industries
           </label>
           <button
-            onClick={addCareerGoal}
+            onClick={addTargetIndustry}
             className="flex items-center px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
           >
             <Plus className="h-3 w-3 mr-1" />
-            Add Goal
+            Add Industry
           </button>
         </div>
         <div className="space-y-2">
-          {formData.careerGoals?.map((goal: string, index: number) => (
+          {formData.careerGoals?.targetIndustries?.map((industry: string, index: number) => (
             <div key={index} className="flex items-center space-x-2">
               <input
                 type="text"
-                value={goal || ''}
-                onChange={(e) => updateCareerGoal(index, e.target.value)}
-                placeholder="Describe a career objective..."
+                value={industry || ''}
+                onChange={(e) => updateTargetIndustry(index, e.target.value)}
+                placeholder="e.g., Technology"
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
               <button
-                onClick={() => removeCareerGoal(index)}
+                onClick={() => removeTargetIndustry(index)}
                 className="text-red-500 hover:text-red-700"
               >
                 <Trash2 className="h-4 w-4" />
@@ -620,154 +772,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     </div>
   );
 
-  const renderAvailabilityForm = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Availability *
-          </label>
-          <select
-            value={formData.availability || ''}
-            onChange={(e) => handleInputChange('availability', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-              errors.availability ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
-          >
-            <option value="">Select availability</option>
-            <option value="Available immediately">Available immediately</option>
-            <option value="Available in 1 week">Available in 1 week</option>
-            <option value="Available in 2 weeks">Available in 2 weeks</option>
-            <option value="Available in 1 month">Available in 1 month</option>
-            <option value="Available in 2 months">Available in 2 months</option>
-            <option value="Available in 3 months">Available in 3 months</option>
-          </select>
-          {errors.availability && <p className="text-sm text-red-600 mt-1">{errors.availability}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Project Duration *
-          </label>
-          <select
-            value={formData.projectDuration || ''}
-            onChange={(e) => handleInputChange('projectDuration', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-              errors.projectDuration ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
-          >
-            <option value="">Select duration</option>
-            <option value="1-3 months">1-3 months</option>
-            <option value="3-6 months">3-6 months</option>
-            <option value="6-12 months">6-12 months</option>
-            <option value="1+ years">1+ years</option>
-            <option value="Flexible">Flexible</option>
-          </select>
-          {errors.projectDuration && <p className="text-sm text-red-600 mt-1">{errors.projectDuration}</p>}
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Payment Type *
-          </label>
-          <select
-            value={formData.paymentType || ''}
-            onChange={(e) => handleInputChange('paymentType', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${
-              errors.paymentType ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
-          >
-            <option value="">Select payment type</option>
-            <option value="Salary">Salary</option>
-            <option value="Hourly">Hourly</option>
-            <option value="Project-based">Project-based</option>
-            <option value="Freelance">Freelance</option>
-            <option value="Contract">Contract</option>
-          </select>
-          {errors.paymentType && <p className="text-sm text-red-600 mt-1">{errors.paymentType}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Currency
-          </label>
-          <select
-            value={formData.currency || 'USD'}
-            onChange={(e) => handleInputChange('currency', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          >
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="CAD">CAD (C$)</option>
-            <option value="AUD">AUD (A$)</option>
-          </select>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Minimum Salary
-          </label>
-          <input
-            type="number"
-            value={formData.expectedSalary?.min || ''}
-            onChange={(e) => handleInputChange('expectedSalary', {
-              ...formData.expectedSalary,
-              min: parseInt(e.target.value) || 0
-            })}
-            placeholder="e.g., 80000"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Maximum Salary
-          </label>
-          <input
-            type="number"
-            value={formData.expectedSalary?.max || ''}
-            onChange={(e) => handleInputChange('expectedSalary', {
-              ...formData.expectedSalary,
-              max: parseInt(e.target.value) || 0
-            })}
-            placeholder="e.g., 120000"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          />
-        </div>
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="flexibleNegotiation"
-          checked={formData.flexibleNegotiation || false}
-          onChange={(e) => handleInputChange('flexibleNegotiation', e.target.checked)}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-        <label htmlFor="flexibleNegotiation" className="text-sm text-gray-700 dark:text-gray-300">
-          I'm flexible with salary negotiation
-        </label>
-      </div>
-    </div>
-  );
-
-  const renderPortfolioForm = () => (
+  const renderContactForm = () => (
     <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Portfolio URL
-        </label>
-        <input
-          type="url"
-          value={formData.portfolioUrl || ''}
-          onChange={(e) => handleInputChange('portfolioUrl', e.target.value)}
-          placeholder="https://your-portfolio.com"
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-        />
-      </div>
-      
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           LinkedIn URL
@@ -777,6 +783,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           value={formData.linkedinUrl || ''}
           onChange={(e) => handleInputChange('linkedinUrl', e.target.value)}
           placeholder="https://linkedin.com/in/yourprofile"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Portfolio URL
+        </label>
+        <input
+          type="url"
+          value={formData.portfolioUrl || ''}
+          onChange={(e) => handleInputChange('portfolioUrl', e.target.value)}
+          placeholder="https://your-portfolio.com"
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
         />
       </div>
@@ -793,33 +812,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
         />
       </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Resume
-        </label>
-        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
-          <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {formData.resume?.name || 'Click to upload or drag and drop'}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-            PDF, DOC, DOCX up to 10MB
-          </p>
-        </div>
-      </div>
     </div>
   );
 
   const getSectionTitle = () => {
     switch (section) {
       case 'basic': return 'Basic Information';
-      case 'skills': return 'Skills & Expertise';
-      case 'experience': return 'Work Experience';
-      case 'education': return 'Education';
+      case 'availability': return 'Availability & Start Date';
+      case 'skills': return 'Skills & Interests';
+      case 'projects': return 'Projects & Experience';
       case 'careerGoals': return 'Career Goals';
-      case 'availability': return 'Availability & Preferences';
-      case 'portfolio': return 'Portfolio & Links';
+      case 'contact': return 'Contact & Links';
       default: return 'Edit Profile';
     }
   };
@@ -827,12 +830,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const renderForm = () => {
     switch (section) {
       case 'basic': return renderBasicInfoForm();
-      case 'skills': return renderSkillsForm();
-      case 'experience': return renderExperienceForm();
-      case 'education': return renderEducationForm();
-      case 'careerGoals': return renderCareerGoalsForm();
       case 'availability': return renderAvailabilityForm();
-      case 'portfolio': return renderPortfolioForm();
+      case 'skills': return renderSkillsForm();
+      case 'projects': return renderProjectsForm();
+      case 'careerGoals': return renderCareerGoalsForm();
+      case 'contact': return renderContactForm();
       default: return null;
     }
   };
