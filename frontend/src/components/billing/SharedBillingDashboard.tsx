@@ -301,7 +301,18 @@ const SharedBillingDashboard: React.FC<SharedBillingDashboardProps> = ({ role })
 
   const handlePaymentConfirm = (paymentData: any) => {
     console.log('Payment confirmed:', paymentData);
-    router.push(`/billing/checkout?projectId=${selectedPayment?.id}&amount=${paymentData.salary}&deposit=${paymentData.deposit}`);
+    
+    // Navigate to the unified payment page with salary payment context
+    const paymentUrl = new URLSearchParams({
+      type: 'salary',
+      candidateName: selectedPayment?.studentName || selectedPayment?.employerName || 'Unknown',
+      jobTitle: selectedPayment?.projectName || 'Project Work',
+      startDate: new Date().toISOString().split('T')[0],
+      duration: '3 months',
+      amount: paymentData.salary.toString()
+    });
+    
+    router.push(`/billing/payment?${paymentUrl.toString()}`);
   };
 
   const handleManagePayments = (payment: Payment) => {

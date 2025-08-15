@@ -124,6 +124,19 @@ const SubscriptionManagement: React.FC = () => {
   const handleConfirmAction = () => {
     // Handle subscription change
     console.log('Subscription action:', selectedAction, selectedPlan);
+    
+    if (selectedAction === 'upgrade' || selectedAction === 'downgrade') {
+      // Navigate to unified payment page for subscription payment
+      const paymentUrl = new URLSearchParams({
+        type: 'subscription',
+        planName: selectedPlan?.name || 'Unknown Plan',
+        planDuration: 'Monthly',
+        amount: selectedPlan?.price.toString() || '0'
+      });
+      
+      window.location.href = `/billing/payment?${paymentUrl.toString()}`;
+    }
+    
     setIsConfirmationModalOpen(false);
     setSelectedAction(null);
     setSelectedPlan(null);

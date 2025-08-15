@@ -122,8 +122,18 @@ const EmployerBillingDashboard: React.FC = () => {
   const handlePaymentConfirm = (paymentData: any) => {
     // Handle payment confirmation
     console.log('Payment confirmed:', paymentData);
-    // Redirect to checkout with context
-    router.push(`/billing/checkout?projectId=${selectedPayment?.id}&amount=${paymentData.salary}&deposit=${paymentData.deposit}`);
+    
+    // Navigate to the unified payment page with salary payment context
+    const paymentUrl = new URLSearchParams({
+      type: 'salary',
+      candidateName: selectedPayment?.studentName || 'Unknown',
+      jobTitle: selectedPayment?.projectName || 'Project Work',
+      startDate: new Date().toISOString().split('T')[0],
+      duration: '3 months',
+      amount: paymentData.salary.toString()
+    });
+    
+    router.push(`/billing/payment?${paymentUrl.toString()}`);
   };
 
   const handleManagePayments = (projectId: string) => {
