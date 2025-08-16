@@ -2,20 +2,25 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, RotateCcw } from 'lucide-react';
-import AccountSettingsSection from './sections/AccountSettingsSection';
+import { Settings, RotateCcw, LogOut } from 'lucide-react';
+import PersonalInfoSection from './sections/PersonalInfoSection';
+import SecurityAccountSection from './sections/SecurityAccountSection';
 import NotificationSettingsSection from './sections/NotificationSettingsSection';
 import AppearanceSettingsSection from './sections/AppearanceSettingsSection';
-import PrivacySecuritySection from './sections/PrivacySecuritySection';
-import OtherSettingsSection from './sections/OtherSettingsSection';
+import HelpSupportSection from './sections/HelpSupportSection';
 import { useSettings } from './hooks/useSettings';
 import { useSettingsShortcuts } from '@/hooks/useKeyboardShortcuts';
 import StickyActionBar, { SettingsActionBar } from '@/components/common/StickyActionBar';
 import { animations } from '@/components/common/ui/Animations';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+import Button from '@/components/common/ui/Button';
 
 export default function SettingsPage() {
   const { settings, saveSettings, resetSettings, isLoading, hasChanges } = useSettings();
   const [isSaving, setIsSaving] = useState(false);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   const handleSaveAll = async () => {
     setIsSaving(true);
@@ -33,6 +38,13 @@ export default function SettingsPage() {
   const handleReset = () => {
     if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) {
       resetSettings();
+    }
+  };
+
+  const handleSignOut = () => {
+    if (confirm('Are you sure you want to sign out? You will be redirected to the preview mode.')) {
+      logout();
+      router.push('/');
     }
   };
 
@@ -58,15 +70,15 @@ export default function SettingsPage() {
         {/* Header */}
         <motion.div variants={itemVariants} className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center">
-              <Settings className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Settings className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Settings
+                Account Settings
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Manage your account preferences and settings
+                Manage your account, security, and platform preferences
               </p>
             </div>
           </div>
@@ -76,54 +88,156 @@ export default function SettingsPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 text-sm font-medium rounded-full"
+              className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 text-sm font-medium rounded-full border border-yellow-200 dark:border-yellow-800"
             >
               Unsaved Changes
             </motion.div>
           )}
         </motion.div>
 
+        {/* Quick Actions Banner */}
+        <motion.div variants={itemVariants} className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Quick Actions
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Manage your profile and explore opportunities
+              </p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button
+                onClick={() => router.push('/student_portal/workspace/profile')}
+                variant="secondary"
+                className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+              >
+                Edit Profile
+              </Button>
+              <Button
+                onClick={() => router.push('/student_portal/workspace/jobs')}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Browse Jobs
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Settings Sections */}
         <motion.div variants={itemVariants} className="space-y-8">
-          <AccountSettingsSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
-          <NotificationSettingsSection />
-          <AppearanceSettingsSection />
-          <PrivacySecuritySection />
-          <OtherSettingsSection />
+          {/* Personal Information */}
+          <div className="space-y-6">
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Personal Information
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Basic account information and contact details
+              </p>
+            </div>
+            <PersonalInfoSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
+          </div>
+
+          {/* Account & Security */}
+          <div className="space-y-6">
+            <div className="border-l-4 border-green-500 pl-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Account & Security
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Manage your account security and privacy settings
+              </p>
+            </div>
+            <SecurityAccountSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
+          </div>
+
+          {/* Notifications */}
+          <div className="space-y-6">
+            <div className="border-l-4 border-purple-500 pl-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Notifications
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Control how you receive updates and alerts
+              </p>
+            </div>
+            <NotificationSettingsSection />
+          </div>
+
+          {/* Appearance */}
+          <div className="space-y-6">
+            <div className="border-l-4 border-indigo-500 pl-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Appearance
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Customize the look and feel of your interface
+              </p>
+            </div>
+            <AppearanceSettingsSection />
+          </div>
+
+          {/* Help & Support */}
+          <div className="space-y-6">
+            <div className="border-l-4 border-orange-500 pl-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Help & Support
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Get help and learn about our policies
+              </p>
+            </div>
+            <HelpSupportSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
+          </div>
         </motion.div>
 
         {/* Bottom Actions */}
-        <motion.div variants={itemVariants} className="pt-8 border-t border-gray-200 dark:border-gray-800 space-y-4">
-          {/* Reset Button */}
-          <div className="flex justify-center">
-            <button
-              onClick={handleReset}
-              disabled={isLoading}
-              className="inline-flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reset All Settings</span>
-            </button>
-          </div>
+        <motion.div variants={itemVariants} className="pt-8 border-t border-gray-200 dark:border-gray-800">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
+            <div className="text-center space-y-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Account Actions
+              </h3>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                {/* Reset Button */}
+                <Button
+                  onClick={handleReset}
+                  disabled={isLoading}
+                  variant="secondary"
+                  icon={RotateCcw}
+                  className="w-full sm:w-auto"
+                >
+                  Reset All Settings
+                </Button>
 
-          {/* Sign Out Button */}
-          <div className="flex justify-center">
-            <button className="inline-flex items-center space-x-2 px-6 py-3 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span>Sign Out</span>
-            </button>
-          </div>
+                {/* Sign Out Button */}
+                <Button
+                  onClick={handleSignOut}
+                  icon={LogOut}
+                  className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white border-red-600"
+                >
+                  Sign Out
+                </Button>
+              </div>
 
-          {/* Footer Info */}
-          <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Settings are automatically saved to your browser. For persistent storage across devices, 
-              please ensure you're signed in to your account.
-            </p>
+              {/* Footer Info */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Your settings are automatically saved. For any issues, visit our{' '}
+                  <a href="/help" className="text-blue-600 dark:text-blue-400 hover:underline">
+                    Help Centre
+                  </a>{' '}
+                  or contact support.
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                  MicroBridge - Connecting Hong Kong students with opportunities
+                </p>
+              </div>
+            </div>
           </div>
-                 </motion.div>
+        </motion.div>
        </motion.div>
        
        {/* Sticky Action Bar */}

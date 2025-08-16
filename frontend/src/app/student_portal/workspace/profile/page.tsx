@@ -38,6 +38,8 @@ import { useUser } from "@/hooks/useUser";
 import { useLevel } from "@/hooks/useLevel";
 import Link from "next/link";
 import EditProfileModal from "./EditProfileModal";
+import EducationSection from "./sections/EducationSection";
+import CareerGoalsSection from "./sections/CareerGoalsSection";
 
 // Extended user data structure for student profile
 interface StudentProfileData {
@@ -53,6 +55,16 @@ interface StudentProfileData {
   school: string;
   major: string;
   yearOfStudy: string;
+  
+  // Education Details
+  education: {
+    university: string;
+    major: string;
+    yearOfStudy: string;
+    graduationDate: string;
+    gpa: string;
+    relevantCoursework: string[];
+  };
   
   // Gamification
   level: number;
@@ -90,6 +102,7 @@ interface StudentProfileData {
     statement: string;
     interests: string[];
     targetIndustries: string[];
+    availability: string[];
   };
   
   // Links
@@ -112,8 +125,24 @@ const getStudentProfileData = (): StudentProfileData => ({
   
   // School Info (Hong Kong focused)
   school: "The University of Hong Kong",
-  major: "Computer Science",
+  major: "Computer Science", 
   yearOfStudy: "Year 3",
+  
+  // Education Details
+  education: {
+    university: "The University of Hong Kong",
+    major: "computer_science",
+    yearOfStudy: "year_3",
+    graduationDate: "2025-06",
+    gpa: "3.75",
+    relevantCoursework: [
+      "Data Structures and Algorithms",
+      "Machine Learning Fundamentals", 
+      "Web Development",
+      "Database Systems",
+      "Software Engineering"
+    ]
+  },
   
   // Gamification
   level: 8,
@@ -168,8 +197,9 @@ const getStudentProfileData = (): StudentProfileData => ({
   // Career Goals (for job recommendations)
   careerGoals: {
     statement: "I want to work on meaningful software projects that solve real-world problems, particularly in the areas of education technology and sustainability.",
-    interests: ["Software Development", "AI/ML", "Education Technology", "Sustainability"],
-    targetIndustries: ["Technology", "Education", "Non-profit"]
+    interests: ["software_development", "data_science", "web_development", "machine_learning"],
+    targetIndustries: ["fintech", "edtech", "healthtech"],
+    availability: ["part_time_flexible", "remote_only", "hybrid"]
   },
   
   // Links
@@ -184,7 +214,7 @@ const getStudentProfileData = (): StudentProfileData => ({
 const StudentProfilePage: React.FC = () => {
   const searchParams = useSearchParams();
   const { user } = useUser();
-  const { level, gainXP, unlockAchievement } = useLevel();
+  const { levelData, gainXP, unlockAchievement } = useLevel();
   
   const [profileData, setProfileData] = useState<StudentProfileData>(getStudentProfileData());
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -192,6 +222,30 @@ const StudentProfilePage: React.FC = () => {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [isFromRoleSelection, setIsFromRoleSelection] = useState(false);
+
+  // Update handlers for new sections
+  const handleEducationUpdate = (educationData: any) => {
+    setProfileData(prev => ({
+      ...prev,
+      education: educationData,
+      // Also update the legacy fields for compatibility
+      school: educationData.university,
+      major: educationData.major,
+      yearOfStudy: educationData.yearOfStudy
+    }));
+  };
+
+  const handleCareerGoalsUpdate = (careerGoalsData: any) => {
+    setProfileData(prev => ({
+      ...prev,
+      careerGoals: {
+        statement: careerGoalsData.careerStatement,
+        interests: careerGoalsData.interests,
+        targetIndustries: careerGoalsData.targetIndustries,
+        availability: careerGoalsData.availability
+      }
+    }));
+  };
 
   // Check if coming from role selection
   useEffect(() => {
@@ -210,6 +264,14 @@ const StudentProfilePage: React.FC = () => {
         school: "",
         major: "",
         yearOfStudy: "",
+        education: {
+          university: "",
+          major: "",
+          yearOfStudy: "",
+          graduationDate: "",
+          gpa: "",
+          relevantCoursework: []
+        },
         level: 1,
         xp: 0,
         careerCoins: 0,
@@ -224,7 +286,8 @@ const StudentProfilePage: React.FC = () => {
         careerGoals: {
           statement: "",
           interests: [],
-          targetIndustries: []
+          targetIndustries: [],
+          availability: []
         },
         linkedinUrl: "",
         portfolioUrl: "",
@@ -550,6 +613,13 @@ const StudentProfilePage: React.FC = () => {
             </div>
           </div>
 
+          {/* Education Section */}
+          <EducationSection
+            data={profileData.education}
+            onUpdate={handleEducationUpdate}
+            isPreviewMode={isPreviewMode}
+          />
+
           {/* Projects & Experience Section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6">
@@ -611,59 +681,16 @@ const StudentProfilePage: React.FC = () => {
           </div>
 
           {/* Career Goals Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Career Goals
-                </h2>
-                <button
-                  onClick={() => handleEdit('careerGoals')}
-                  className="flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
-                >
-                  <Edit2 className="h-4 w-4 mr-1" />
-                  Edit
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Career Statement
-                  </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {profileData.careerGoals.statement || 'No career statement added yet'}
-                  </p>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Interests
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {profileData.careerGoals.interests.map((interest, index) => (
-                      <span key={index} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm">
-                        {interest}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Target Industries
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {profileData.careerGoals.targetIndustries.map((industry, index) => (
-                      <span key={index} className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm">
-                        {industry}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <CareerGoalsSection
+            data={{
+              interests: profileData.careerGoals.interests,
+              targetIndustries: profileData.careerGoals.targetIndustries,
+              careerStatement: profileData.careerGoals.statement,
+              availability: profileData.careerGoals.availability
+            }}
+            onUpdate={handleCareerGoalsUpdate}
+            isPreviewMode={isPreviewMode}
+          />
 
           {/* Contact & Links Section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">

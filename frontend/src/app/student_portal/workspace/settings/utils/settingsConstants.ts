@@ -2,8 +2,21 @@ export const DEFAULT_SETTINGS = {
   account: {
     name: "John Doe",
     email: "john.doe@example.com",
+    phone: "",
     profilePicture: "",
     bio: "Passionate software developer with expertise in React and Node.js",
+    // Education fields
+    university: "",
+    major: "",
+    yearOfStudy: "",
+    graduationDate: "",
+    gpa: "",
+    relevantCoursework: [] as string[],
+    // Career fields
+    interests: [] as string[],
+    targetIndustries: [] as string[],
+    careerStatement: "",
+    availability: [] as string[],
   },
   notifications: {
     inApp: true,
@@ -27,8 +40,8 @@ export const DEFAULT_SETTINGS = {
   },
   preferences: {
     language: "en" as "en" | "es" | "fr" | "de" | "zh",
-    timezone: "UTC",
-    dateFormat: "MM/DD/YYYY",
+    timezone: "Asia/Hong_Kong",
+    dateFormat: "DD/MM/YYYY",
     currency: "HKD",
   },
 };
@@ -56,17 +69,19 @@ export const LANGUAGE_OPTIONS = [
 ];
 
 export const TIMEZONE_OPTIONS = [
+  { value: "Asia/Hong_Kong", label: "Hong Kong Time (HKT)" },
   { value: "UTC", label: "UTC (Coordinated Universal Time)" },
   { value: "EST", label: "EST (Eastern Standard Time)" },
   { value: "PST", label: "PST (Pacific Standard Time)" },
   { value: "GMT", label: "GMT (Greenwich Mean Time)" },
-  { value: "CET", label: "CET (Central European Time)" },
+  { value: "Asia/Shanghai", label: "China Standard Time (CST)" },
+  { value: "Asia/Tokyo", label: "Japan Standard Time (JST)" },
 ];
 
 export const DATE_FORMAT_OPTIONS = [
-  { value: "MM/DD/YYYY", label: "MM/DD/YYYY" },
-  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
-  { value: "YYYY-MM-DD", label: "YYYY-MM-DD" },
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY (Hong Kong style)" },
+  { value: "MM/DD/YYYY", label: "MM/DD/YYYY (US style)" },
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD (ISO format)" },
 ];
 
 export const CURRENCY_OPTIONS = [
