@@ -15,7 +15,8 @@ import {
   User, 
   Settings,
   FolderOpen,
-  Lock
+  Lock,
+  HelpCircle
 } from "lucide-react";
 
 const navItems = [
@@ -73,6 +74,12 @@ const navItems = [
     icon: Settings,
     restricted: true,
     feature: "profile",
+  },
+  {
+    name: "Help Centre",
+    path: "/help",
+    icon: HelpCircle,
+    restricted: false,
   },
 ];
 

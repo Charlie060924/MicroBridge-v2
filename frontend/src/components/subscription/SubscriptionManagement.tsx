@@ -10,7 +10,8 @@ import {
   Calendar,
   AlertTriangle,
   ChevronRight,
-  LucideIcon
+  LucideIcon,
+  Shield
 } from 'lucide-react';
 import Card from '@/components/common/ui/Card';
 import Badge from '@/components/common/ui/Badge';
@@ -59,40 +60,49 @@ const SubscriptionManagement: React.FC = () => {
     {
       id: 'starter',
       name: 'Starter',
-      price: 29,
+      price: 49,
       features: [
-        '5 job posts per month',
-        'Basic candidate search',
+        '3 job posts per month',
+        'Basic candidate search & filtering',
+        'View candidate profiles',
         'Email support',
-        'Standard analytics'
+        'Standard analytics',
+        'Secure payment processing'
       ]
     },
     {
       id: 'growth',
       name: 'Growth',
-      price: 49,
+      price: 99,
       features: [
         'Unlimited job posts',
         'Advanced candidate filtering',
-        'Featured listings',
-        'Enhanced analytics',
+        'Priority candidate access',
+        'Featured job listings',
+        'Calendar scheduling integration',
+        'In-platform messaging',
+        'Enhanced analytics & reporting',
         'Priority email support',
-        'Custom branding'
+        'Custom company branding',
+        'Secure salary payments'
       ],
       popular: true
     },
     {
       id: 'pro',
-      name: 'Pro',
-      price: 99,
+      name: 'Professional',
+      price: 199,
       features: [
         'Everything in Growth',
+        'Unlimited team members',
+        'Advanced analytics dashboard',
+        'Candidate shortlisting tools',
         'Priority phone support',
-        'Advanced analytics & reporting',
-        'Early access to new features',
         'Dedicated account manager',
         'Custom integrations',
-        'White-label options'
+        'White-label options',
+        'Advanced security features',
+        'Bulk payment processing'
       ],
       recommended: true
     }
@@ -168,6 +178,14 @@ const SubscriptionManagement: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             View and manage your subscription plan and billing
           </p>
+          <div className="mt-3 flex items-center">
+            <div className="p-1 bg-blue-100 dark:bg-blue-900/20 rounded-md mr-2">
+              <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              All payments secured with Hong Kong banking standards
+            </span>
+          </div>
         </div>
       </div>
 

@@ -18,7 +18,8 @@ import {
   Plus,
   Building,
   CreditCard,
-  Lock
+  Lock,
+  DollarSign
 } from "lucide-react";
 
 const navItems = [
@@ -69,6 +70,12 @@ const navItems = [
     icon: CreditCard,
     restricted: true,
     feature: "billing",
+  },
+  {
+    name: "Pricing",
+    path: "/employer_portal/workspace/pricing",
+    icon: DollarSign,
+    restricted: false,
   },
   {
     name: "Reports",
