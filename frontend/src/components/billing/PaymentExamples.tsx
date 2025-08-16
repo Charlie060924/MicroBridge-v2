@@ -220,3 +220,4 @@ const PaymentExamples: React.FC = () => {
 };
 
 export default PaymentExamples;
+
