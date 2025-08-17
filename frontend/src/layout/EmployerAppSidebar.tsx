@@ -72,12 +72,7 @@ const navItems = [
     restricted: true,
     feature: "billing",
   },
-  {
-    name: "Pricing",
-    path: "/employer_portal/workspace/pricing",
-    icon: DollarSign,
-    restricted: false,
-  },
+
   {
     name: "Reports",
     path: "/employer_portal/workspace/reports",

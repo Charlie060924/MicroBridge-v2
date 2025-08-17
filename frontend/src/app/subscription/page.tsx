@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import SubscriptionManagement from '@/components/subscription/SubscriptionManagement';
+import PricingContent from '@/components/subscription/PricingContent';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import Button from '@/components/common/ui/Button';
@@ -96,17 +97,24 @@ const SubscriptionPage: React.FC = () => {
           </Button>
         </div>
 
-        {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Subscription Management
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage your subscription plans and billing
-          </p>
+        {/* Subscription Management */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-12">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Subscription Management
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Choose the plan that fits your hiring needs and manage your billing
+            </p>
+          </div>
+
+          <SubscriptionManagement />
         </div>
 
-        <SubscriptionManagement />
+        {/* Pricing Content */}
+        <div>
+          <PricingContent />
+        </div>
       </div>
     </div>
   );

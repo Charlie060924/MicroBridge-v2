@@ -59,7 +59,7 @@ const Footer = () => {
                     </li>
                     <li>
                       <a
-                        href="/pricing"
+                        href="/subscription"
                         className="mb-3 inline-block hover:text-primary"
                       >
                         Pricing
