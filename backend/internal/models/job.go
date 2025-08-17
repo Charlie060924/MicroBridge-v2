@@ -3,11 +3,13 @@
 import (
     "database/sql/driver"
     "encoding/json"
+    "errors"
     "time"
 )
 
 type Job struct {
     ID              string              `json:"id" gorm:"primaryKey"`
+    EmployerID      string              `json:"employer_id" gorm:"not null"`
     Title           string              `json:"title"`
     Description     string              `json:"description"`
     Company         string              `json:"company"`

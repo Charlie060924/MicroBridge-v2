@@ -1,0 +1,231 @@
+package main
+
+import (
+    "context"
+    "fmt"
+    "net/http"
+    "os"
+    "os/signal"
+    "syscall"
+    "time"
+
+    "github.com/gin-contrib/cors"
+    "github.com/gin-gonic/gin"
+    "microbridge/backend/config"
+    "microbridge/backend/internal/handlers"
+    "microbridge/backend/internal/middleware"
+    "microbridge/backend/internal/repository"
+    "microbridge/backend/internal/service"
+    "microbridge/backend/internal/services/database"
+    "microbridge/backend/internal/validation"
+    jwtpkg "microbridge/backend/pkg/jwt"
+    "microbridge/backend/pkg/logger"
+)
+
+type Application struct {
+    config         *config.Config
+    securityConfig *config.SecurityConfig
+    logger         *logger.Logger
+    db             *database.Database
+    jwtService     *jwtpkg.Service
+    authMiddleware *middleware.AuthMiddleware
+    rateLimiter    *middleware.RateLimiter
+    validator      *validation.Validator
+    userService    service.UserService
+    userHandler    *handlers.UserHandler
+}
+
+func main() {
+    // Load configuration
+    cfg, err := config.LoadConfig()
+    if err != nil {
+        panic(fmt.Sprintf("Failed to load config: %v", err))
+    }
+
+    // Load security configuration
+    securityCfg, err := config.LoadSecurityConfig()
+    if err != nil {
+        panic(fmt.Sprintf("Failed to load security config: %v", err))
+    }
+
+    // Initialize logger
+    isDev := cfg.Server.Environment == "development"
+    log := logger.New("info", isDev)
+    logger.Init("info", isDev)
+
+    // Initialize database
+    db, err := database.New(&cfg.Database, getLogLevel(cfg.Server.Environment))
+    if err != nil {
+        log.Error().Err(err).Msg("Failed to initialize database")
+        os.Exit(1)
+    }
+
+    // Run migrations
+    if err := db.Migrate(); err != nil {
+        log.Error().Err(err).Msg("Failed to run migrations")
+        os.Exit(1)
+    }
+
+    // Initialize JWT service
+    jwtService := jwtpkg.NewJWTService(
+        securityCfg.JWTSecretKey,
+        "microbridge-api",
+        securityCfg.JWTAccessTokenExpiry,
+        securityCfg.JWTRefreshTokenExpiry,
+    )
+
+    // Initialize middleware
+    authMiddleware := middleware.NewAuthMiddleware(jwtService, log)
+    rateLimiter := middleware.NewRateLimiter(
+        float64(securityCfg.RateLimitRequests)/3600, // Convert per hour to per second
+        10, // Burst capacity
+    )
+
+    // Initialize validator
+    validator := validation.New()
+
+    // Initialize repositories
+    userRepo := repository.NewUserRepository(db.DB)
+
+    // Initialize services
+    userService := service.NewUserService(userRepo, jwtService)
+
+    // Initialize handlers
+    userHandler := handlers.NewUserHandler(userService, validator, log)
+
+    app := &Application{
+        config:         cfg,
+        securityConfig: securityCfg,
+        logger:         log,
+        db:             db,
+        jwtService:     jwtService,
+        authMiddleware: authMiddleware,
+        rateLimiter:    rateLimiter,
+        validator:      validator,
+        userService:    userService,
+        userHandler:    userHandler,
+    }
+
+    // Setup router with security middleware
+    router := app.setupSecureRouter()
+
+    // Create server with timeouts
+    srv := &http.Server{
+        Addr:         ":" + cfg.Server.Port,
+        Handler:      router,
+        ReadTimeout:  cfg.Server.ReadTimeout,
+        WriteTimeout: cfg.Server.WriteTimeout,
+        IdleTimeout:  cfg.Server.IdleTimeout,
+    }
+
+    // Graceful shutdown
+    go func() {
+        log.Info().Str("port", cfg.Server.Port).Msg("Starting secure server")
+        if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            log.Fatal().Err(err).Msg("Failed to start server")
+        }
+    }()
+
+    // Wait for interrupt signal
+    quit := make(chan os.Signal, 1)
+    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+    <-quit
+
+    log.Info().Msg("Shutting down server...")
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer cancel()
+
+    if err := srv.Shutdown(ctx); err != nil {
+        log.Fatal().Err(err).Msg("Server forced to shutdown")
+    }
+
+    log.Info().Msg("Server exited")
+}
+
+func (app *Application) setupSecureRouter() *gin.Engine {
+    if app.config.Server.Environment == "production" {
+        gin.SetMode(gin.ReleaseMode)
+    }
+
+    r := gin.New()
+
+    // Security middleware (order matters!)
+    r.Use(middleware.SecurityHeaders())
+    r.Use(app.rateLimiter.Limit())
+    r.Use(middleware.RequestLogger())
+    r.Use(middleware.ErrorHandler())
+    r.Use(gin.Recovery())
+
+    // CORS with security
+    corsConfig := cors.DefaultConfig()
+    corsConfig.AllowOrigins = app.securityConfig.AllowedOrigins
+    corsConfig.AllowCredentials = true
+    corsConfig.AddAllowHeaders("Authorization", "Content-Type")
+    r.Use(cors.New(corsConfig))
+
+    // Health check (no auth required)
+    r.GET("/health", func(c *gin.Context) {
+        if err := app.db.HealthCheck(); err != nil {
+            c.JSON(http.StatusServiceUnavailable, gin.H{
+                "status": "unhealthy",
+                "error":  "database connection failed",
+            })
+            return
+        }
+
+        c.JSON(http.StatusOK, gin.H{
+            "status":      "healthy",
+            "timestamp":   time.Now(),
+            "environment": app.config.Server.Environment,
+            "version":     "v1.0.0",
+        })
+    })
+
+    // API routes with authentication
+    api := r.Group("/api/v1")
+    {
+        // Public routes (no auth required)
+        auth := api.Group("/auth")
+        {
+            auth.POST("/login", app.userHandler.Login)
+            auth.POST("/register", app.userHandler.CreateUser)
+            // TODO: Add refresh token endpoint
+            // auth.POST("/refresh", app.userHandler.RefreshToken)
+        }
+
+        // Protected routes (auth required)
+        protected := api.Group("")
+        protected.Use(app.authMiddleware.RequireAuth())
+        {
+            // User routes (self-access only)
+            users := protected.Group("/users")
+            {
+                users.GET("/:id", app.authMiddleware.RequireSelfOrAdmin(), app.userHandler.GetUser)
+                users.PUT("/:id", app.authMiddleware.RequireSelfOrAdmin(), app.userHandler.UpdateUser)
+                users.DELETE("/:id", app.authMiddleware.RequireSelfOrAdmin(), app.userHandler.DeleteUser)
+                users.POST("/:id/change-password", app.authMiddleware.RequireSelfOrAdmin(), app.userHandler.ChangePassword)
+            }
+
+            // Admin-only routes
+            admin := protected.Group("/admin")
+            admin.Use(app.authMiddleware.RequireRole("admin"))
+            {
+                admin.GET("/users", app.userHandler.ListUsers)
+                // Add other admin endpoints
+            }
+        }
+    }
+
+    return r
+}
+
+func getLogLevel(env string) logger.LogLevel {
+    switch env {
+    case "development":
+        return logger.Info
+    case "production":
+        return logger.Error
+    default:
+        return logger.Warn
+    }
+}

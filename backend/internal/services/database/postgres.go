@@ -1,45 +1,94 @@
 ﻿package database
 
 import (
-"fmt"
-"log"
-"os"
+	"context"
+	"database/sql"
+	"fmt"
+	"log"
+	"time"
 
-"microbridge/backend/internal/models"
-"gorm.io/driver/postgres"
-"gorm.io/gorm"
-"gorm.io/gorm/logger"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	
+	"microbridge/backend/internal/database/migrations"
 )
 
-var DB *gorm.DB
-
-func InitDB() (*gorm.DB, error) {
-dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Hong_Kong",
-os.Getenv("DB_HOST"),
-os.Getenv("DB_USERNAME"),
-os.Getenv("DB_PASSWORD"),
-os.Getenv("DB_NAME"),
-os.Getenv("DB_PORT"),
-)
-
-db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-Logger: logger.Default.LogMode(logger.Info),
-})
-if err != nil {
-return nil, fmt.Errorf("failed to connect to database: %v", err)
+type PostgresDB struct {
+	DB       *gorm.DB
+	SqlDB    *sql.DB
+	migrator *migrations.Migrator
 }
 
-// Auto migrate models
-err = db.AutoMigrate(
-&models.User{},
-&models.Job{},
-&models.Application{},
-)
-if err != nil {
-return nil, fmt.Errorf("failed to migrate database: %v", err)
+// REPLACE your existing InitDB function with this
+func NewPostgresDB(dsn string) (*PostgresDB, error) {
+	// Open SQL connection first for migrations
+	sqlDB, err := sql.Open("postgres", dsn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	// Test connection
+	if err := sqlDB.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	// Configure connection pool
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
+	// Open GORM connection
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: sqlDB,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize GORM: %w", err)
+	}
+
+	// Initialize migrator
+	migrator := migrations.NewMigrator(sqlDB)
+
+	return &PostgresDB{
+		DB:       gormDB,
+		SqlDB:    sqlDB,
+		migrator: migrator,
+	}, nil
 }
 
-DB = db
-log.Println(" Database connected and migrated successfully")
-return db, nil
+// CRITICAL: Replace your AutoMigrate with proper migrations
+func (db *PostgresDB) RunMigrations(ctx context.Context) error {
+	log.Println("Running database migrations...")
+	
+	// This replaces your dangerous AutoMigrate calls
+	if err := db.migrator.Up(ctx, 999999999999); err != nil {
+		return fmt.Errorf("migration failed: %w", err)
+	}
+	
+	log.Println("Database migrations completed successfully")
+	return nil
+}
+
+func (db *PostgresDB) GetMigrationStatus(ctx context.Context) error {
+	status, err := db.migrator.Status(ctx)
+	if err != nil {
+		return err
+	}
+	
+	log.Println("=== Migration Status ===")
+	for _, s := range status {
+		applied := "❌ No"
+		if s.Applied {
+			applied = "✅ Yes"
+		}
+		log.Printf("Version %d: %s - Applied: %s", s.Version, s.Name, applied)
+	}
+	
+	return nil
+}
+
+func (db *PostgresDB) Close() error {
+	return db.SqlDB.Close()
 }
