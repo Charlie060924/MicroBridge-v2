@@ -79,7 +79,7 @@ const CareerGoalsSection: React.FC<CareerGoalsSectionProps> = ({
     </button>
   );
 
-  const getDisplayLabels = (values: string[], options: Array<{value: string, label: string}>) => {
+  const getDisplayLabels = (values: string[], options: ReadonlyArray<{readonly value: string, readonly label: string}>) => {
     return values.map(value => options.find(opt => opt.value === value)?.label || value);
   };
 

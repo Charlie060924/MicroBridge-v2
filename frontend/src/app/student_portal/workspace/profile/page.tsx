@@ -110,8 +110,7 @@ interface StudentProfileData {
   portfolioUrl: string;
   githubUrl: string;
   
-  // Profile Completion
-  completionPercentage: number;
+  // Profile Completion - now computed dynamically
 }
 
 // Mock student data with platform-specific features
@@ -207,8 +206,7 @@ const getStudentProfileData = (): StudentProfileData => ({
   portfolioUrl: "https://sarahwilson.dev",
   githubUrl: "https://github.com/sarahwilson",
   
-  // Profile Completion
-  completionPercentage: 85
+  // Profile Completion - computed dynamically
 });
 
 const StudentProfilePage: React.FC = () => {
@@ -218,6 +216,11 @@ const StudentProfilePage: React.FC = () => {
   
   const [profileData, setProfileData] = useState<StudentProfileData>(getStudentProfileData());
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  
+  // Handle preview mode toggle
+  const handlePreviewToggle = (newMode: boolean) => {
+    setIsPreviewMode(newMode);
+  };
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -291,14 +294,13 @@ const StudentProfilePage: React.FC = () => {
         },
         linkedinUrl: "",
         portfolioUrl: "",
-        githubUrl: "",
-        completionPercentage: 0
+        githubUrl: ""
       });
     }
   }, [searchParams, user]);
 
-  // Calculate profile completion
-  useEffect(() => {
+  // Calculate profile completion - computed value instead of state
+  const calculateCompletionPercentage = () => {
     const requiredFields = [
       profileData.firstName, profileData.lastName, profileData.email,
       profileData.bio, profileData.school, profileData.major,
@@ -307,10 +309,10 @@ const StudentProfilePage: React.FC = () => {
     ];
     
     const completedFields = requiredFields.filter(Boolean).length;
-    const completion = Math.round((completedFields / requiredFields.length) * 100);
-    
-    setProfileData(prev => ({ ...prev, completionPercentage: completion }));
-  }, [profileData]);
+    return Math.round((completedFields / requiredFields.length) * 100);
+  };
+
+  const completionPercentage = calculateCompletionPercentage();
 
   const handleEdit = (section: string) => {
     setEditingSection(section);
@@ -406,22 +408,24 @@ const StudentProfilePage: React.FC = () => {
                 <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div 
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${profileData.completionPercentage}%` }}
+                    style={{ width: `${completionPercentage}%` }}
                   ></div>
                 </div>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {profileData.completionPercentage}% Complete
+                  {completionPercentage}% Complete
                 </span>
               </div>
               
               {/* Preview Button */}
               <button
-                onClick={() => setIsPreviewMode(true)}
+                onClick={() => handlePreviewToggle(true)}
                 className="flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Preview
               </button>
+              
+
             </div>
           </div>
         </div>
@@ -766,9 +770,266 @@ const StudentProfilePage: React.FC = () => {
     </div>
   );
 
+  // Preview Mode Component
+  const StudentPreviewMode = () => (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-4xl mx-auto p-6">
+        {/* Preview Header */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <Eye className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Employer View
+                </h1>
+              </div>
+              <button
+                onClick={() => handlePreviewToggle(false)}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Back to Edit Mode
+              </button>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              This is how employers will see your profile when you apply for micro-internships.
+            </p>
+          </div>
+        </div>
+
+        {/* Profile Content in Preview Mode */}
+        <div className="space-y-6">
+          {/* Basic Information */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-start space-x-6">
+                {/* Profile Photo */}
+                <div className="flex-shrink-0">
+                  {profileData.profilePicture ? (
+                    <img
+                      src={profileData.profilePicture}
+                      alt={`${profileData.firstName} ${profileData.lastName}`}
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <User className="h-10 w-10 text-white" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Name and School Info */}
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {profileData.firstName} {profileData.lastName}
+                    </h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getLevelBg(profileData.level)} ${getLevelColor(profileData.level)}`}>
+                      Level {profileData.level}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4 text-gray-600 dark:text-gray-400 mb-3">
+                    <div className="flex items-center">
+                      <School className="h-4 w-4 mr-1" />
+                      {profileData.school || 'School not specified'}
+                    </div>
+                    <div className="flex items-center">
+                      <BookOpen className="h-4 w-4 mr-1" />
+                      {profileData.major || 'Major not specified'}
+                    </div>
+                    <div className="flex items-center">
+                      <GraduationCap className="h-4 w-4 mr-1" />
+                      {profileData.yearOfStudy || 'Year not specified'}
+                    </div>
+                  </div>
+                  
+                  {/* XP and Career Coins */}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center text-sm">
+                      <Zap className="h-4 w-4 mr-1 text-yellow-500" />
+                      <span className="text-gray-600 dark:text-gray-400">{profileData.xp} XP</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
+                      <span className="text-gray-600 dark:text-gray-400">{profileData.careerCoins} CC</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Bio */}
+              {profileData.bio && (
+                <div className="mt-6">
+                  <p className="text-gray-900 dark:text-white">{profileData.bio}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Education Section in Preview */}
+          <EducationSection
+            data={profileData.education}
+            onUpdate={handleEducationUpdate}
+            isPreviewMode={true}
+          />
+
+          {/* Career Goals Section in Preview */}
+          <CareerGoalsSection
+            data={{
+              interests: profileData.careerGoals.interests,
+              targetIndustries: profileData.careerGoals.targetIndustries,
+              careerStatement: profileData.careerGoals.statement,
+              availability: profileData.careerGoals.availability
+            }}
+            onUpdate={handleCareerGoalsUpdate}
+            isPreviewMode={true}
+          />
+
+          {/* Skills Section */}
+          {profileData.skills.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Skills & Expertise
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {profileData.skills.map((skill, index) => (
+                    <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-gray-900 dark:text-white">{skill.skill}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          skill.proficiency === 'Advanced' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300' :
+                          skill.proficiency === 'Intermediate' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300' :
+                          'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+                        }`}>
+                          {skill.proficiency}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">{skill.category}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Projects Section */}
+          {profileData.projects.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Projects & Experience
+                </h2>
+                <div className="space-y-4">
+                  {profileData.projects.map((project, index) => (
+                    <div key={index} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-medium text-gray-900 dark:text-white">{project.title}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          project.type === 'academic' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300' :
+                          project.type === 'competition' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300' :
+                          project.type === 'volunteer' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300' :
+                          'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
+                        }`}>
+                          {project.type}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{project.description}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>{project.duration}</span>
+                        <span className="flex items-center">
+                          <Zap className="h-3 w-3 mr-1 text-yellow-500" />
+                          {project.xpEarned} XP
+                        </span>
+                      </div>
+                      {project.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {project.skills.map((skill, skillIndex) => (
+                            <span key={skillIndex} className="px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Contact & Links Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Contact & Links
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Email
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {profileData.email}
+                  </p>
+                </div>
+                {profileData.phone && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Phone
+                    </label>
+                    <p className="text-gray-900 dark:text-white">
+                      {profileData.phone}
+                    </p>
+                  </div>
+                )}
+                {profileData.linkedinUrl && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      LinkedIn
+                    </label>
+                    <a 
+                      href={profileData.linkedinUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:underline flex items-center"
+                    >
+                      {profileData.linkedinUrl}
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </a>
+                  </div>
+                )}
+                {profileData.portfolioUrl && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Portfolio
+                    </label>
+                    <a 
+                      href={profileData.portfolioUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:underline flex items-center"
+                    >
+                      {profileData.portfolioUrl}
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+
+  
   return (
     <>
-      {isPreviewMode ? <div>Preview Mode (to be implemented)</div> : <StudentEditMode />}
+      {isPreviewMode ? <StudentPreviewMode /> : <StudentEditMode />}
       <SaveModal />
       <EditProfileModal
         isOpen={showEditModal}

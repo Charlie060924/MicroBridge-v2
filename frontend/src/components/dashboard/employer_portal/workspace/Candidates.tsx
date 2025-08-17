@@ -15,6 +15,7 @@ import {
   Building,
   Briefcase
 } from 'lucide-react';
+import { Avatar } from '@/components/common/OptimizedImage';
 
 interface Candidate {
   id: string;
@@ -280,17 +281,11 @@ const Candidates: React.FC = () => {
                       <div className="flex items-start space-x-4 flex-1">
                         {/* Avatar */}
                         <div className="flex-shrink-0">
-                          {candidate.avatar ? (
-                            <img
-                              src={candidate.avatar}
-                              alt={candidate.name}
-                              className="w-12 h-12 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
-                              <User className="h-6 w-6 text-white" />
-                            </div>
-                          )}
+                          <Avatar
+                            src={candidate.avatar}
+                            alt={candidate.name}
+                            size="medium"
+                          />
                         </div>
 
                         {/* Candidate Info */}

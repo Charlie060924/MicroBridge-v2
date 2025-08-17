@@ -1,11 +1,78 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { useLevel } from "@/hooks/useLevel";
 import { usePreviewMode } from "@/context/PreviewModeContext";
+import { usePrefetchStudentData } from "@/hooks/useStudentData";
 import RestrictedPageModal from "@/components/common/RestrictedPageModal";
+
+// Memoized navigation item component
+const NavigationItem = React.memo(({ 
+  nav, 
+  isActive, 
+  isRestricted, 
+  onRestrictedClick, 
+  onMouseEnter,
+  isExpanded,
+  isHovered,
+  isMobileOpen,
+  levelData
+}: {
+  nav: any;
+  isActive: boolean;
+  isRestricted: boolean;
+  onRestrictedClick: (e: React.MouseEvent) => void;
+  onMouseEnter: () => void;
+  isExpanded: boolean;
+  isHovered: boolean;
+  isMobileOpen: boolean;
+  levelData: any;
+}) => {
+  const IconComponent = nav.icon;
+  
+  return (
+    <li className="overflow-hidden">
+      <Link
+        href={nav.path}
+        onClick={onRestrictedClick}
+        onMouseEnter={onMouseEnter}
+        className={`menu-item group relative overflow-hidden ${
+          isActive
+            ? "menu-item-active"
+            : "menu-item-inactive"
+        } ${isRestricted ? "opacity-60" : ""}`}
+      >
+        {/* Icon */}
+        <div className="relative">
+          {IconComponent && (
+            <IconComponent className="w-5 h-5 flex-shrink-0" />
+          )}
+          {isRestricted && (
+            <Lock className="w-3 h-3 absolute -top-1 -right-1 text-gray-400" />
+          )}
+        </div>
+        
+        {/* Text */}
+        {(isExpanded || isHovered || isMobileOpen) && (
+          <span className="menu-item-text truncate">{nav.name}</span>
+        )}
+        
+        {/* Level Badge for Level System */}
+        {nav.showBadge && (isExpanded || isHovered || isMobileOpen) && (
+          <div className="sidebar-badge w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500">
+            <span className="text-xs font-bold text-white truncate">
+              {levelData.level}
+            </span>
+          </div>
+        )}
+      </Link>
+    </li>
+  );
+});
+
+NavigationItem.displayName = 'NavigationItem';
 import { 
   Star, 
   CreditCard, 
@@ -15,8 +82,7 @@ import {
   User, 
   Settings,
   FolderOpen,
-  Lock,
-  HelpCircle
+  Lock
 } from "lucide-react";
 
 const navItems = [
@@ -75,22 +141,20 @@ const navItems = [
     restricted: true,
     feature: "profile",
   },
-  {
-    name: "Help Centre",
-    path: "/help",
-    icon: HelpCircle,
-    restricted: false,
-  },
 ];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const { levelData } = useLevel();
   const { isPreviewMode, isFeatureLocked } = usePreviewMode();
+  const { prefetchBilling, prefetchProjects, prefetchLevelData, prefetchSettings } = usePrefetchStudentData();
   const pathname = usePathname();
   const [showRestrictedModal, setShowRestrictedModal] = useState(false);
   const [restrictedFeature, setRestrictedFeature] = useState<string>("");
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
+
+  // Memoize navigation items to prevent unnecessary re-renders
+  const memoizedNavItems = useMemo(() => navItems, []);
 
   return (
     <aside
@@ -128,8 +192,7 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto no-scrollbar sidebar-overflow-fix">
         <nav className="mb-6 overflow-hidden">
           <ul className="flex flex-col gap-4 overflow-hidden">
-            {navItems.map((nav) => {
-              const IconComponent = nav.icon;
+            {memoizedNavItems.map((nav) => {
               const isCurrentActive = isActive(nav.path);
               const isRestricted = isPreviewMode && nav.restricted && isFeatureLocked(nav.feature || "");
               
@@ -140,43 +203,40 @@ const AppSidebar: React.FC = () => {
                   setShowRestrictedModal(true);
                 }
               };
+
+              const handleMouseEnter = () => {
+                // Prefetch data on hover for better UX
+                if (!isRestricted) {
+                  switch (nav.path) {
+                    case '/billing':
+                      prefetchBilling();
+                      break;
+                    case '/student_portal/workspace/working_projects':
+                      prefetchProjects();
+                      break;
+                    case '/student_portal/workspace/levels':
+                      prefetchLevelData();
+                      break;
+                    case '/student_portal/workspace/settings':
+                      prefetchSettings();
+                      break;
+                  }
+                }
+              };
               
               return (
-                <li key={nav.name} className="overflow-hidden">
-                  <Link
-                    href={nav.path}
-                    onClick={handleClick}
-                    className={`menu-item group relative overflow-hidden ${
-                      isCurrentActive
-                        ? "menu-item-active"
-                        : "menu-item-inactive"
-                    } ${isRestricted ? "opacity-60" : ""}`}
-                  >
-                    {/* Icon */}
-                    <div className="relative">
-                      {IconComponent && (
-                        <IconComponent className="w-5 h-5 flex-shrink-0" />
-                      )}
-                      {isRestricted && (
-                        <Lock className="w-3 h-3 absolute -top-1 -right-1 text-gray-400" />
-                      )}
-                    </div>
-                    
-                    {/* Text */}
-                    {(isExpanded || isHovered || isMobileOpen) && (
-                      <span className="menu-item-text truncate">{nav.name}</span>
-                    )}
-                    
-                    {/* Level Badge for Level System */}
-                    {nav.showBadge && (isExpanded || isHovered || isMobileOpen) && (
-                      <div className="sidebar-badge w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500">
-                        <span className="text-xs font-bold text-white truncate">
-                          {levelData.level}
-                        </span>
-                      </div>
-                    )}
-                  </Link>
-                </li>
+                <NavigationItem
+                  key={nav.name}
+                  nav={nav}
+                  isActive={isCurrentActive}
+                  isRestricted={isRestricted}
+                  onRestrictedClick={handleClick}
+                  onMouseEnter={handleMouseEnter}
+                  isExpanded={isExpanded}
+                  isHovered={isHovered}
+                  isMobileOpen={isMobileOpen}
+                  levelData={levelData}
+                />
               );
             })}
           </ul>

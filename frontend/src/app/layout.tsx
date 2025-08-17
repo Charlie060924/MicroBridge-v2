@@ -1,14 +1,6 @@
-"use client";//landing page layout
-
-import ScrollToTop from "@/components/common/ScrollToTop";
-import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { usePathname } from "next/navigation";
-import { LevelProvider } from "./context/LevelContext";
-import { MockAccountProvider } from "@/context/MockAccountContext";
-import AchievementPopup from "@/components/common/Level/AchievementPopup";
-import UserRoleSwitcher from "@/components/common/UserRoleSwitcher";
+import ClientProviders from "./ClientProviders";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,20 +12,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`dark:bg-black ${inter.className}`}>
-        <ThemeProvider
-          enableSystem={false}
-          attribute="class"
-          defaultTheme="light"
-        >
-          <MockAccountProvider>
-            <LevelProvider>
-              {children}
-              <ScrollToTop />
-              <AchievementPopup achievement={null} />
-              <UserRoleSwitcher />
-            </LevelProvider>
-          </MockAccountProvider>
-        </ThemeProvider>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

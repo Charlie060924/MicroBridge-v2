@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { PreviewModeProvider } from "@/context/PreviewModeContext";
@@ -8,6 +8,7 @@ import AppSidebar from "@/layout/AppSidebar";
 import AppHeader from "@/layout/AppHeader";
 import Backdrop from "@/layout/Backdrop";
 import PreviewBanner from "@/components/common/PreviewBanner";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Calculate sidebar width based on state
   const getSidebarWidth = () => {
@@ -42,8 +44,19 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    
+    // Set loading to false after a short delay to ensure hydration
+    const timer = setTimeout(() => setIsLoading(false), 100);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      clearTimeout(timer);
+    };
   }, []);
+
+  if (isLoading) {
+    return <LoadingSkeleton />;
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 sidebar-layout">
@@ -70,7 +83,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Page Content */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-x-hidden">
-          {children}
+          <Suspense fallback={<LoadingSkeleton />}>
+            {children}
+          </Suspense>
         </main>
       </div>
     </div>

@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/common/ui/Button';
 
 export default function SettingsPage() {
-  const { settings, saveSettings, resetSettings, isLoading, hasChanges } = useSettings();
+  const { settings, saveSettings, resetSettings, isLoading, hasChanges, isSettingsLoaded } = useSettings();
   const [isSaving, setIsSaving] = useState(false);
   const { logout } = useAuth();
   const router = useRouter();
@@ -55,9 +55,15 @@ export default function SettingsPage() {
     onClose: () => window.history.back()
   });
 
-  // Use centralized animations
-  const containerVariants = animations.stagger.container;
-  const itemVariants = animations.card;
+  // Simplified animations for better performance
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.3 } }
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.2 } }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -125,19 +131,20 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* Settings Sections */}
-        <motion.div variants={itemVariants} className="space-y-8">
-          {/* Personal Information */}
-          <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Personal Information
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Basic account information and contact details
-              </p>
+        {isSettingsLoaded ? (
+          <motion.div variants={itemVariants} className="space-y-8">
+            {/* Personal Information */}
+            <div className="space-y-6">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Personal Information
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Basic account information and contact details
+                </p>
+              </div>
+              <PersonalInfoSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
             </div>
-            <PersonalInfoSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
-          </div>
 
           {/* Account & Security */}
           <div className="space-y-6">
@@ -191,6 +198,18 @@ export default function SettingsPage() {
             <HelpSupportSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
           </div>
         </motion.div>
+        ) : (
+          <motion.div variants={itemVariants} className="space-y-8">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 dark:text-gray-400">Loading settings...</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Bottom Actions */}
         <motion.div variants={itemVariants} className="pt-8 border-t border-gray-200 dark:border-gray-800">

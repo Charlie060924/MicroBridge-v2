@@ -1,0 +1,18 @@
+[
+  {
+    "path": ".next/static/chunks/**/*.js",
+    "limit": "500 KB",
+    "name": "Initial JS Bundle"
+  },
+  {
+    "path": ".next/static/chunks/pages/**/*.js",
+    "limit": "200 KB",
+    "name": "Page Chunks"
+  },
+  {
+    "path": ".next/static/chunks/framework-*.js",
+    "limit": "150 KB",
+    "name": "Framework"
+  }
+]
+

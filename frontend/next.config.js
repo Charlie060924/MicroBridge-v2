@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
   reactStrictMode: true,
   
@@ -12,6 +16,21 @@ const nextConfig = {
         hostname: "cdn.sanity.io",
         port: "",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        port: "",
+      },
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+        port: "",
+      },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+        port: "",
+      },
     ],
     // Enable modern image formats
     formats: ['image/webp', 'image/avif'],
@@ -19,12 +38,16 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
+    // Performance optimizations
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // Performance optimizations
   experimental: {
     // Enable modern React features
     optimizePackageImports: ['lucide-react', '@fullcalendar/react', '@fullcalendar/core'],
+    instrumentationHook: true,
   },
 
   // Bundle optimization
@@ -89,20 +112,6 @@ const nextConfig = {
       },
     ];
   },
-
-  // Bundle analyzer (uncomment for analysis)
-  // webpack: (config, { isServer }) => {
-  //   if (!isServer) {
-  //     const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-  //     config.plugins.push(
-  //       new BundleAnalyzerPlugin({
-  //         analyzerMode: 'static',
-  //         openAnalyzer: false,
-  //       })
-  //     );
-  //   }
-  //   return config;
-  // },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

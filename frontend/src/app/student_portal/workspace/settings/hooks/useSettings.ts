@@ -1,34 +1,70 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { DEFAULT_SETTINGS } from '../utils/settingsConstants';
 
 export type Settings = typeof DEFAULT_SETTINGS;
+
+// Debounce function for localStorage writes
+const debounce = (func: Function, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
 
 export const useSettings = () => {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
 
-  // Load settings from localStorage on mount
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('microbridge-settings');
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings);
-        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
-      } catch (error) {
-        console.error('Failed to parse saved settings:', error);
-      }
+  // Optimize localStorage read with useMemo
+  const savedSettings = useMemo(() => {
+    try {
+      const stored = localStorage.getItem('microbridge-settings');
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error('Failed to parse saved settings:', error);
+      return null;
     }
-    setIsLoading(false);
   }, []);
 
-  // Save settings to localStorage whenever they change
+  // Load settings from localStorage on mount (optimized)
   useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem('microbridge-settings', JSON.stringify(settings));
-      setHasChanges(false);
+    const loadSettings = async () => {
+      if (savedSettings) {
+        setSettings({ ...DEFAULT_SETTINGS, ...savedSettings });
+      }
+      setIsLoading(false);
+      setIsSettingsLoaded(true);
+    };
+    
+    loadSettings();
+  }, [savedSettings]);
+
+  // Debounced save to localStorage
+  const debouncedSave = useCallback(
+    debounce((settingsToSave: Settings) => {
+      try {
+        localStorage.setItem('microbridge-settings', JSON.stringify(settingsToSave));
+        setHasChanges(false);
+      } catch (error) {
+        console.error('Failed to save settings:', error);
+      }
+    }, 500),
+    []
+  );
+
+  // Save settings to localStorage with debouncing
+  useEffect(() => {
+    if (isSettingsLoaded && !isLoading) {
+      debouncedSave(settings);
     }
-  }, [settings, isLoading]);
+  }, [settings, isLoading, isSettingsLoaded, debouncedSave]);
 
   const updateSettings = <K extends keyof Settings>(
     section: K,
@@ -62,5 +98,6 @@ export const useSettings = () => {
     saveSettings,
     isLoading,
     hasChanges,
+    isSettingsLoaded,
   };
 };
