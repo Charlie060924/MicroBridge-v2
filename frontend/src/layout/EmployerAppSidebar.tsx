@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { useLevel } from "@/hooks/useLevel";
 import { usePreviewMode } from "@/context/PreviewModeContext";
+import { usePrefetchEmployerData } from "@/hooks/useEmployerData";
 import RestrictedPageModal from "@/components/common/RestrictedPageModal";
 import { 
   Star, 
@@ -108,6 +109,41 @@ const EmployerAppSidebar: React.FC = () => {
   const [showRestrictedModal, setShowRestrictedModal] = useState(false);
   const [restrictedFeature, setRestrictedFeature] = useState<string>("");
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
+  
+  // Prefetch data on hover
+  const { 
+    prefetchCandidates, 
+    prefetchJobs, 
+    prefetchApplications, 
+    prefetchReports, 
+    prefetchDashboard 
+  } = usePrefetchEmployerData();
+
+  // Memoized navigation items with prefetch handlers
+  const navigationItems = useMemo(() => navItems.map(nav => ({
+    ...nav,
+    onMouseEnter: () => {
+      if (isPreviewMode) return;
+      
+      switch (nav.path) {
+        case '/employer_portal/workspace':
+          prefetchDashboard();
+          break;
+        case '/employer_portal/workspace/candidates':
+          prefetchCandidates();
+          break;
+        case '/employer_portal/workspace/manage-jobs':
+          prefetchJobs();
+          break;
+        case '/employer_portal/workspace/applications':
+          prefetchApplications();
+          break;
+        case '/employer_portal/workspace/reports':
+          prefetchReports();
+          break;
+      }
+    }
+  })), [isPreviewMode, prefetchCandidates, prefetchJobs, prefetchApplications, prefetchReports, prefetchDashboard]);
 
   return (
     <aside
@@ -145,7 +181,7 @@ const EmployerAppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto no-scrollbar sidebar-overflow-fix">
         <nav className="mb-6 overflow-hidden">
           <ul className="flex flex-col gap-4 overflow-hidden">
-            {navItems.map((nav) => {
+            {navigationItems.map((nav) => {
               const IconComponent = nav.icon;
               const isCurrentActive = isActive(nav.path);
               const isRestricted = isPreviewMode && nav.restricted && isFeatureLocked(nav.feature || "");
@@ -163,6 +199,7 @@ const EmployerAppSidebar: React.FC = () => {
                   <Link
                     href={nav.path}
                     onClick={handleClick}
+                    onMouseEnter={nav.onMouseEnter}
                     className={`menu-item group relative overflow-hidden ${
                       isCurrentActive
                         ? "menu-item-active"

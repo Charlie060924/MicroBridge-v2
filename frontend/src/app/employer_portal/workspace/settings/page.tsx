@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, RotateCcw } from 'lucide-react';
+import { SettingsSkeleton } from '@/components/skeletons/EmployerSkeletons';
 import AccountSettingsSection from './sections/AccountSettingsSection';
 import NotificationSettingsSection from './sections/NotificationSettingsSection';
 import AppearanceSettingsSection from './sections/AppearanceSettingsSection';
@@ -85,11 +86,13 @@ export default function EmployerSettingsPage() {
 
         {/* Settings Sections */}
         <motion.div variants={itemVariants} className="space-y-8">
-          <AccountSettingsSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
-          <NotificationSettingsSection />
-          <AppearanceSettingsSection />
-          <PrivacySecuritySection />
-          <OtherSettingsSection />
+          <Suspense fallback={<SettingsSkeleton />}>
+            <AccountSettingsSection onSaveAll={handleSaveAll} isSaving={isSaving} hasChanges={hasChanges} />
+            <NotificationSettingsSection />
+            <AppearanceSettingsSection />
+            <PrivacySecuritySection />
+            <OtherSettingsSection />
+          </Suspense>
         </motion.div>
 
         {/* Bottom Actions */}
