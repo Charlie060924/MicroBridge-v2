@@ -4,9 +4,9 @@ import { DEFAULT_SETTINGS } from '../utils/settingsConstants';
 export type Settings = typeof DEFAULT_SETTINGS;
 
 // Debounce function for localStorage writes
-const debounce = (func: Function, wait: number) => {
+const debounce = <T extends (...args: any[]) => void>(func: T, wait: number) => {
   let timeout: NodeJS.Timeout;
-  return function executedFunction(...args: any[]) {
+  return function executedFunction(...args: Parameters<T>) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);

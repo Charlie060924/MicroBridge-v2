@@ -40,6 +40,8 @@ import Link from "next/link";
 import EditProfileModal from "./EditProfileModal";
 import EducationSection from "./sections/EducationSection";
 import CareerGoalsSection from "./sections/CareerGoalsSection";
+import ReviewsSection from "@/components/reviews/ReviewsSection";
+import ReviewSystem from "@/components/reviews/ReviewSystem";
 
 // Extended user data structure for student profile
 interface StudentProfileData {
@@ -748,6 +750,14 @@ const StudentProfilePage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Reviews Section */}
+          <ReviewsSection
+            userId={user?.id || ""}
+            userType="student"
+            showHeader={true}
+            className=""
+          />
         </div>
       </div>
     </div>
@@ -1020,6 +1030,14 @@ const StudentProfilePage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Reviews Section */}
+          <ReviewsSection
+            userId={user?.id || ""}
+            userType="student"
+            showHeader={true}
+            className=""
+          />
         </div>
       </div>
     </div>
@@ -1028,7 +1046,7 @@ const StudentProfilePage: React.FC = () => {
 
   
   return (
-    <>
+    <ReviewSystem>
       {isPreviewMode ? <StudentPreviewMode /> : <StudentEditMode />}
       <SaveModal />
       <EditProfileModal
@@ -1038,7 +1056,7 @@ const StudentProfilePage: React.FC = () => {
         section={editingSection || ''}
         currentData={profileData}
       />
-    </>
+    </ReviewSystem>
   );
 };
 

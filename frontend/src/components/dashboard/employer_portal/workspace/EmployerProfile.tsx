@@ -6,6 +6,8 @@ import { User, Building, MapPin, Mail, Phone, Globe, Edit, Save, X, Shield, Eye,
 import { companyTypes, industries, companySizes } from "@/components/dashboard/Employers/Emplyer_Info_Constant";
 import LevelProgressBar from "@/components/common/Level/LevelProgressBar";
 import { useLevel } from "@/hooks/useLevel";
+import ReviewsSection from "@/components/reviews/ReviewsSection";
+import ReviewSystem from "@/components/reviews/ReviewSystem";
 
 interface UnifiedEmployerProfile {
   // Company Information (Public)
@@ -237,8 +239,9 @@ const UnifiedEmployerProfile: React.FC = () => {
   const completionPercentage = getProfileCompletionPercentage();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <ReviewSystem>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
           <div className="flex items-center justify-between">
@@ -729,8 +732,17 @@ const UnifiedEmployerProfile: React.FC = () => {
             </div>
           )}
         </form>
+
+        {/* Reviews Section */}
+        <ReviewsSection
+          userId="employer-001" // Using mock user ID for testing
+          userType="employer"
+          showHeader={true}
+          className="mt-8"
+        />
       </div>
     </div>
+    </ReviewSystem>
   );
 };
 

@@ -27,7 +27,7 @@ const CandidatesPage: React.FC = () => {
 
   // Memoized filtered candidates
   const filteredCandidates = useMemo(() => {
-    let filtered = candidates;
+    let filtered: typeof candidates = candidates;
 
     if (searchTerm) {
       filtered = filtered.filter(candidate =>
