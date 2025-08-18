@@ -58,9 +58,14 @@ docker-down: ## Stop all services with Docker Compose
 docker-logs: ## View Docker Compose logs
 	$(DOCKER_COMPOSE) logs -f
 
-migrate: ## Run database migrations (placeholder)
-	@echo "Running database migrations..."
-	@echo "TODO: Implement migration runner"
+migrate: ## Run database migrations
+	go run cmd/migrate/main.go
+
+seed: ## Seed database with mock data
+	go run cmd/seed/main.go
+
+seed-clear: ## Clear existing data and seed database
+	go run cmd/seed/main.go --clear
 
 deps: ## Install dependencies
 	go mod tidy

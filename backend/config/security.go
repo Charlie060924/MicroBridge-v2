@@ -6,7 +6,6 @@ import (
     "fmt"
     "os"
     "strings"
-    "strconv"
     "time"
 )
 
@@ -81,28 +80,4 @@ func getSliceEnv(key string, defaultValue []string) []string {
     return defaultValue
 }
 
-// Helper functions (reusing from existing config.go)
-func getEnv(key, defaultValue string) string {
-    if value := os.Getenv(key); value != "" {
-        return value
-    }
-    return defaultValue
-}
 
-func getIntEnv(key string, defaultValue int) int {
-    if value := os.Getenv(key); value != "" {
-        if intValue, err := strconv.Atoi(value); err == nil {
-            return intValue
-        }
-    }
-    return defaultValue
-}
-
-func getDurationEnv(key string, defaultValue time.Duration) time.Duration {
-    if value := os.Getenv(key); value != "" {
-        if duration, err := time.ParseDuration(value); err == nil {
-            return duration
-        }
-    }
-    return defaultValue
-}
