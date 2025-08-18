@@ -107,3 +107,25 @@ func (r *userRepository) UpdateLastActivity(ctx context.Context, userID string) 
 
 	return nil
 }
+
+func (r *userRepository) GetByResetToken(ctx context.Context, token string) (*models.User, error) {
+	var user models.User
+	if err := r.db.WithContext(ctx).First(&user, "reset_token = ?", token).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperrors.ErrUserNotFound
+		}
+		return nil, apperrors.NewAppError(500, "Failed to get user by reset token", err)
+	}
+	return &user, nil
+}
+
+func (r *userRepository) GetByVerificationToken(ctx context.Context, token string) (*models.User, error) {
+	var user models.User
+	if err := r.db.WithContext(ctx).First(&user, "verification_token = ?", token).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperrors.ErrUserNotFound
+		}
+		return nil, apperrors.NewAppError(500, "Failed to get user by verification token", err)
+	}
+	return &user, nil
+}

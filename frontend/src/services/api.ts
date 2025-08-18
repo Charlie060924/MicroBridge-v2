@@ -13,7 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Get token from localStorage or wherever you store it
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,7 +33,8 @@ api.interceptors.response.use(
     // Handle common errors like 401, 403, etc.
     if (error.response?.status === 401) {
       // Redirect to login or refresh token
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
       window.location.href = '/auth/signin';
     }
     return Promise.reject(error);

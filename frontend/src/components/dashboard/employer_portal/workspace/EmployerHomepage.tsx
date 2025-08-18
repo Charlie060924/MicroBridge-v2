@@ -44,21 +44,25 @@ interface Application {
 
 import { Candidate } from '@/data/mockCandidates';
 
-// Dynamic imports for components
+// Dynamic imports for components with error boundaries
 const RecommendedCandidates = dynamic(() => import("./RecommendedCandidates"), {
-  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
+  ssr: false
 });
 
 const StatCard = dynamic(() => import("./StatCard"), {
-  loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
+  loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
+  ssr: false
 });
 
 const JobListCard = dynamic(() => import("./JobListCard"), {
-  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
+  ssr: false
 });
 
 const JobPostingPerformance = dynamic(() => import("./JobPostingPerformance"), {
-  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
+  ssr: false
 });
 
 interface EmployerHomepageProps {
@@ -72,9 +76,10 @@ interface EmployerHomepageProps {
 }
 
 const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
-  console.log("EmployerHomepage rendering with user:", user);
+  console.log("🏢 EmployerHomepage rendering with user:", user);
   
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Real data state
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
@@ -96,8 +101,13 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
 
   // Replace the useEffect with temporary mock data to avoid API errors
   useEffect(() => {
+    console.log("🏢 EmployerHomepage useEffect triggered, isPreviewMode:", isPreviewMode);
+    
     const fetchData = async () => {
       try {
+        console.log("🏢 Fetching employer homepage data");
+        setError(null);
+        
         // Temporary mock data until your API is ready
         const mockJobs: Job[] = [
           {
@@ -347,12 +357,23 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
 
+        console.log("🏢 Setting employer homepage data:", {
+          jobs: mockJobs.length,
+          applications: mockApplications.length,
+          candidates: mockCandidates.length,
+          stats: mockStats
+        });
+
         setRecentJobs(mockJobs);
         setApplications(mockApplications);
         setRecommendedCandidates(mockCandidates);
         setStats(mockStats);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error fetching data';
+        console.error('🏢 Error fetching employer homepage data:', error);
+        setError(errorMessage);
+        
+        // Set safe defaults on error
         setRecentJobs([]);
         setApplications([]);
         setRecommendedCandidates([]);
@@ -392,6 +413,7 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
         className="w-12 h-12 rounded-full object-cover"
         loading="lazy"
         onError={(e) => {
+          console.log("🏢 Avatar image failed to load, using fallback");
           (e.target as HTMLImageElement).style.display = 'none';
         }}
       />
@@ -404,24 +426,28 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
 
   // Event handlers
   const handlePostJob = useCallback(() => {
+    console.log("🏢 Post job button clicked");
     router.push('/employer_portal/workspace/post-job');
   }, [router]);
 
   const handleManageJobs = useCallback(() => {
+    console.log("🏢 Manage jobs button clicked");
     router.push('/employer_portal/workspace/manage-jobs');
   }, [router]);
 
   const handleViewApplications = useCallback(() => {
+    console.log("🏢 View applications button clicked");
     router.push('/employer_portal/workspace/applications');
   }, [router]);
 
   const handleViewCandidates = useCallback(() => {
+    console.log("🏢 View candidates button clicked");
     router.push('/employer_portal/workspace/candidates');
   }, [router]);
 
   // Show loading state while fetching data
   if (isDataLoading) {
-    console.log("Showing loading state");
+    console.log("🏢 Showing loading state");
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -429,7 +455,25 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
     );
   }
 
-  console.log("Rendering main content with jobs:", recentJobs.length);
+  // Show error state if there's an error
+  if (error) {
+    console.log("🏢 Showing error state:", error);
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">Something went wrong loading the dashboard</div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  console.log("🏢 Rendering main content with jobs:", recentJobs.length);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

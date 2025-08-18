@@ -12,7 +12,15 @@ type User struct {
     ID              string          `json:"id" gorm:"primaryKey"`
     Email           string          `json:"email" gorm:"uniqueIndex"`
     Name            string          `json:"name"`
+    Password        string          `json:"-" gorm:"column:password_hash"` // Hidden from JSON
     UserType        string          `json:"user_type"` // "student" | "employer"
+    
+    // Authentication fields
+    EmailVerified   bool            `json:"email_verified" gorm:"default:false"`
+    VerificationToken *string       `json:"-" gorm:"column:verification_token"`
+    ResetToken      *string         `json:"-" gorm:"column:reset_token"`
+    ResetTokenExpiresAt *time.Time  `json:"-" gorm:"column:reset_token_expires_at"`
+    IsActive        bool            `json:"is_active" gorm:"default:true"`
     
     // Enhanced matching fields
     Skills          SkillsArray     `json:"skills" gorm:"type:jsonb"`

@@ -159,5 +159,34 @@ func GetAllMigrations() []Migration {
 			`,
 			DownSQL: `DROP TABLE reviews;`,
 		},
+		{
+			Version: 20240101000007,
+			Name:    "add_auth_fields_to_users",
+			Description: "Add authentication fields to users table",
+			UpSQL: `
+				ALTER TABLE users 
+				ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE,
+				ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255),
+				ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255),
+				ADD COLUMN IF NOT EXISTS reset_token_expires_at TIMESTAMP,
+				ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMP;
+				
+				CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token) WHERE verification_token IS NOT NULL;
+				CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_token) WHERE reset_token IS NOT NULL;
+				CREATE INDEX IF NOT EXISTS idx_users_email_verified ON users(email_verified) WHERE email_verified = FALSE;
+			`,
+			DownSQL: `
+				DROP INDEX IF EXISTS idx_users_verification_token;
+				DROP INDEX IF EXISTS idx_users_reset_token;
+				DROP INDEX IF EXISTS idx_users_email_verified;
+				
+				ALTER TABLE users 
+				DROP COLUMN IF EXISTS email_verified,
+				DROP COLUMN IF EXISTS verification_token,
+				DROP COLUMN IF EXISTS reset_token,
+				DROP COLUMN IF EXISTS reset_token_expires_at,
+				DROP COLUMN IF EXISTS last_activity_at;
+			`,
+		},
 	}
 }

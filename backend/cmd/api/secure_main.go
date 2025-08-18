@@ -189,6 +189,10 @@ func (app *Application) setupSecureRouter() *gin.Engine {
         {
             auth.POST("/login", app.userHandler.Login)
             auth.POST("/register", app.userHandler.CreateUser)
+            auth.POST("/forgot-password", app.userHandler.ForgotPassword)
+            auth.POST("/reset-password", app.userHandler.ResetPassword)
+            auth.POST("/verify-email", app.userHandler.VerifyEmail)
+            auth.POST("/resend-verification", app.userHandler.ResendVerification)
             // TODO: Add refresh token endpoint
             // auth.POST("/refresh", app.userHandler.RefreshToken)
         }

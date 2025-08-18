@@ -17,6 +17,10 @@ type UserService interface {
 	AuthenticateUser(ctx context.Context, email, password string) (*models.User, string, error)
 	ChangePassword(ctx context.Context, userID string, req dto.ChangePasswordRequest) error
 	UpdateLastActivity(ctx context.Context, userID string) error
+	ForgotPassword(ctx context.Context, email string) error
+	ResetPassword(ctx context.Context, token, newPassword string) error
+	VerifyEmail(ctx context.Context, token string) error
+	ResendVerification(ctx context.Context, email string) error
 }
 
 type JobService interface {

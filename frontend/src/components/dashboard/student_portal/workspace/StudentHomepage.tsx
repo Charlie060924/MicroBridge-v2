@@ -25,21 +25,27 @@ const RecentlyViewedJobs = dynamic(() => import("./RecentlyViewedJobs"), {
         <div key={i} className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
       ))}
     </div>
-  )
+  ),
+  ssr: false
 });
 
 const OngoingProjects = dynamic(() => import("./OngoingProjects"), {
-  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
+  ssr: false
 });
 
 const Recommendations = dynamic(() => import("./Recommendations"), {
-  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
+  ssr: false
 });
 
-const EmptyState = dynamic(() => import("./EmptyState"));
+const EmptyState = dynamic(() => import("./EmptyState"), {
+  ssr: false
+});
 
 const JobCategoryCard = dynamic(() => import("./JobCategoryCard"), {
-  loading: () => <div className="h-full bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
+  loading: () => <div className="h-full bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
+  ssr: false
 });
 
 interface StudentHomepageProps {
@@ -51,12 +57,13 @@ interface StudentHomepageProps {
 }
 
 const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
-  console.log("StudentHomepage rendering with user:", user);
+  console.log("🎓 StudentHomepage rendering with user:", user);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Real data state
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
@@ -70,8 +77,13 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
 
   // Replace the useEffect with temporary mock data to avoid API errors
   useEffect(() => {
+    console.log("🎓 StudentHomepage useEffect triggered, isPreviewMode:", isPreviewMode);
+    
     const fetchData = async () => {
       try {
+        console.log("🎓 Fetching student homepage data");
+        setError(null);
+        
         // Temporary mock data until your API is ready
         const mockJobs: Job[] = [
           {
@@ -159,21 +171,36 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
 
+        console.log("🎓 Setting student homepage data:", {
+          jobs: mockJobs.length,
+          projects: mockProjects.length,
+          skills: mockSkills.length
+        });
+
         setFeaturedJobs(mockJobs);
         setOngoingProjects(mockProjects);
         setUserSkills(mockSkills);
 
         // Load recently viewed jobs from localStorage
-        const recentJobs = recentlyViewedJobsService.getRecentlyViewedJobs();
-        if (recentJobs.length === 0) {
-          // Use mock data for development if no recent jobs exist
-          const mockRecentJobs = recentlyViewedJobsService.getMockRecentlyViewedJobs();
-          setRecentlyViewedJobs(mockRecentJobs);
-        } else {
-          setRecentlyViewedJobs(recentJobs);
+        try {
+          const recentJobs = recentlyViewedJobsService.getRecentlyViewedJobs();
+          if (recentJobs.length === 0) {
+            // Use mock data for development if no recent jobs exist
+            const mockRecentJobs = recentlyViewedJobsService.getMockRecentlyViewedJobs();
+            setRecentlyViewedJobs(mockRecentJobs);
+          } else {
+            setRecentlyViewedJobs(recentJobs);
+          }
+        } catch (error) {
+          console.error("🎓 Error loading recently viewed jobs:", error);
+          setRecentlyViewedJobs([]);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error fetching data';
+        console.error('🎓 Error fetching student homepage data:', error);
+        setError(errorMessage);
+        
+        // Set safe defaults on error
         setFeaturedJobs([]);
         setRecentlyViewedJobs([]);
         setOngoingProjects([]);
@@ -224,6 +251,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
         className="w-12 h-12 rounded-full object-cover"
         loading="lazy"
         onError={(e) => {
+          console.log("🎓 Avatar image failed to load, using fallback");
           (e.target as HTMLImageElement).style.display = 'none';
         }}
       />
@@ -236,6 +264,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
 
   // Optimized event handlers
   const handleSearch = useCallback((query: string, location: string, category: string) => {
+    console.log("🎓 Search triggered:", { query, location, category });
     setSearchQuery(query);
     setSearchLocation(location);
     setSearchCategory(category);
@@ -246,24 +275,30 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   }, []);
 
   const handleBookmark = useCallback((jobId: string) => {
-    // Optimized bookmark handler
-    console.log("Bookmark toggled for job:", jobId);
+    console.log("🎓 Bookmark toggled for job:", jobId);
   }, []);
 
   const handleJobClick = useCallback((job: Job) => {
+    console.log("🎓 Job clicked:", job.id);
     // Add job to recently viewed when clicked
-    recentlyViewedJobsService.addRecentlyViewedJob(job);
+    try {
+      recentlyViewedJobsService.addRecentlyViewedJob(job);
+    } catch (error) {
+      console.error("🎓 Error adding job to recently viewed:", error);
+    }
     
     router.prefetch(`/student_portal/workspace/job-details/${job.id}`);
     router.push(`/student_portal/workspace/job-details/${job.id}`);
   }, [router]);
 
   const handleProjectClick = useCallback((project: Project) => {
+    console.log("🎓 Project clicked:", project.id);
     router.prefetch(`/student_portal/workspace/project-details/${project.id}`);
     router.push(`/student_portal/workspace/project-details/${project.id}`);
   }, [router]);
 
   const handleClearFilters = useCallback(() => {
+    console.log("🎓 Clearing search filters");
     setSearchQuery("");
     setSearchLocation("");
     setSearchCategory("");
@@ -330,7 +365,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
 
   // Show loading state while fetching data
   if (isDataLoading) {
-    console.log("Showing loading state");
+    console.log("🎓 Showing loading state");
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -338,7 +373,25 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
     );
   }
 
-  console.log("Rendering main content with jobs:", featuredJobs.length);
+  // Show error state if there's an error
+  if (error) {
+    console.log("🎓 Showing error state:", error);
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">Something went wrong loading the dashboard</div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  console.log("🎓 Rendering main content with jobs:", featuredJobs.length);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

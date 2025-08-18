@@ -229,6 +229,10 @@ func (app *Application) setupRouter() *gin.Engine {
 		{
 			auth.POST("/register", app.userHandler.CreateUser)
 			auth.POST("/login", app.userHandler.Login)
+			auth.POST("/forgot-password", app.userHandler.ForgotPassword)
+			auth.POST("/reset-password", app.userHandler.ResetPassword)
+			auth.POST("/verify-email", app.userHandler.VerifyEmail)
+			auth.POST("/resend-verification", app.userHandler.ResendVerification)
 		}
 
 		// Protected routes
@@ -252,6 +256,31 @@ func (app *Application) setupRouter() *gin.Engine {
 				jobs.GET("/:id", app.jobHandler.GetJob)
 				jobs.PUT("/:id", app.jobHandler.UpdateJob)
 				jobs.DELETE("/:id", app.jobHandler.DeleteJob)
+			}
+
+			// Application routes
+			applications := protected.Group("/applications")
+			{
+				applications.POST("", app.applicationHandler.CreateApplication)
+				applications.GET("/user", app.applicationHandler.GetUserApplications)
+				applications.GET("/job/:job_id", app.applicationHandler.GetJobApplications)
+				applications.GET("/:id", app.applicationHandler.GetApplication)
+				applications.PUT("/:id", app.applicationHandler.UpdateApplication)
+				applications.DELETE("/:id", app.applicationHandler.DeleteApplication)
+				applications.PUT("/:id/status", app.applicationHandler.UpdateApplicationStatus)
+				applications.POST("/:id/withdraw", app.applicationHandler.WithdrawApplication)
+			}
+
+			// Notification routes
+			notifications := protected.Group("/notifications")
+			{
+				notifications.GET("", app.notificationHandler.GetNotifications)
+				notifications.GET("/unread-count", app.notificationHandler.GetUnreadCount)
+				notifications.PUT("/:id/read", app.notificationHandler.MarkAsRead)
+				notifications.PUT("/read-all", app.notificationHandler.MarkAllAsRead)
+				notifications.DELETE("/:id", app.notificationHandler.DeleteNotification)
+				notifications.GET("/settings", app.notificationHandler.GetNotificationSettings)
+				notifications.PUT("/settings", app.notificationHandler.UpdateNotificationSettings)
 			}
 
 			// Matching routes (now cached!)

@@ -13,6 +13,8 @@ type UserRepository interface {
 	Delete(ctx context.Context, id string) error
 	List(ctx context.Context, limit, offset int) ([]*models.User, int64, error)
 	UpdateLastActivity(ctx context.Context, userID string) error
+	GetByResetToken(ctx context.Context, token string) (*models.User, error)
+	GetByVerificationToken(ctx context.Context, token string) (*models.User, error)
 }
 
 type JobRepository interface {

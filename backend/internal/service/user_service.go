@@ -244,3 +244,106 @@ func (s *userService) ChangePassword(ctx context.Context, userID string, req dto
 func (s *userService) UpdateLastActivity(ctx context.Context, userID string) error {
 	return s.userRepo.UpdateLastActivity(ctx, userID)
 }
+
+func (s *userService) ForgotPassword(ctx context.Context, email string) error {
+	// Check if user exists
+	user, err := s.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		// Don't reveal if user exists or not for security
+		return nil
+	}
+
+	// Generate reset token
+	token := uuid.New().String()
+	expiresAt := time.Now().Add(1 * time.Hour) // 1 hour expiry
+
+	// Store reset token in user model (you might want to create a separate table for this)
+	user.ResetToken = &token
+	user.ResetTokenExpiresAt = &expiresAt
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return apperrors.NewAppError(500, "Failed to generate reset token", err)
+	}
+
+	// TODO: Send email with reset link
+	// For now, just log the token (in production, send email)
+	// logger.Info().Str("email", email).Str("token", token).Msg("Password reset token generated")
+
+	return nil
+}
+
+func (s *userService) ResetPassword(ctx context.Context, token, newPassword string) error {
+	// Find user by reset token
+	user, err := s.userRepo.GetByResetToken(ctx, token)
+	if err != nil {
+		return apperrors.NewAppError(400, "Invalid or expired reset token", err)
+	}
+
+	// Check if token is expired
+	if user.ResetTokenExpiresAt != nil && time.Now().After(*user.ResetTokenExpiresAt) {
+		return apperrors.NewAppError(400, "Reset token has expired", err)
+	}
+
+	// Hash new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return apperrors.NewAppError(500, "Failed to hash new password", err)
+	}
+
+	// Update password and clear reset token
+	user.Password = string(hashedPassword)
+	user.ResetToken = nil
+	user.ResetTokenExpiresAt = nil
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return apperrors.NewAppError(500, "Failed to update password", err)
+	}
+
+	return nil
+}
+
+func (s *userService) VerifyEmail(ctx context.Context, token string) error {
+	// Find user by verification token
+	user, err := s.userRepo.GetByVerificationToken(ctx, token)
+	if err != nil {
+		return apperrors.NewAppError(400, "Invalid verification token", err)
+	}
+
+	// Mark email as verified
+	user.EmailVerified = true
+	user.VerificationToken = nil
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return apperrors.NewAppError(500, "Failed to verify email", err)
+	}
+
+	return nil
+}
+
+func (s *userService) ResendVerification(ctx context.Context, email string) error {
+	// Check if user exists
+	user, err := s.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		// Don't reveal if user exists or not for security
+		return nil
+	}
+
+	// If already verified, don't send
+	if user.EmailVerified {
+		return nil
+	}
+
+	// Generate new verification token
+	token := uuid.New().String()
+	user.VerificationToken = &token
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return apperrors.NewAppError(500, "Failed to generate verification token", err)
+	}
+
+	// TODO: Send email with verification link
+	// For now, just log the token (in production, send email)
+	// logger.Info().Str("email", email).Str("token", token).Msg("Email verification token generated")
+
+	return nil
+}

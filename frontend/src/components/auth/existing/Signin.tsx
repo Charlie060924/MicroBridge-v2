@@ -181,9 +181,9 @@ const Signin = () => {
                   <span>Keep me signed in</span>
                 </label>
 
-                <a href="#" className="hover:text-primary">
+                <Link href="/auth/forgot-password" className="hover:text-primary">
                   Forgot Password?
-                </a>
+                </Link>
               </div>
 
               <button

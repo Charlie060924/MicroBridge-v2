@@ -79,6 +79,14 @@ type ResetPasswordRequest struct {
 	NewPassword string `json:"new_password" validate:"required,min=8"`
 }
 
+type VerifyEmailRequest struct {
+	Token string `json:"token" validate:"required"`
+}
+
+type ResendVerificationRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
 type UserListResponse struct {
 	Users      []UserResponse `json:"users"`
 	Total      int64          `json:"total"`

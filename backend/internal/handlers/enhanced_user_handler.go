@@ -266,6 +266,130 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
 }
 
+// ForgotPassword initiates password reset process
+// @Summary Forgot password
+// @Description Send password reset email
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ForgotPasswordRequest true "Email for password reset"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /api/v1/auth/forgot-password [post]
+func (h *UserHandler) ForgotPassword(c *gin.Context) {
+	var req dto.ForgotPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if err := h.validator.Validate(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.userService.ForgotPassword(c.Request.Context(), req.Email)
+	if err != nil {
+		h.handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password reset email sent if account exists"})
+}
+
+// ResetPassword resets password using token
+// @Summary Reset password
+// @Description Reset password using token from email
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ResetPasswordRequest true "Password reset data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /api/v1/auth/reset-password [post]
+func (h *UserHandler) ResetPassword(c *gin.Context) {
+	var req dto.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if err := h.validator.Validate(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.userService.ResetPassword(c.Request.Context(), req.Token, req.NewPassword)
+	if err != nil {
+		h.handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
+}
+
+// VerifyEmail verifies user email using token
+// @Summary Verify email
+// @Description Verify user email using token from email
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.VerifyEmailRequest true "Email verification data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /api/v1/auth/verify-email [post]
+func (h *UserHandler) VerifyEmail(c *gin.Context) {
+	var req dto.VerifyEmailRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if err := h.validator.Validate(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.userService.VerifyEmail(c.Request.Context(), req.Token)
+	if err != nil {
+		h.handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
+}
+
+// ResendVerification resends email verification
+// @Summary Resend verification
+// @Description Resend email verification
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ResendVerificationRequest true "Resend verification data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /api/v1/auth/resend-verification [post]
+func (h *UserHandler) ResendVerification(c *gin.Context) {
+	var req dto.ResendVerificationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if err := h.validator.Validate(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.userService.ResendVerification(c.Request.Context(), req.Email)
+	if err != nil {
+		h.handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Verification email sent"})
+}
+
 func (h *UserHandler) toUserResponse(user *models.User) dto.UserResponse {
 	// Convert UserSkill slice to string slice for response
 	var skills []string

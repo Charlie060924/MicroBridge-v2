@@ -17,28 +17,42 @@ interface EmployerProfile {
 }
 
 export const useEmployerOnboarding = () => {
+  console.log('🏢 useEmployerOnboarding hook initialized');
+  
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Check if profile is complete
   const checkProfileCompletion = (profile: EmployerProfile): boolean => {
+    console.log('🏢 Checking profile completion:', profile);
+    
     const requiredFields = [
       'companyName', 'companyType', 'industry', 'companySize', 'location',
       'firstName', 'lastName', 'email', 'phone', 'position'
     ];
     
-    return requiredFields.every(field => {
+    const isComplete = requiredFields.every(field => {
       const value = profile[field as keyof EmployerProfile];
-      return value && value.trim().length > 0;
+      const isValid = value && value.trim().length > 0;
+      if (!isValid) {
+        console.log('🏢 Missing required field:', field, 'value:', value);
+      }
+      return isValid;
     });
+    
+    console.log('🏢 Profile completion result:', isComplete);
+    return isComplete;
   };
 
   // Load profile data and check completion
   const loadProfileAndCheck = async () => {
+    console.log('🏢 Loading profile and checking completion');
     try {
       setIsLoading(true);
+      setError(null);
       
       // TODO: Replace with actual API call to get employer profile
       const mockProfile: EmployerProfile = {
@@ -54,38 +68,58 @@ export const useEmployerOnboarding = () => {
         position: "Senior HR Manager",
       };
 
+      console.log('🏢 Mock profile loaded:', mockProfile);
+
       const complete = checkProfileCompletion(mockProfile);
       setIsProfileComplete(complete);
 
-      // If profile is incomplete and user is not on profile page, redirect
+      // Only redirect if profile is incomplete and user is not already on profile page
       if (!complete && pathname !== "/employer_portal/workspace/profile") {
+        console.log('🏢 Profile incomplete, redirecting to profile page');
         router.push("/employer_portal/workspace/profile");
+      } else if (complete) {
+        console.log('🏢 Profile complete, no redirect needed');
+      } else {
+        console.log('🏢 Already on profile page, no redirect needed');
       }
     } catch (error) {
-      console.error('Error loading employer profile:', error);
-      // If there's an error loading profile, assume it's incomplete
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error loading profile';
+      console.error('🏢 Error loading employer profile:', error);
+      setError(errorMessage);
+      
+      // Don't redirect on error - just mark as incomplete
       setIsProfileComplete(false);
-      if (pathname !== "/employer_portal/workspace/profile") {
-        router.push("/employer_portal/workspace/profile");
-      }
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log('🏢 useEmployerOnboarding effect triggered, pathname:', pathname);
+    
     // Only run onboarding check for employer portal routes
     if (pathname?.startsWith('/employer_portal')) {
+      console.log('🏢 Running onboarding check for employer portal');
       loadProfileAndCheck();
     } else {
+      console.log('🏢 Not on employer portal, skipping onboarding check');
       setIsLoading(false);
     }
   }, [pathname]);
 
-  return {
+  const returnValue = {
     isLoading,
     isProfileComplete,
+    error,
     checkProfileCompletion,
     loadProfileAndCheck,
   };
+
+  console.log('🏢 useEmployerOnboarding returning:', {
+    isLoading: returnValue.isLoading,
+    isProfileComplete: returnValue.isProfileComplete,
+    error: returnValue.error
+  });
+
+  return returnValue;
 };
