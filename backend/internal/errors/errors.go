@@ -34,6 +34,7 @@ var (
 	ErrApplicationNotFound  = &AppError{Code: http.StatusNotFound, Message: "Application not found"}
 	ErrProjectNotFound      = &AppError{Code: http.StatusNotFound, Message: "Project not found"}
 	ErrEmployerNotFound     = &AppError{Code: http.StatusNotFound, Message: "Employer not found"}
+	ErrReviewNotFound       = &AppError{Code: http.StatusNotFound, Message: "Review not found"}
 )
 
 // Error constructors

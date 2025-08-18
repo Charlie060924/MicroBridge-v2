@@ -4,6 +4,7 @@ import (
     "database/sql/driver"
     "encoding/json"
     "errors"
+    "strings"
     "time"
 )
 
@@ -40,10 +41,15 @@ type Job struct {
     // Matching preferences
     PreferredCandidates CandidatePreferences `json:"preferred_candidates" gorm:"type:jsonb"`
     
-    // Status and metadata
-    Status          string              `json:"status"`           // "draft" | "active" | "paused" | "closed"
+    // Status and metadata - Updated lifecycle states
+    Status          string              `json:"status"`           // "draft" | "posted" | "hired" | "in_progress" | "submitted" | "review_pending" | "completed" | "disputed" | "archived"
     Views           int                 `json:"views"`
     Applications    int                 `json:"applications"`
+    
+    // Review and completion tracking
+    ReviewDueDate   *time.Time          `json:"review_due_date,omitempty"`
+    CompletedAt     *time.Time          `json:"completed_at,omitempty"`
+    HiredStudentID  *string             `json:"hired_student_id,omitempty"`
     
     // Timestamps
     CreatedAt       time.Time           `json:"created_at"`

@@ -20,6 +20,12 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	
 	// Initialize services
 	notificationService := services.NewNotificationService(db)
+	reviewService := services.NewReviewService(
+		repository.NewReviewRepository(db),
+		repository.NewUserRepository(db),
+		repository.NewJobRepository(db),
+		repository.NewApplicationRepository(db),
+	)
 	
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(db)
@@ -27,6 +33,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	matchingHandler := handlers.NewMatchingHandler(db)
 	applicationHandler := handlers.NewApplicationHandler(db)
 	notificationHandler := handlers.NewNotificationHandler(notificationService)
+	reviewHandler := handlers.NewReviewHandler(reviewService)
 	
 	// User routes
 	userRoutes := api.Group("/users")
@@ -70,6 +77,20 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		applicationRoutes.GET("/user/:userId", applicationHandler.GetUserApplications)
 		applicationRoutes.GET("/job/:jobId", applicationHandler.GetJobApplications)
 	}
+	
+	// Review routes
+	reviewRoutes := api.Group("/reviews")
+	{
+		reviewRoutes.POST("", reviewHandler.CreateReview)
+		reviewRoutes.GET("/:userId", reviewHandler.GetUserReviews)
+		reviewRoutes.GET("/:id", reviewHandler.GetReviewByID)
+		reviewRoutes.PUT("/:id", reviewHandler.UpdateReview)
+		reviewRoutes.DELETE("/:id", reviewHandler.DeleteReview)
+		reviewRoutes.GET("/eligibility/:jobId", reviewHandler.CheckReviewEligibility)
+	}
+	
+	// Job completion route
+	jobRoutes.POST("/:id/complete", reviewHandler.CompleteJob)
 	
 	// Notification routes
 	notificationRoutes := api.Group("/notifications")

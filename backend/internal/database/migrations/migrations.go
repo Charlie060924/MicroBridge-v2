@@ -131,5 +131,33 @@ func GetAllMigrations() []Migration {
 			`,
 			DownSQL: `DROP TABLE match_cache;`,
 		},
+		{
+			Version: 20240101000006,
+			Name:    "create_reviews_table",
+			Description: "Create reviews table for job completion feedback",
+			UpSQL: `
+				CREATE TABLE reviews (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					reviewer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					reviewee_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					job_id UUID NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+					rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+					comment TEXT,
+					category_ratings JSONB,
+					is_visible BOOLEAN DEFAULT FALSE,
+					visible_at TIMESTAMP,
+					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+					UNIQUE(reviewer_id, job_id)
+				);
+				CREATE INDEX idx_reviews_reviewer ON reviews(reviewer_id);
+				CREATE INDEX idx_reviews_reviewee ON reviews(reviewee_id);
+				CREATE INDEX idx_reviews_job ON reviews(job_id);
+				CREATE INDEX idx_reviews_rating ON reviews(rating);
+				CREATE INDEX idx_reviews_visible ON reviews(is_visible);
+				CREATE INDEX idx_reviews_created ON reviews(created_at);
+			`,
+			DownSQL: `DROP TABLE reviews;`,
+		},
 	}
 }

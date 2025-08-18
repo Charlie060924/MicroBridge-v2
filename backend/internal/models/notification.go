@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-	"gorm.io/gorm"
 )
 
 type NotificationType string
