@@ -1,0 +1,7 @@
+MicroBridge is a bilingual online platform that connects Hong Kong university students with startups and SMEs through short-term, paid micro-internship projects. It empowers students to gain real-world experience, build their professional portfolios, and earn income while exploring various industries and startup environments without long-term commitment.
+
+For startups and SMEs, MicroBridge offers a new, cost-effective form of hiring and talent evaluation. By engaging candidates through real projects, startups can test skills and cultural fit in practice—reducing traditional hiring risks and costs. This approach serves as a practical recruitment pipeline, helping startups access motivated, flexible talent and build a reliable talent pool.
+
+The platform’s gamified level and XP system drives student engagement and trust, while an integrated escrow payment system ensures secure, transparent transactions, creating a safe and trustworthy ecosystem for both sides.
+
+In summary, MicroBridge bridges academic talent and entrepreneurial innovation by facilitating meaningful connections. It enables students to launch their careers with hands-on startup experience and empowers startups to hire smartly and flexibly through a low-risk project-based model.
