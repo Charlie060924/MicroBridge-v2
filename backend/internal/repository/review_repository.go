@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 	"microbridge/backend/internal/models"
-	apperrors "microbridge/backend/internal/errors"
+	apperrors "microbridge/backend/internal/shared/errors"
 
 	"gorm.io/gorm"
 )
@@ -21,6 +21,10 @@ type ReviewRepository interface {
 	Delete(ctx context.Context, id string) error
 	GetUserReviewStats(ctx context.Context, userID string) (*UserReviewStats, error)
 	UpdateReviewVisibility(ctx context.Context, jobID string) error
+	// Missing methods that the service needs
+	GetByJobAndReviewer(ctx context.Context, jobID, reviewerID string) (*models.Review, error)
+	GetByReviewee(ctx context.Context, revieweeID string, limit, offset int) ([]*models.Review, int64, error)
+	GetByJob(ctx context.Context, jobID string) ([]*models.Review, error)
 }
 
 type reviewRepository struct {
@@ -208,4 +212,48 @@ func (r *reviewRepository) UpdateReviewVisibility(ctx context.Context, jobID str
 	}
 	
 	return nil
+}
+
+// GetByJobAndReviewer finds a review by job ID and reviewer ID
+func (r *reviewRepository) GetByJobAndReviewer(ctx context.Context, jobID, reviewerID string) (*models.Review, error) {
+	var review models.Review
+	if err := r.db.WithContext(ctx).
+		Where("job_id = ? AND reviewer_id = ?", jobID, reviewerID).
+		First(&review).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, apperrors.NewAppError(500, "Failed to get review", err)
+	}
+	return &review, nil
+}
+
+// GetByReviewee finds reviews for a reviewee with pagination
+func (r *reviewRepository) GetByReviewee(ctx context.Context, revieweeID string, limit, offset int) ([]*models.Review, int64, error) {
+	var reviews []*models.Review
+	var total int64
+	
+	// Get total count
+	if err := r.db.WithContext(ctx).Model(&models.Review{}).
+		Where("reviewee_id = ?", revieweeID).
+		Count(&total).Error; err != nil {
+		return nil, 0, apperrors.NewAppError(500, "Failed to count reviews", err)
+	}
+	
+	// Get paginated reviews
+	if err := r.db.WithContext(ctx).
+		Where("reviewee_id = ?", revieweeID).
+		Limit(limit).
+		Offset(offset).
+		Order("created_at DESC").
+		Find(&reviews).Error; err != nil {
+		return nil, 0, apperrors.NewAppError(500, "Failed to get reviews by reviewee", err)
+	}
+	
+	return reviews, total, nil
+}
+
+// GetByJob finds all reviews for a job (alias for GetByJobID for backwards compatibility)
+func (r *reviewRepository) GetByJob(ctx context.Context, jobID string) ([]*models.Review, error) {
+	return r.GetByJobID(ctx, jobID)
 }

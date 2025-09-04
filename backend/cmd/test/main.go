@@ -9,7 +9,7 @@ import (
 	"microbridge/backend/config"
 	"microbridge/backend/internal/database/migrations"
 	"microbridge/backend/internal/repository"
-	"microbridge/backend/internal/services/matching"
+	"microbridge/backend/internal/core/matching"
 )
 
 func main() {

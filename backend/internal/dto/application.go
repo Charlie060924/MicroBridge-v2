@@ -76,6 +76,11 @@ type ApplicationListResponse struct {
 	TotalPages   int                  `json:"total_pages"`
 }
 
+type PaginatedApplicationResponse struct {
+	Applications []*ApplicationResponse `json:"applications"`
+	Pagination   PaginationResponse     `json:"pagination"`
+}
+
 type ApplicationStatusUpdateRequest struct {
 	Status string `json:"status" validate:"required,application_status"`
 	Feedback string `json:"feedback,omitempty"`

@@ -18,6 +18,9 @@ type Review struct {
 	// Category ratings for detailed feedback
 	CategoryRatings CategoryRatings `json:"category_ratings" gorm:"type:jsonb"`
 	
+	// Anonymous review option
+	Anonymous    bool      `json:"anonymous" gorm:"default:false"`
+	
 	// Review visibility (double-blind system)
 	IsVisible    bool      `json:"is_visible" gorm:"default:false"`
 	VisibleAt    *time.Time `json:"visible_at,omitempty"`
@@ -43,6 +46,40 @@ type CategoryRatings struct {
 	QualityOfWork      int `json:"quality_of_work,omitempty"`      // 1-5
 	Communication      int `json:"communication,omitempty"`        // 1-5
 	Timeliness         int `json:"timeliness,omitempty"`           // 1-5
+}
+
+// FromMap creates CategoryRatings from map[string]int
+func (c *CategoryRatings) FromMap(ratings map[string]int) {
+	c.ClearRequirements = ratings["clear_requirements"]
+	c.Professionalism = ratings["professionalism"]
+	c.PaymentReliability = ratings["payment_reliability"]
+	c.QualityOfWork = ratings["quality_of_work"]
+	c.Communication = ratings["communication"]
+	c.Timeliness = ratings["timeliness"]
+}
+
+// ToMap converts CategoryRatings to map[string]int
+func (c CategoryRatings) ToMap() map[string]int {
+	result := make(map[string]int)
+	if c.ClearRequirements > 0 {
+		result["clear_requirements"] = c.ClearRequirements
+	}
+	if c.Professionalism > 0 {
+		result["professionalism"] = c.Professionalism
+	}
+	if c.PaymentReliability > 0 {
+		result["payment_reliability"] = c.PaymentReliability
+	}
+	if c.QualityOfWork > 0 {
+		result["quality_of_work"] = c.QualityOfWork
+	}
+	if c.Communication > 0 {
+		result["communication"] = c.Communication
+	}
+	if c.Timeliness > 0 {
+		result["timeliness"] = c.Timeliness
+	}
+	return result
 }
 
 // TableName specifies the table name for Review

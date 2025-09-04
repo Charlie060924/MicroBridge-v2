@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 	"microbridge/backend/internal/models"
-	apperrors "microbridge/backend/internal/errors"
+	apperrors "microbridge/backend/internal/shared/errors"
 
 	"gorm.io/gorm"
 )
@@ -100,11 +100,9 @@ func (r *userRepository) UpdateLastActivity(ctx context.Context, userID string) 
 	if result.Error != nil {
 		return apperrors.NewAppError(500, "Failed to update last activity", result.Error)
 	}
-
 	if result.RowsAffected == 0 {
 		return apperrors.ErrUserNotFound
 	}
-
 	return nil
 }
 

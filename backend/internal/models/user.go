@@ -52,6 +52,7 @@ type User struct {
     PrestigeLevel   int             `json:"prestige_level" gorm:"default:0"`
     MetaAchievements StringArray    `json:"meta_achievements" gorm:"type:jsonb"`
     LastActivityAt  *time.Time      `json:"last_activity_at"`
+    LastLoginAt     *time.Time      `json:"last_login_at"`
     
     // Timestamps
     CreatedAt       time.Time       `json:"created_at"`

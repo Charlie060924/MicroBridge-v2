@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 	"microbridge/backend/internal/models"
-	apperrors "microbridge/backend/internal/errors"
+	apperrors "microbridge/backend/internal/shared/errors"
 
 	"gorm.io/gorm"
 )

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,34 +11,25 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
-	"github.com/go-redis/redis/v8"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"microbridge/backend/config"
-	"microbridge/backend/internal/cache"
-	"microbridge/backend/internal/handlers"
-	"microbridge/backend/internal/middleware"
-	"microbridge/backend/internal/monitoring"
+	"microbridge/backend/internal/database"
 	"microbridge/backend/internal/repository"
-	"microbridge/backend/internal/service"
-	"microbridge/backend/internal/services/database"
-	"microbridge/backend/internal/services/matching"
-	"microbridge/backend/internal/validation"
+	"microbridge/backend/internal/services"
+	"microbridge/backend/internal/transport/http/handlers"
+	"microbridge/backend/internal/transport/http/middleware"
+	"microbridge/backend/pkg/jwt"
 	pkglogger "microbridge/backend/pkg/logger"
 )
 
 type Application struct {
-	config    *config.Config
-	logger    *pkglogger.Logger
-	db        *database.PostgresDB
-	validator *validation.Validator
-	// Services
-	userService    service.UserService
-	matchingService *matching.OptimizedMatchingService
-	// Handlers
-	userHandler    *handlers.UserHandler
-	jobHandler     *handlers.JobHandler
-	matchingHandler *handlers.MatchingHandler
+	config       *config.Config
+	logger       *pkglogger.Logger
+	db           database.Database
+	jwtService   *jwt.Service
+	userService  services.UserService
+	emailService services.EmailService
 }
 
 func main() {
@@ -68,7 +58,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// CRITICAL: Replace dangerous AutoMigrate with proper migrations
+	// Run database migrations
 	ctx := context.Background()
 	if err := db.RunMigrations(ctx); err != nil {
 		log.Error().Err(err).Msg("Database migration failed")
@@ -80,52 +70,28 @@ func main() {
 		log.Error().Err(err).Msg("Failed to get migration status")
 	}
 
-	// Initialize Redis for caching
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port),
-		Password: cfg.Redis.Password,
-		DB:       0,
-	})
-
-	// Test Redis connection
-	if err := redisClient.Ping(ctx).Err(); err != nil {
-		log.Error().Err(err).Msg("Failed to connect to Redis")
-		os.Exit(1)
-	}
-
-	// Initialize cache layer
-	cacheLayer := cache.NewCacheLayer(redisClient)
-	matchingCache := cache.NewMatchingCache(cacheLayer)
-
-	// Initialize validator
-	validator := validation.New()
+	// Initialize JWT service
+	jwtService := jwt.NewJWTService(
+		cfg.JWT.SecretKey,
+		"microbridge",
+		cfg.JWT.AccessExpiry,
+		cfg.JWT.RefreshExpiry,
+	)
 
 	// Initialize repositories
-	userRepo := repository.NewUserRepository(db.DB)
-	jobRepo := repository.NewJobRepository(db.DB)
+	userRepo := repository.NewUserRepository(db.DB())
 
 	// Initialize services
-	userService := service.NewUserService(userRepo)
-	
-	// CRITICAL: Replace your matching service with optimized version
-	baseMatchingService := matching.NewMatchingService(userRepo, jobRepo)
-	matchingService := matching.NewOptimizedMatchingService(baseMatchingService, matchingCache)
-
-	// Initialize handlers
-	userHandler := handlers.NewUserHandler(userService, validator)
-	jobHandler := handlers.NewJobHandler(jobRepo)
-	matchingHandler := handlers.NewMatchingHandler(matchingService)
+	emailService := services.NewEmailService()
+	userService := services.NewUserService(userRepo, jwtService, emailService)
 
 	app := &Application{
-		config:          cfg,
-		logger:          log,
-		db:              db,
-		validator:       validator,
-		userService:     userService,
-		matchingService: matchingService,
-		userHandler:     userHandler,
-		jobHandler:      jobHandler,
-		matchingHandler: matchingHandler,
+		config:       cfg,
+		logger:       log,
+		db:           db,
+		jwtService:   jwtService,
+		userService:  userService,
+		emailService: emailService,
 	}
 
 	// Setup router
@@ -167,10 +133,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Close Redis connection
-	if err := redisClient.Close(); err != nil {
-		log.Error().Err(err).Msg("Failed to close Redis connection")
-	}
 
 	log.Info().Msg("Server stopped")
 }
@@ -181,9 +143,6 @@ func (app *Application) setupRouter() *gin.Engine {
 	}
 
 	r := gin.New()
-
-	// Add monitoring middleware FIRST
-	r.Use(monitoring.PrometheusMiddleware())
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
@@ -197,22 +156,8 @@ func (app *Application) setupRouter() *gin.Engine {
 	config.AddAllowHeaders("Authorization")
 	r.Use(cors.New(config))
 
-	// Global middleware
-	r.Use(middleware.RequestLogger())
-	r.Use(middleware.SecurityHeaders())
-	r.Use(middleware.ErrorHandler())
-
 	// Health check
 	r.GET("/health", func(c *gin.Context) {
-		// Check database health
-		if err := app.db.SqlDB.PingContext(c.Request.Context()); err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"status": "unhealthy",
-				"error":  "database connection failed",
-			})
-			return
-		}
-
 		c.JSON(http.StatusOK, gin.H{
 			"status":      "healthy",
 			"timestamp":   time.Now(),
@@ -221,74 +166,42 @@ func (app *Application) setupRouter() *gin.Engine {
 		})
 	})
 
+	// Initialize middleware
+	authMiddleware := middleware.NewAuthMiddleware(app.jwtService, app.logger)
+
+	// Initialize handlers
+	userHandler := handlers.NewUserHandler(app.userService)
+
 	// API routes
 	api := r.Group("/api/v1")
+	
+	// Public authentication routes
+	auth := api.Group("/auth")
 	{
-		// Auth routes
-		auth := api.Group("/auth")
-		{
-			auth.POST("/register", app.userHandler.CreateUser)
-			auth.POST("/login", app.userHandler.Login)
-			auth.POST("/forgot-password", app.userHandler.ForgotPassword)
-			auth.POST("/reset-password", app.userHandler.ResetPassword)
-			auth.POST("/verify-email", app.userHandler.VerifyEmail)
-			auth.POST("/resend-verification", app.userHandler.ResendVerification)
-		}
+		auth.POST("/register", userHandler.Register)
+		auth.POST("/login", userHandler.Login)
+		auth.POST("/refresh", userHandler.RefreshToken)
+		auth.GET("/verify-email", userHandler.VerifyEmail)
+		auth.POST("/forgot-password", userHandler.ForgotPassword)
+		auth.POST("/reset-password", userHandler.ResetPassword)
+	}
 
-		// Protected routes
-		protected := api.Group("/")
-		protected.Use(middleware.AuthRequired())
-		{
-			// User routes
-			users := protected.Group("/users")
-			{
-				users.GET("/:id", app.userHandler.GetUser)
-				users.PUT("/:id", app.userHandler.UpdateUser)
-				users.DELETE("/:id", app.userHandler.DeleteUser)
-				users.GET("", app.userHandler.ListUsers)
-			}
+	// Protected user routes
+	users := api.Group("/users")
+	users.Use(authMiddleware.RequireAuth())
+	{
+		users.GET("/profile", userHandler.GetProfile)
+		users.PUT("/profile", userHandler.UpdateProfile)
+		users.GET("/:id", userHandler.GetUser)
+	}
 
-			// Job routes
-			jobs := protected.Group("/jobs")
-			{
-				jobs.GET("", app.jobHandler.GetJobs)
-				jobs.POST("", app.jobHandler.CreateJob)
-				jobs.GET("/:id", app.jobHandler.GetJob)
-				jobs.PUT("/:id", app.jobHandler.UpdateJob)
-				jobs.DELETE("/:id", app.jobHandler.DeleteJob)
-			}
-
-			// Application routes
-			applications := protected.Group("/applications")
-			{
-				applications.POST("", app.applicationHandler.CreateApplication)
-				applications.GET("/user", app.applicationHandler.GetUserApplications)
-				applications.GET("/job/:job_id", app.applicationHandler.GetJobApplications)
-				applications.GET("/:id", app.applicationHandler.GetApplication)
-				applications.PUT("/:id", app.applicationHandler.UpdateApplication)
-				applications.DELETE("/:id", app.applicationHandler.DeleteApplication)
-				applications.PUT("/:id/status", app.applicationHandler.UpdateApplicationStatus)
-				applications.POST("/:id/withdraw", app.applicationHandler.WithdrawApplication)
-			}
-
-			// Notification routes
-			notifications := protected.Group("/notifications")
-			{
-				notifications.GET("", app.notificationHandler.GetNotifications)
-				notifications.GET("/unread-count", app.notificationHandler.GetUnreadCount)
-				notifications.PUT("/:id/read", app.notificationHandler.MarkAsRead)
-				notifications.PUT("/read-all", app.notificationHandler.MarkAllAsRead)
-				notifications.DELETE("/:id", app.notificationHandler.DeleteNotification)
-				notifications.GET("/settings", app.notificationHandler.GetNotificationSettings)
-				notifications.PUT("/settings", app.notificationHandler.UpdateNotificationSettings)
-			}
-
-			// Matching routes (now cached!)
-			matching := protected.Group("/matching")
-			{
-				matching.GET("/jobs", app.matchingHandler.GetRecommendedJobs)
-			}
-		}
+	// Admin routes (placeholder)
+	admin := api.Group("/admin")
+	admin.Use(authMiddleware.RequireAuth())
+	admin.Use(authMiddleware.RequireRole("admin"))
+	{
+		admin.GET("/users", userHandler.ListUsers)
+		admin.DELETE("/users/:id", userHandler.DeleteUser)
 	}
 
 	return r

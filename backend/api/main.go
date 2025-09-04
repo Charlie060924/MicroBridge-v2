@@ -10,8 +10,8 @@ import (
 "github.com/joho/godotenv"
 
 "microbridge/backend/internal/database"
-"microbridge/backend/internal/handlers"
-"microbridge/backend/internal/middleware"
+"microbridge/backend/internal/transport/http/handlers"
+"microbridge/backend/internal/transport/http/middleware"
 "microbridge/backend/internal/routes"
 )
 

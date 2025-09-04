@@ -4,6 +4,9 @@ import (
     "time"
 )
 
+// Employer is an alias for EmployerProfile for backwards compatibility
+type Employer = EmployerProfile
+
 // EmployerProfile represents the unified employer profile combining company and personal information
 type EmployerProfile struct {
     ID          string    `json:"id" gorm:"primaryKey"`

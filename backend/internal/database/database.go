@@ -83,9 +83,7 @@ func (p *PostgresDB) RunMigrations(ctx context.Context) error {
 	for _, migration := range migrationList {
 		// Check if migration already applied
 		var count int64
-		p.db.Model(&struct {
-			Version int64 `gorm:"column:version"`
-		}{}).Where("version = ?", migration.Version).Count(&count)
+		p.db.Table("migrations").Where("version = ?", migration.Version).Count(&count)
 
 		if count == 0 {
 			// Run the migration
