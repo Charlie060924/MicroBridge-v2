@@ -4,8 +4,8 @@ import { Building2, Mail, Camera, Save, X, Edit3, Key, Link, Eye, Phone, Globe, 
 import SettingCard from '../components/SettingCard';
 import { CONNECTED_ACCOUNTS, COMPANY_SIZE_OPTIONS, INDUSTRY_OPTIONS } from '../utils/settingsConstants';
 import { useSettings } from '../hooks/useSettings';
-import Button from '@/components/common/ui/Button';
-import Input from '@/components/common/ui/Input';
+import Button from '@/components/ui/button';
+import Input from '@/components/ui/input';
 import { useProfileShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 interface AccountSettingsSectionProps {

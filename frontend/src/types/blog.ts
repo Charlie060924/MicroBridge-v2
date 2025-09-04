@@ -9,10 +9,15 @@ export type Author = {
 export type Blog = {
   _id: number;
   title: string;
-  slug?: any;
+  slug?: string | { current: string };
   metadata?: string;
   body?: string;
-  mainImage?: any;
+  mainImage?: {
+    asset: {
+      url: string;
+    };
+    alt?: string;
+  };
   author?: Author;
   tags?: string[];
   publishedAt?: string;

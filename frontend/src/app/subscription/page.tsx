@@ -5,7 +5,7 @@ import SubscriptionManagement from '@/components/subscription/SubscriptionManage
 import PricingContent from '@/components/subscription/PricingContent';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import Button from '@/components/common/ui/Button';
+import Button from '@/components/ui/button';
 
 const SubscriptionPage: React.FC = () => {
   const { user, isLoading } = useAuth();

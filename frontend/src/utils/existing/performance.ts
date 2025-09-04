@@ -19,7 +19,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 }
 
 // Throttle hook for scroll events
-export function useThrottle<T extends (...args: any[]) => any>(
+export function useThrottle<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T {
@@ -129,19 +129,19 @@ export function useMemoizedSearch<T>(
 }
 
 // Performance monitoring hook
-export function usePerformanceMonitor(componentName: string) {
+export function usePerformanceMonitor(_componentName: string) {
   const renderCount = useRef(0);
   const startTime = useRef(performance.now());
 
   useEffect(() => {
     renderCount.current += 1;
     const endTime = performance.now();
-    const renderTime = endTime - startTime.current;
+    const _renderTime = endTime - startTime.current;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(
-        `[Performance] ${componentName} rendered ${renderCount.current} times in ${renderTime.toFixed(2)}ms`
-      );
+      // // console.log(
+      //   `[Performance] ${componentName} rendered ${renderCount.current} times in ${renderTime.toFixed(2)}ms`
+      // );
     }
 
     startTime.current = performance.now();

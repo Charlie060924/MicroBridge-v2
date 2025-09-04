@@ -1,4 +1,4 @@
-import { Achievement } from "@/types/level";
+// import { Achievement } from "@/types/level"; // Unused for now
 
 /**
  * XP values for common actions

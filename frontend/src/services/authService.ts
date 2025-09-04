@@ -55,7 +55,7 @@ export interface AuthResponse {
   expires_at: string;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -117,7 +117,7 @@ class AuthService {
         success: true,
         data: data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Login failed'
@@ -139,7 +139,7 @@ class AuthService {
         success: true,
         data: data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Registration failed'
@@ -164,7 +164,7 @@ class AuthService {
         success: true,
         message: 'Password reset email sent'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to send reset email'
@@ -180,7 +180,7 @@ class AuthService {
         success: true,
         message: 'Password reset successfully'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to reset password'
@@ -196,7 +196,7 @@ class AuthService {
         success: true,
         message: 'Email verified successfully'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to verify email'
@@ -212,7 +212,7 @@ class AuthService {
         success: true,
         message: 'Verification email sent'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to send verification email'
@@ -221,7 +221,7 @@ class AuthService {
   }
 
   // Get current user
-  async getCurrentUser(): Promise<ApiResponse<any>> {
+  async getCurrentUser(): Promise<ApiResponse<unknown>> {
     try {
       const token = this.getToken();
       if (!token) {
@@ -236,7 +236,7 @@ class AuthService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response?.status === 401) {
         this.clearTokens();
       }
@@ -272,7 +272,7 @@ class AuthService {
           expires_at: data.expires_at
         }
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.clearTokens();
       return {
         success: false,

@@ -16,9 +16,9 @@ import {
 } from 'lucide-react';
 import PaymentStatusBadge from './PaymentStatusBadge';
 import TransactionSummary from './TransactionSummary';
-import Card from '@/components/common/ui/Card';
-import Badge from '@/components/common/ui/Badge';
-import Button from '@/components/common/ui/Button';
+import Card from '@/components/ui/card';
+import Badge from '@/components/ui/badge';
+import Button from '@/components/ui/button';
 
 interface UpcomingPayment {
   id: string;

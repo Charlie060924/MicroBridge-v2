@@ -9,8 +9,8 @@ import {
   Filter,
   TrendingUp
 } from 'lucide-react';
-import Card from '@/components/common/ui/Card';
-import Button from '@/components/common/ui/Button';
+import Card from '@/components/ui/card';
+import Button from '@/components/ui/button';
 import PaymentList from './PaymentList';
 import BillingHistoryTable from './BillingHistoryTable';
 import PaymentSetupModal from './PaymentSetupModal';

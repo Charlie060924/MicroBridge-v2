@@ -18,14 +18,6 @@
   background: rgba(156, 163, 175, 0.5);
 }
 
-/* Dark mode scrollbar */
-.dark .settings-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(75, 85, 99, 0.3);
-}
-
-.dark .settings-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(75, 85, 99, 0.5);
-}
 
 /* Smooth transitions for all interactive elements */
 .settings-transition {
@@ -58,7 +50,3 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* Dark mode card hover */
-.dark .settings-card-hover:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-}

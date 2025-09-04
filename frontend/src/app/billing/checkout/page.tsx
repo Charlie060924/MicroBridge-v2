@@ -46,7 +46,7 @@ const CheckoutPage: React.FC = () => {
 
   const handlePaymentComplete = () => {
     // Handle payment completion
-    console.log('Payment completed');
+    // console.log('Payment completed');
     router.push('/billing?success=true');
   };
 

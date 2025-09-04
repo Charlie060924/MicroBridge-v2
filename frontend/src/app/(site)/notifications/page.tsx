@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Bell, 
@@ -13,8 +13,7 @@ import {
   Clock,
   AlertCircle,
   Info,
-  CheckSquare,
-  Square
+  CheckSquare
 } from "lucide-react";
 import { notificationService, NotificationResponse } from "@/services/notificationService";
 import toast from "react-hot-toast";
@@ -31,9 +30,9 @@ const NotificationsPage = () => {
 
   useEffect(() => {
     loadNotifications();
-  }, [currentPage, unreadOnly]);
+  }, [currentPage, unreadOnly, loadNotifications]);
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     setLoading(true);
     try {
       const response = await notificationService.getNotifications(currentPage, 20, unreadOnly);
@@ -43,13 +42,12 @@ const NotificationsPage = () => {
       } else {
         toast.error(response.error || "Failed to load notifications");
       }
-    } catch (error) {
-      console.error("Error loading notifications:", error);
+    } catch {
       toast.error("Failed to load notifications");
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, unreadOnly]);
 
   const getNotificationIcon = (type: string) => {
     switch (type.toLowerCase()) {
@@ -106,8 +104,7 @@ const NotificationsPage = () => {
       } else {
         toast.error(response.error || "Failed to mark as read");
       }
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
+    } catch {
       toast.error("Failed to mark as read");
     }
   };
@@ -123,8 +120,7 @@ const NotificationsPage = () => {
       } else {
         toast.error(response.error || "Failed to mark all as read");
       }
-    } catch (error) {
-      console.error("Error marking all notifications as read:", error);
+    } catch {
       toast.error("Failed to mark all as read");
     }
   };
@@ -142,8 +138,7 @@ const NotificationsPage = () => {
       } else {
         toast.error(response.error || "Failed to delete notification");
       }
-    } catch (error) {
-      console.error("Error deleting notification:", error);
+    } catch {
       toast.error("Failed to delete notification");
     }
   };
@@ -175,8 +170,7 @@ const NotificationsPage = () => {
         toast.success(`${selectedNotifications.length} notification(s) deleted`);
       }
       setSelectedNotifications([]);
-    } catch (error) {
-      console.error(`Error performing bulk ${action}:`, error);
+    } catch {
       toast.error(`Failed to ${action} notifications`);
     }
   };

@@ -2,7 +2,7 @@
 import React from 'react';
 import { ArrowLeft, CheckCircle, Star, Crown, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Button from '@/components/common/ui/Button';
+import Button from '@/components/ui/button';
 import PricingSection from './PricingSection';
 import Link from 'next/link';
 

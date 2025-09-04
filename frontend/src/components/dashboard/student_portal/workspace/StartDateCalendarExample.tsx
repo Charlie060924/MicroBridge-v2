@@ -27,13 +27,13 @@ const StartDateCalendarExample: React.FC = () => {
 
   const handleSingleDateSelect = (date: Date | null) => {
     setSelectedDate(date);
-    console.log('Selected single date:', date);
+    // Selected single date logged for debugging
   };
 
   const handleRangeDateSelect = (startDate: Date | null, endDate: Date | null) => {
     setSelectedStartDate(startDate);
     setSelectedEndDate(endDate);
-    console.log('Selected date range:', { startDate, endDate });
+    // Selected date range logged for debugging
   };
 
   const getDateDisplayText = () => {

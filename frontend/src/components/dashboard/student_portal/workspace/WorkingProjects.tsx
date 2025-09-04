@@ -28,7 +28,7 @@ const WorkingProjects: React.FC = () => {
         try {
           response = await workingProjectsService.getWorkingProjects();
         } catch (apiError) {
-          console.log('API not available, using mock data');
+          // API not available, using mock data
           response = workingProjectsService.getMockWorkingProjectsResponse();
         }
 

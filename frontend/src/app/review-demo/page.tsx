@@ -8,7 +8,7 @@ const ReviewDemo = () => {
   const [reviewerRole, setReviewerRole] = useState<'employer' | 'student'>('employer');
 
   const handleReviewSubmit = async (reviewData: any) => {
-    console.log('Review submitted:', reviewData);
+    // console.log('Review submitted:', reviewData);
     alert(`Review submitted successfully!\n\nRating: ${reviewData.rating}/5\nComment: ${reviewData.comment}\nAnonymous: ${reviewData.anonymous}\nCategory Ratings: ${JSON.stringify(reviewData.categoryRatings, null, 2)}`);
     setIsModalOpen(false);
   };
@@ -74,7 +74,7 @@ const ReviewDemo = () => {
             
             <button
               onClick={() => {
-                console.log('Review system demo loaded');
+                // console.log('Review system demo loaded');
                 alert('Review system demo is ready! Click "Open Review Modal" to test.');
               }}
               className="w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium"

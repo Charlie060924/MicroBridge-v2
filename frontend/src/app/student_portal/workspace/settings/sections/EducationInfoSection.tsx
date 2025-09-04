@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { GraduationCap, Edit3, Save, X, Plus, Trash2 } from 'lucide-react';
 import SettingCard from '../components/SettingCard';
-import Button from '@/components/common/ui/Button';
-import Input from '@/components/common/ui/Input';
+import Button from '@/components/ui/button';
+import Input from '@/components/ui/input';
 import { useSettings } from '../hooks/useSettings';
 import { HK_UNIVERSITIES, STUDENT_MAJORS, YEAR_OF_STUDY } from '../utils/studentConstants';
 

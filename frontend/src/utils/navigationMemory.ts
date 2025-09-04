@@ -5,7 +5,7 @@ export interface NavigationState {
   scrollPosition: number;
   activeTab?: string;
   searchTerm?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, string | number | boolean | string[]>;
   landingPageOrigin?: 'student' | 'employer';
   previewMode?: boolean;
 }
@@ -21,7 +21,7 @@ export class NavigationMemory {
     try {
       sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
-      console.warn('Failed to save navigation state:', error);
+      // console.warn('Failed to save navigation state:', error);
     }
   }
 
@@ -36,7 +36,7 @@ export class NavigationMemory {
         return JSON.parse(stored);
       }
     } catch (error) {
-      console.warn('Failed to retrieve navigation state:', error);
+      // console.warn('Failed to retrieve navigation state:', error);
     }
     return null;
   }
@@ -48,7 +48,7 @@ export class NavigationMemory {
     try {
       sessionStorage.setItem(this.LANDING_ORIGIN_KEY, origin);
     } catch (error) {
-      console.warn('Failed to save landing origin:', error);
+      // console.warn('Failed to save landing origin:', error);
     }
   }
 
@@ -60,7 +60,7 @@ export class NavigationMemory {
       const origin = sessionStorage.getItem(this.LANDING_ORIGIN_KEY);
       return origin as 'student' | 'employer' | null;
     } catch (error) {
-      console.warn('Failed to get landing origin:', error);
+      // console.warn('Failed to get landing origin:', error);
     }
     return null;
   }
@@ -72,7 +72,7 @@ export class NavigationMemory {
     try {
       sessionStorage.removeItem(this.LANDING_ORIGIN_KEY);
     } catch (error) {
-      console.warn('Failed to clear landing origin:', error);
+      // console.warn('Failed to clear landing origin:', error);
     }
   }
 
@@ -129,7 +129,7 @@ export class NavigationMemory {
       sessionStorage.removeItem(this.STORAGE_KEY);
       sessionStorage.removeItem(this.LANDING_ORIGIN_KEY);
     } catch (error) {
-      console.warn('Failed to clear navigation state:', error);
+      // console.warn('Failed to clear navigation state:', error);
     }
   }
 }

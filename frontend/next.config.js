@@ -47,7 +47,6 @@ const nextConfig = {
   experimental: {
     // Enable modern React features
     optimizePackageImports: ['lucide-react', '@fullcalendar/react', '@fullcalendar/core'],
-    instrumentationHook: true,
   },
 
   // Bundle optimization

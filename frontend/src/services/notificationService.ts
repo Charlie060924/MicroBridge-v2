@@ -1,5 +1,14 @@
 import { api } from './api';
 
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
+  message?: string;
+}
+
 export interface NotificationResponse {
   id: string;
   user_id: string;
@@ -9,7 +18,7 @@ export interface NotificationResponse {
   is_read: boolean;
   action_url?: string;
   action_text?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean>;
   created_at: string;
   updated_at: string;
 }
@@ -56,10 +65,10 @@ class NotificationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to get notifications'
+        error: (error as ApiError)?.response?.data?.error || 'Failed to get notifications'
       };
     }
   }
@@ -72,10 +81,10 @@ class NotificationService {
         success: true,
         message: 'Notification marked as read'
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to mark notification as read'
+        error: ((error as ApiError).response)?.data?.error || 'Failed to mark notification as read'
       };
     }
   }
@@ -88,10 +97,10 @@ class NotificationService {
         success: true,
         message: 'All notifications marked as read'
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to mark all notifications as read'
+        error: ((error as ApiError).response)?.data?.error || 'Failed to mark all notifications as read'
       };
     }
   }
@@ -104,10 +113,10 @@ class NotificationService {
         success: true,
         message: 'Notification deleted'
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to delete notification'
+        error: ((error as ApiError).response)?.data?.error || 'Failed to delete notification'
       };
     }
   }
@@ -120,10 +129,10 @@ class NotificationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to get unread count'
+        error: ((error as ApiError).response)?.data?.error || 'Failed to get unread count'
       };
     }
   }
@@ -136,10 +145,10 @@ class NotificationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to get notification settings'
+        error: ((error as ApiError).response)?.data?.error || 'Failed to get notification settings'
       };
     }
   }
@@ -152,10 +161,10 @@ class NotificationService {
         success: true,
         message: 'Notification settings updated'
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to update notification settings'
+        error: ((error as ApiError).response)?.data?.error || 'Failed to update notification settings'
       };
     }
   }
@@ -171,8 +180,8 @@ class NotificationService {
           const latestNotification = response.data.notifications[0];
           callback(latestNotification);
         }
-      } catch (error) {
-        console.error('Error polling for notifications:', error);
+      } catch {
+        // console.error('Error polling for notifications:', error);
       }
     }, 30000); // Poll every 30 seconds
 
@@ -193,10 +202,10 @@ class NotificationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to get notification statistics'
+        error: ((error as ApiError).response)?.data?.error || 'Failed to get notification statistics'
       };
     }
   }
@@ -213,10 +222,10 @@ class NotificationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to create test notification'
+        error: ((error as ApiError).response)?.data?.error || 'Failed to create test notification'
       };
     }
   }

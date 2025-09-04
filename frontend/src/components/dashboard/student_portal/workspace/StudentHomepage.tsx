@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import LockedFeature from "@/components/common/LockedFeature";
 import { usePreviewMode } from "@/context/PreviewModeContext";
 import PreviewBanner from "@/components/common/PreviewBanner";
+import PreviewModeShowcase from "@/components/common/PreviewModeShowcase";
 
 // Import types from the components that define them
 import { Job } from "./JobCategoryCard";
@@ -73,7 +74,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   const router = useRouter();
-  const { isPreviewMode, isFeatureLocked } = usePreviewMode();
+  const { isPreviewMode, isFeatureLocked, getDemoData } = usePreviewMode();
 
   // Replace the useEffect with temporary mock data to avoid API errors
   useEffect(() => {
@@ -84,89 +85,164 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
         console.log("🎓 Fetching student homepage data");
         setError(null);
         
-        // Temporary mock data until your API is ready
-        const mockJobs: Job[] = [
-          {
-            id: "1",
-            title: "Frontend Developer",
-            company: "TechCorp",
-            location: "Remote",
-            salary: "$25-35/hr",
-            duration: "3 months",
-            category: "Development",
-            description: "Build responsive web applications using modern technologies",
-            skills: ["React", "TypeScript", "CSS"],
-            rating: 4.5,
-            isBookmarked: false,
-            postedDate: "2024-01-15",
-            deadline: "2024-02-15",
-            isRemote: true,
-            experienceLevel: "Intermediate"
-          },
-          {
-            id: "2",
-            title: "UI/UX Designer",
-            company: "DesignStudio",
-            location: "New York, NY",
-            salary: "$30-45/hr",
-            duration: "2 months",
-            category: "Design",
-            description: "Create beautiful and intuitive user interfaces",
-            skills: ["Figma", "Adobe XD", "Prototyping"],
-            rating: 4.8,
-            isBookmarked: true,
-            postedDate: "2024-01-10",
-            deadline: "2024-02-10",
-            isRemote: false,
-            experienceLevel: "Entry"
-          },
-          {
-            id: "3",
-            title: "Data Analyst",
-            company: "DataCorp",
-            location: "San Francisco, CA",
-            salary: "$35-50/hr",
-            duration: "4 months",
-            category: "Analytics",
-            description: "Analyze data and create insights for business decisions",
-            skills: ["Python", "SQL", "Tableau"],
-            rating: 4.2,
-            isBookmarked: false,
-            postedDate: "2024-01-20",
-            deadline: "2024-02-20",
-            isRemote: true,
-            experienceLevel: "Intermediate"
-          }
-        ];
+        // Use demo data in preview mode, fallback to temporary mock data
+        let mockJobs: Job[] = [];
+        let mockProjects: Project[] = [];
+        let mockSkills: string[] = [];
 
-        const mockProjects: Project[] = isPreviewMode ? [] : [
-          {
-            id: "1",
-            title: "E-commerce Website",
-            company: "StartupXYZ",
-            status: "In Progress",
-            progress: 75,
-            dueDate: "2024-03-01",
-            startDate: "2024-01-01",
-            description: "Building a modern e-commerce platform",
-            payment: "$2,500",
-            category: "Web Development"
-          },
-          {
-            id: "2",
-            title: "Mobile App Design",
-            company: "AppCorp",
-            status: "Review",
-            progress: 90,
-            dueDate: "2024-02-15",
-            startDate: "2024-01-15",
-            description: "Designing user interface for mobile application",
-            payment: "$1,800",
-            category: "Design"
-          }
-        ];
+        if (isPreviewMode) {
+          const demoData = getDemoData();
+          if (demoData) {
+            // Convert demo jobs to Job interface format
+            mockJobs = demoData.demoDataService?.getDemoJobs() || [
+              {
+                id: "1",
+                title: "Frontend Developer",
+                company: "TechCorp",
+                location: "Remote",
+                salary: "$25-35/hr",
+                duration: "3 months",
+                category: "Development",
+                description: "Build responsive web applications using modern technologies",
+                skills: ["React", "TypeScript", "CSS"],
+                rating: 4.5,
+                isBookmarked: false,
+                postedDate: "2024-01-15",
+                deadline: "2024-02-15",
+                isRemote: true,
+                experienceLevel: "Intermediate"
+              }
+            ];
+            
+            // Show demo projects in preview
+            mockProjects = demoData.projects ? demoData.projects.map((project: any) => ({
+              id: project.id,
+              title: project.title,
+              company: project.company,
+              status: project.status === 'active' ? 'In Progress' : project.status === 'completed' ? 'Completed' : 'Pending',
+              progress: project.progress,
+              dueDate: project.milestones?.[project.milestones.length - 1]?.dueDate || '2024-02-01',
+              startDate: '2024-01-01',
+              description: project.description,
+              payment: `$${project.budget}`,
+              category: project.category
+            })) : [];
 
-        const mockSkills = isPreviewMode ? [] : ["React", "TypeScript", "Node.js", "Python"];
+            // Show demo skills
+            mockSkills = ["React", "TypeScript", "UI/UX Design", "Python", "Node.js", "Figma"];
+          } else {
+            // Fallback for preview mode without demo data
+            mockJobs = [
+              {
+                id: "1",
+                title: "Frontend Developer",
+                company: "TechCorp",
+                location: "Remote",
+                salary: "$25-35/hr",
+                duration: "3 months",
+                category: "Development",
+                description: "Build responsive web applications using modern technologies",
+                skills: ["React", "TypeScript", "CSS"],
+                rating: 4.5,
+                isBookmarked: false,
+                postedDate: "2024-01-15",
+                deadline: "2024-02-15",
+                isRemote: true,
+                experienceLevel: "Intermediate"
+              }
+            ];
+          }
+        } else {
+          // Regular mode mock data for development
+          mockJobs = [
+            {
+              id: "1",
+              title: "Frontend Developer",
+              company: "TechCorp",
+              location: "Remote",
+              salary: "$25-35/hr",
+              duration: "3 months",
+              category: "Development",
+              description: "Build responsive web applications using modern technologies",
+              skills: ["React", "TypeScript", "CSS"],
+              rating: 4.5,
+              isBookmarked: false,
+              postedDate: "2024-01-15",
+              deadline: "2024-02-15",
+              isRemote: true,
+              experienceLevel: "Intermediate"
+            },
+            {
+              id: "2",
+              title: "UI/UX Designer",
+              company: "DesignStudio",
+              location: "New York, NY",
+              salary: "$30-45/hr",
+              duration: "2 months",
+              category: "Design",
+              description: "Create beautiful and intuitive user interfaces",
+              skills: ["Figma", "Adobe XD", "Prototyping"],
+              rating: 4.8,
+              isBookmarked: true,
+              postedDate: "2024-01-10",
+              deadline: "2024-02-10",
+              isRemote: false,
+              experienceLevel: "Entry"
+            },
+            {
+              id: "3",
+              title: "Data Analyst",
+              company: "DataCorp",
+              location: "San Francisco, CA",
+              salary: "$35-50/hr",
+              duration: "4 months",
+              category: "Analytics",
+              description: "Analyze data and create insights for business decisions",
+              skills: ["Python", "SQL", "Tableau"],
+              rating: 4.2,
+              isBookmarked: false,
+              postedDate: "2024-01-20",
+              deadline: "2024-02-20",
+              isRemote: true,
+              experienceLevel: "Intermediate"
+            }
+          ];
+        }
+
+        // Only add fallback projects if not already set in preview mode
+        if (!isPreviewMode || mockProjects.length === 0) {
+          mockProjects = isPreviewMode ? [] : [
+            {
+              id: "1",
+              title: "E-commerce Website",
+              company: "StartupXYZ",
+              status: "In Progress",
+              progress: 75,
+              dueDate: "2024-03-01",
+              startDate: "2024-01-01",
+              description: "Building a modern e-commerce platform",
+              payment: "$2,500",
+              category: "Web Development"
+            },
+            {
+              id: "2",
+              title: "Mobile App Design",
+              company: "AppCorp",
+              status: "Review",
+              progress: 90,
+              dueDate: "2024-02-15",
+              startDate: "2024-01-15",
+              description: "Designing user interface for mobile application",
+              payment: "$1,800",
+              category: "Design"
+            }
+          ];
+        }
+
+        // Only set fallback skills if not already set in preview mode
+        if (!isPreviewMode || mockSkills.length === 0) {
+          mockSkills = isPreviewMode ? [] : ["React", "TypeScript", "Node.js", "Python"];
+        }
 
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -304,9 +380,38 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
     setSearchCategory("");
   }, []);
 
-  // Update the stats cards to use real data
+  // Update the stats cards to use demo data in preview mode
   const statsCards = useMemo(() => {
     if (isPreviewMode) {
+      const demoData = getDemoData();
+      if (demoData?.stats) {
+        return [
+          {
+            icon: <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
+            bg: "bg-blue-100 dark:bg-blue-900",
+            label: "Active Projects",
+            value: demoData.projects.filter((p: any) => p.status === 'active').length
+          },
+          {
+            icon: <Calendar className="h-6 w-6 text-green-600 dark:text-green-400" />,
+            bg: "bg-green-100 dark:bg-green-900",
+            label: "Completed",
+            value: demoData.stats.projectsCompleted
+          },
+          {
+            icon: <User className="h-6 w-6 text-purple-600 dark:text-purple-400" />,
+            bg: "bg-purple-100 dark:bg-purple-900",
+            label: "Skills",
+            value: demoData.stats.skillsVerified
+          },
+          {
+            icon: <DollarSign className="h-6 w-6 text-orange-600 dark:text-orange-400" />,
+            bg: "bg-orange-100 dark:bg-orange-900",
+            label: "Earnings",
+            value: `$${(demoData.stats.totalEarnings / 1000).toFixed(1)}k`
+          }
+        ];
+      }
       return [
         {
           icon: <TrendingUp className="h-6 w-6 text-gray-400" />,
@@ -327,7 +432,7 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
           value: "—"
         },
         {
-          icon: <TrendingUp className="h-6 w-6 text-gray-400" />,
+          icon: <DollarSign className="h-6 w-6 text-gray-400" />,
           bg: "bg-gray-100 dark:bg-gray-800",
           label: "Earnings",
           value: "—"
@@ -552,26 +657,12 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                     )}
                   </div>
 
-                  {/* Current Projects - Locked in Preview Mode */}
+                  {/* Current Projects - Show Demo Projects in Preview Mode */}
                   <div>
-                    {isPreviewMode ? (
-                      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            Current Projects
-                          </h3>
-                          <Lock className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">
-                          Sign in to view your current projects and track progress.
-                        </p>
-                      </div>
-                    ) : (
-                      <OngoingProjects
-                        projects={ongoingProjects}
-                        onProjectClick={handleProjectClick}
-                      />
-                    )}
+                    <OngoingProjects
+                      projects={ongoingProjects}
+                      onProjectClick={handleProjectClick}
+                    />
                   </div>
                 </div>
 
@@ -595,6 +686,11 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                     </div>
                   ))}
                 </div>
+
+                {/* Preview Mode CTA Showcase */}
+                {isPreviewMode && (
+                  <PreviewModeShowcase variant="inline" />
+                )}
               </div>
             )}
           </>

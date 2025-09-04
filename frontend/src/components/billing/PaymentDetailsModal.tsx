@@ -15,9 +15,9 @@ import {
   ArrowLeft,
   ExternalLink
 } from 'lucide-react';
-import Modal from '@/components/common/ui/modal';
-import Button from '@/components/common/ui/Button';
-import Badge from '@/components/common/ui/Badge';
+import Modal from '@/components/ui/modal';
+import Button from '@/components/ui/button';
+import Badge from '@/components/ui/badge';
 
 interface PaymentDetails {
   id: string;

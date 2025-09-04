@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { X, GraduationCap, Briefcase, Award, DollarSign, Filter } from "lucide-react";
-import Modal from "@/components/common/ui/modal";
-import { Slider } from "@/components/common/ui/slider";
+import Modal from "@/components/ui/modal";
+import { Slider } from "@/components/ui/slider";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FilterModalProps {

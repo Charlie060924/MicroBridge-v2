@@ -53,8 +53,8 @@ export const LevelProvider = ({ children }: { children: ReactNode }) => {
     // Handle level up rewards
     if (result.levelUp && result.rewards) {
       // You could trigger a level up modal here
-      console.log(`Level up! Reached level ${result.newData.level}`);
-      console.log(`Rewards: ${result.rewards.careerCoins} CC, Unlocks: ${result.rewards.unlocks.join(', ')}`);
+      // console.log(`Level up! Reached level ${result.newData.level}`);
+      // console.log(`Rewards: ${result.rewards.careerCoins} CC, Unlocks: ${result.rewards.unlocks.join(', ')}`);
     }
   };
 
@@ -79,7 +79,7 @@ export const LevelProvider = ({ children }: { children: ReactNode }) => {
     setLevelData(result.newData);
     
     if (result.isNew) {
-      console.log(`Achievement unlocked: ${achievement.title}`);
+      // console.log(`Achievement unlocked: ${achievement.title}`);
     }
   };
 
@@ -89,7 +89,7 @@ export const LevelProvider = ({ children }: { children: ReactNode }) => {
     setLevelData(result.newData);
     
     if (result.streakBonus > 0) {
-      console.log(`Streak bonus: +${result.streakBonus} XP`);
+      // console.log(`Streak bonus: +${result.streakBonus} XP`);
     }
   };
 
@@ -98,7 +98,7 @@ export const LevelProvider = ({ children }: { children: ReactNode }) => {
     const result = enhancedLevelService.prestigeBadges(levelData);
     if (result.success) {
       setLevelData(result.newData);
-      console.log(`Prestige level increased to ${result.newData.prestigeLevel}`);
+      // console.log(`Prestige level increased to ${result.newData.prestigeLevel}`);
     }
     return result.success;
   };

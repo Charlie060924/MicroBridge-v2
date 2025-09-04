@@ -81,7 +81,7 @@ export interface ApplicationListResponse {
   total_pages: number;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -97,7 +97,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to create application'
@@ -113,7 +113,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to get application'
@@ -129,7 +129,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to update application'
@@ -145,7 +145,7 @@ class ApplicationService {
         success: true,
         message: 'Application deleted successfully'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to delete application'
@@ -170,7 +170,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to get user applications'
@@ -195,7 +195,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to get job applications'
@@ -211,7 +211,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to update application status'
@@ -227,7 +227,7 @@ class ApplicationService {
         success: true,
         message: 'Application withdrawn successfully'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to withdraw application'
@@ -243,7 +243,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response?.status === 404) {
         return {
           success: true,
@@ -272,7 +272,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to get application statistics'
@@ -295,7 +295,7 @@ class ApplicationService {
         success: true,
         data: response.data
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to get job application statistics'

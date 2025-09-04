@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Target, Edit3, Save, X, Plus, Trash2 } from 'lucide-react';
 import SettingCard from '../components/SettingCard';
-import Button from '@/components/common/ui/Button';
+import Button from '@/components/ui/button';
 import { useSettings } from '../hooks/useSettings';
 import { CAREER_INTERESTS, TARGET_INDUSTRIES, AVAILABILITY_PREFERENCES } from '../utils/studentConstants';
 

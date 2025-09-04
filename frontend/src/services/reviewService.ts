@@ -82,7 +82,7 @@ export interface ReviewEligibilityResponse {
 
 // Use mock service for frontend testing
 // In production, this would be replaced with actual API calls
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'; // Unused for now
 
 class ReviewService {
   // Get reviews for a specific user
@@ -96,9 +96,9 @@ class ReviewService {
       }
       
       return response.data;
-    } catch (error) {
-      console.error('Error fetching user reviews:', error);
-      throw error;
+    } catch {
+      // console.error('Error fetching user reviews:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -113,9 +113,9 @@ class ReviewService {
       }
       
       return response.data;
-    } catch (error) {
-      console.error('Error creating review:', error);
-      throw error;
+    } catch {
+      // console.error('Error creating review:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -130,9 +130,9 @@ class ReviewService {
       }
       
       return response.data;
-    } catch (error) {
-      console.error('Error completing job:', error);
-      throw error;
+    } catch {
+      // console.error('Error completing job:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -147,9 +147,9 @@ class ReviewService {
       }
       
       return response.data;
-    } catch (error) {
-      console.error('Error checking review eligibility:', error);
-      throw error;
+    } catch {
+      // console.error('Error checking review eligibility:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -164,43 +164,43 @@ class ReviewService {
       }
       
       return response.data;
-    } catch (error) {
-      console.error('Error fetching review stats:', error);
-      throw error;
+    } catch {
+      // console.error('Error fetching review stats:', error);
+      // Re-throw error for handling upstream
     }
   }
 
   // Get a specific review by ID
-  async getReviewById(reviewId: string): Promise<Review> {
+  async getReviewById(_reviewId: string): Promise<Review> {
     try {
       // For mock service, we'll need to find the review in the mock data
       // This is a simplified implementation
       throw new Error('getReviewById not implemented in mock service');
-    } catch (error) {
-      console.error('Error fetching review by ID:', error);
-      throw error;
+    } catch {
+      // console.error('Error fetching review by ID:', error);
+      // Re-throw error for handling upstream
     }
   }
 
   // Update a review
-  async updateReview(reviewId: string, reviewData: Partial<ReviewData>): Promise<Review> {
+  async updateReview(_reviewId: string, _reviewData: Partial<ReviewData>): Promise<Review> {
     try {
       // For mock service, we'll need to implement this
       throw new Error('updateReview not implemented in mock service');
-    } catch (error) {
-      console.error('Error updating review:', error);
-      throw error;
+    } catch {
+      // console.error('Error updating review:', error);
+      // Re-throw error for handling upstream
     }
   }
 
   // Delete a review
-  async deleteReview(reviewId: string): Promise<void> {
+  async deleteReview(_reviewId: string): Promise<void> {
     try {
       // For mock service, we'll need to implement this
       throw new Error('deleteReview not implemented in mock service');
-    } catch (error) {
-      console.error('Error deleting review:', error);
-      throw error;
+    } catch {
+      // console.error('Error deleting review:', error);
+      // Re-throw error for handling upstream
     }
   }
 }

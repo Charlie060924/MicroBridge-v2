@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Edit3, User, Mail, MapPin, Calendar, Briefcase, Award, ExternalLink } from 'lucide-react';
-import Button from './ui/Button';
+import Button from '@/components/ui/Button';
 import Modal from './ui/modal';
 
 interface ProfileData {

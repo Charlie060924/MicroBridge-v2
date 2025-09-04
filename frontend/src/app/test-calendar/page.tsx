@@ -8,7 +8,7 @@ const TestCalendarPage: React.FC = () => {
 
   const handleDateSelect = (date: Date | null) => {
     setSelectedDate(date);
-    console.log('Selected date:', date);
+    // console.log('Selected date:', date);
   };
 
   return (

@@ -114,7 +114,7 @@ const TestReviewSystem = () => {
                 setSelectedProject(null);
               }}
               onSubmit={async (reviewData) => {
-                console.log('Review submitted:', reviewData);
+                // console.log('Review submitted:', reviewData);
                 alert('Review submitted successfully! Check console for details.');
                 setIsModalOpen(false);
                 setSelectedProject(null);

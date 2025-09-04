@@ -49,7 +49,7 @@ function LevelOverview() {
     getEmployerLevelColor = levelHook.getEmployerLevelColor;
   } catch (err) {
     setError("Failed to load level data");
-    console.error("Level hook error:", err);
+    // console.error("Level hook error:", err);
   }
 
   useEffect(() => {

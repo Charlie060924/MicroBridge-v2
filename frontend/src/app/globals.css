@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-@custom-variant dark (&:is(.dark *));
 
 @theme {
   --font-*: initial;
@@ -8,19 +7,36 @@
 
   --color-current: currentColor;
   --color-transparent: transparent;
-  --color-stroke: #eeeeee;
-  --color-strokedark: #2d2f40;
-  --color-hoverdark: #252a42;
-  --color-titlebg: #adfff8;
-  --color-titlebg2: #ffeac2;
-  --color-titlebgdark: #46495a;
-  --color-btndark: #292e45;
+  
+  /* Brand Colors */
+  --color-primary: #006bff;
+  --color-primary-hover: #0056d9;
+  --color-secondary: #20c5a8;
+  --color-success: #28c76f;
+  --color-warning: #ffba00;
+  --color-error: #f44336;
+  --color-info: #00b8ff;
+  
+  /* Neutral Colors */
   --color-white: #ffffff;
   --color-black: #181c31;
+  --color-neutral-dark: #181c31;
+  --color-neutral-light: #edf5ff;
+  
+  /* Gray Scale */
+  --color-gray-700: #757693;
+  --color-gray-500: #999aa1;
+  --color-gray-200: #eeeeee;
+  --color-gray-100: #fbfbfb;
+  --color-gray-50: #edf5ff;
+  
+  /* Legacy Support (keeping existing names for compatibility) */
+  --color-stroke: #eeeeee;
+  --color-titlebg: #adfff8;
+  --color-titlebg2: #ffeac2;
   --color-blackho: #2c3149;
   --color-blacksection: #1c2136;
-  --color-primary: #006bff;
-  --color-primaryho: #0063ec;
+  --color-primaryho: #0056d9;
   --color-meta: #20c5a8;
   --color-waterloo: #757693;
   --color-manatee: #999aa1;
@@ -28,6 +44,14 @@
   --color-zumthor: #edf5ff;
   --color-socialicon: #d1d8e0;
 
+  /* Typography Scale - Brand Design System */
+  --text-h1: 36px, 44px, 700; /* 2.25rem / bold */
+  --text-h2: 24px, 32px, 700; /* 1.5rem / bold */
+  --text-h3: 20px, 28px, 600; /* 1.25rem / semibold */
+  --text-body: 16px, 26px, 400; /* 1rem / regular */
+  --text-caption: 14px, 20px, 400; /* 0.875rem / regular */
+  
+  /* Legacy Typography (for compatibility) */
   --text-metatitle: 12px, 20px;
   --text-sectiontitle: 14px, 22px;
   --text-regular: 16px, 26px;
@@ -105,11 +129,115 @@
   html {
     font-family: var(--font-inter), system-ui, sans-serif;
   }
+  
+  /* Accessibility improvements */
+  *:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  
+  /* Typography base styles */
+  h1 {
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+    font-weight: 700;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+  }
+  
+  body {
+    font-size: 1rem;
+    line-height: 1.625rem;
+    font-weight: 400;
+  }
+  
+  /* Ensure minimum font size for accessibility */
+  small, .caption {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 400;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* Button Components - Design System */
+  .btn-primary {
+    @apply bg-primary text-white border-0 rounded-lg px-6 py-3 font-semibold min-h-[44px] hover:bg-primary-hover transition-all duration-200 focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-white border-0 rounded-lg px-6 py-3 font-semibold min-h-[44px] hover:brightness-90 transition-all duration-200 focus:ring-2 focus:ring-secondary focus:ring-offset-2;
+  }
+  
+  .btn-success {
+    @apply bg-success text-white border-0 rounded-lg px-6 py-3 font-semibold min-h-[44px] hover:brightness-90 transition-all duration-200 focus:ring-2 focus:ring-success focus:ring-offset-2;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-primary text-primary bg-transparent rounded-lg px-6 py-3 font-semibold min-h-[44px] hover:bg-primary hover:text-white transition-all duration-200 focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+  
+  /* Input Components - Design System */
+  .input-field {
+    @apply min-h-[48px] px-4 py-3 border border-gray-200 rounded-lg bg-white text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200;
+  }
+  
+  /* Card Components - Design System */
+  .card {
+    @apply bg-white rounded-lg p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200;
+  }
+  
+  .card-lg {
+    @apply bg-white rounded-lg p-8 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200;
+  }
+  
+  /* Status Badges - Semantic Colors */
+  .badge-success {
+    @apply bg-success text-white px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-warning {
+    @apply bg-warning text-black px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-error {
+    @apply bg-error text-white px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-info {
+    @apply bg-info text-white px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-primary {
+    @apply bg-primary text-white px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-secondary {
+    @apply bg-secondary text-white px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  /* Tab Components */
+  .tab-active {
+    @apply border-b-2 border-primary text-primary font-semibold;
+  }
+  
+  .tab-inactive {
+    @apply border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium;
   }
 }
 
@@ -150,26 +278,26 @@
 
 /* Blog details styles */
 .blog-details h1 {
-  @apply mb-6 text-[32px] font-bold! leading-tight! text-black dark:text-white sm:text-4xl md:text-5xl;
+  @apply mb-6 text-[32px] font-bold! leading-tight! text-black sm:text-4xl md:text-5xl;
 }
 
 .blog-details h2 strong,
 .blog-details h2 {
-  @apply mb-4 text-[26px] font-bold! leading-tight! text-black dark:text-white sm:text-3xl md:text-4xl;
+  @apply mb-4 text-[26px] font-bold! leading-tight! text-black sm:text-3xl md:text-4xl;
 }
 
 .blog-details ul,
 .blog-details ol {
-  @apply mb-10 list-inside list-disc text-titlebgdark;
+  @apply mb-10 list-inside list-disc text-black;
 }
 
 .blog-details li,
 .blog-details li {
-  @apply mb-2 text-base text-titlebgdark dark:text-waterloo;
+  @apply mb-2 text-base text-waterloo;
 }
 
 .blog-details blockquote {
-  @apply relative z-10 mb-10 overflow-hidden rounded-xs bg-manatee p-8 text-center text-base font-medium italic text-black dark:bg-titlebgdark md:py-9 lg:px-10;
+  @apply relative z-10 mb-10 overflow-hidden rounded-xs bg-manatee p-8 text-center text-base font-medium italic text-black md:py-9 lg:px-10;
 }
 
 .blog-details blockquote::after {
@@ -179,18 +307,18 @@
 
 .blog-details blockquote::before {
   content: "";
-  @apply absolute left-0 top-0 h-[106px] w-[140px] bg-[url(/images/blog/quote-shape-1.svg)] bg-contain bg-left-top bg-no-repeat dark:bg-[url(/images/blog/quote-shape-1.svg)];
+  @apply absolute left-0 top-0 h-[106px] w-[140px] bg-[url(/images/blog/quote-shape-1.svg)] bg-contain bg-left-top bg-no-repeat;
 }
 
 pre {
-  @apply relative mb-2 rounded-lg bg-strokedark px-4 py-2;
+  @apply relative mb-2 rounded-lg bg-gray-800 px-4 py-2;
 }
 .prism-copy-button {
   @apply absolute right-2 top-2 h-[26px] rounded-sm bg-white px-4 text-primary;
 }
 
 .active-tab {
-  @apply bg-stroke text-black dark:bg-blackho dark:text-white;
+  @apply bg-stroke text-black;
 }
 
 /* Custom utilities for student homepage */
@@ -227,7 +355,7 @@ pre {
 }
 
 .menu-item-inactive {
-  @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800;
+  @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
 }
 
 .menu-item-text {
@@ -275,7 +403,7 @@ pre {
 
 /* Badge overflow prevention */
 .sidebar-badge {
-  @apply absolute -top-1 -right-1 px-2 py-1 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900;
+  @apply absolute -top-1 -right-1 px-2 py-1 rounded-full flex items-center justify-center border-2 border-white;
   max-width: calc(100% - 1rem);
   overflow: hidden;
 }

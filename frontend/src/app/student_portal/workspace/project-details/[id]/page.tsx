@@ -36,14 +36,14 @@ const ProjectDetailsPage: React.FC = () => {
         try {
           projectData = await workingProjectsService.getWorkingProjectById(projectId);
         } catch (apiError) {
-          console.log('API not available, using mock data');
+          // console.log('API not available, using mock data');
           const mockProjects = workingProjectsService.getMockWorkingProjects();
           projectData = mockProjects.find(p => p.id === projectId) || mockProjects[0];
         }
         
         setProject(projectData);
       } catch (error) {
-        console.error('Error fetching project:', error);
+        // console.error('Error fetching project:', error);
         setError('Failed to load project details');
       } finally {
         setIsLoading(false);

@@ -1,0 +1,5 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#1F2937"/>
+  <circle cx="400" cy="300" r="100" fill="#374151"/>
+  <text x="400" y="310" text-anchor="middle" fill="#E5E7EB" font-family="Arial" font-size="18">Features Dark 02</text>
+</svg>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Key, LogOut, Smartphone, AlertTriangle, Eye, Activity } from 'lucide-react';
 import SettingCard from '../components/SettingCard';
 import ToggleSwitch from '../components/ToggleSwitch';
-import Button from '@/components/common/ui/Button';
+import Button from '@/components/ui/button';
 import { useSettings } from '../hooks/useSettings';
 
 interface SecurityAccountSectionProps {
@@ -57,7 +57,7 @@ const SecurityAccountSection: React.FC<SecurityAccountSectionProps> = ({
   const handleSignOutAllDevices = () => {
     if (confirm('This will sign you out from all devices. You will need to log in again on each device. Continue?')) {
       // Handle sign out from all devices
-      console.log('Signing out from all devices...');
+      // console.log('Signing out from all devices...');
     }
   };
 

@@ -14,7 +14,7 @@ export function useUser() {
         setUser(userData);
       } catch (err) {
         setError('Failed to fetch user data');
-        console.error('Error fetching user:', err);
+        // console.error('Error fetching user:', err);
       } finally {
         setLoading(false);
       }
@@ -31,7 +31,7 @@ export function useUser() {
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
       return { success: true };
-    } catch (err) {
+    } catch {
       setError('Failed to update user');
       return { success: false, error: 'Update failed' };
     }

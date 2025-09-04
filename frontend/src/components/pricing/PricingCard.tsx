@@ -1,8 +1,8 @@
 "use client";
 import React from 'react';
 import { Check, Star, Crown, Zap, Briefcase, GraduationCap, CalendarDays, MessageSquare, Shield } from 'lucide-react';
-import Button from '@/components/common/ui/Button';
-import Badge from '@/components/common/ui/Badge';
+import Button from '@/components/ui/button';
+import Badge from '@/components/ui/badge';
 
 export interface PricingPlan {
   id: string;

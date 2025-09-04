@@ -107,12 +107,12 @@ const JobAnalyticsPage: React.FC = () => {
   }, [jobId]);
 
   const handleExport = () => {
-    console.log('Export analytics data');
+    // console.log('Export analytics data');
     // Implement export functionality
   };
 
   const handleShare = () => {
-    console.log('Share analytics');
+    // console.log('Share analytics');
     // Implement share functionality
   };
 

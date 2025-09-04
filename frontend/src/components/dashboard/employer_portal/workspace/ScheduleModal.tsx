@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { Calendar, Clock, User, MapPin, FileText, X } from "lucide-react";
-import Modal from "@/components/common/ui/modal";
-import Button from "@/components/common/ui/Button";
-import Input from "@/components/common/ui/Input";
+import Modal from "@/components/ui/modal";
+import Button from "@/components/ui/button";
+import Input from "@/components/ui/input";
 
 interface Candidate {
   id: string;

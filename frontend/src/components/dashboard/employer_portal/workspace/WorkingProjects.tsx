@@ -14,8 +14,8 @@ import {
   AlertCircle,
   ExternalLink
 } from 'lucide-react';
-import Button from '@/components/common/ui/Button';
-import Badge from '@/components/common/ui/Badge';
+import Button from '@/components/ui/button';
+import Badge from '@/components/ui/badge';
 import ReviewModal, { ReviewData } from '@/components/reviews/ReviewModal';
 
 interface WorkingProject {

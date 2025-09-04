@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import JobActionModal, { ModalType } from '@/components/common/JobActionModal';
-import Button from '@/components/common/ui/Button';
+import Button from '@/components/ui/button';
 
 interface ModalState {
   isOpen: boolean;

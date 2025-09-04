@@ -1,7 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, memo } from "react";
-import ThemeToggler from "./ThemeToggler";
 import menuData from "./menuData";
 import Link from "next/link";
 
@@ -167,8 +166,6 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-6 2xsm:gap-8">
-            <ThemeToggler />
-
             <div className="flex items-center gap-5 2xsm:gap-6">
               <Link
                 href={isEmployer ? "/" : "/employer"}

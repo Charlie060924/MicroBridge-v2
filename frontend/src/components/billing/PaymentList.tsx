@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, User, Building } from 'lucide-react';
-import Button from '@/components/common/ui/Button';
-import Badge from '@/components/common/ui/Badge';
+import Button from '@/components/ui/button';
+import Badge from '@/components/ui/badge';
 
 interface PaymentItem {
   id: string;

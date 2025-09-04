@@ -35,6 +35,8 @@ const Feature = lazy(() => import("@/components/marketing/home/Features/index").
 const FeaturesTab = lazy(() => import("@/components/marketing/home/FeaturesTab/index").catch(() => ({ default: () => <div>Error loading FeaturesTab</div> })));
 const Testimonial = lazy(() => import("@/components/marketing/Testimonial/index").catch(() => ({ default: () => <div>Error loading Testimonial</div> })));
 const Pricing = lazy(() => import("@/components/marketing/Pricing/index").catch(() => ({ default: () => <div>Error loading Pricing</div> })));
+const HowItWorks = lazy(() => import("@/components/marketing/HowItWorks/index").catch(() => ({ default: () => <div>Error loading HowItWorks</div> })));
+const TrustSignals = lazy(() => import("@/components/marketing/TrustSignals/index").catch(() => ({ default: () => <div>Error loading TrustSignals</div> })));
 const FAQ = lazy(() => import("@/components/marketing/FAQ/index").catch(() => ({ default: () => <div>Error loading FAQ</div> })));
 const Contact = lazy(() => import("@/components/marketing/Contact/index").catch(() => ({ default: () => <div>Error loading Contact</div> })));
 const Blog = lazy(() => import("@/components/marketing/Blog/index"));
@@ -58,7 +60,7 @@ const NonCriticalSection = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function Home() {
-  console.log("Home component rendering");
+  // console.log("Home component rendering");
   
   return (
     <LandingLayout>
@@ -67,9 +69,10 @@ export default function Home() {
         <LazyLoadComponent>
           <Hero />
         </LazyLoadComponent>
-        
+
+        {/* How It Works - Before Features as per UX recommendations */}
         <LazyLoadComponent>
-          <Brands />
+          <HowItWorks />
         </LazyLoadComponent>
 
         {/* Main features */}
@@ -84,6 +87,11 @@ export default function Home() {
         {/* Below-the-fold components (less critical) */}
         <NonCriticalSection>
           <Testimonial />
+        </NonCriticalSection>
+
+        {/* Trust Signals - After Testimonials as per UX recommendations */}
+        <NonCriticalSection>
+          <TrustSignals />
         </NonCriticalSection>
 
         <NonCriticalSection>

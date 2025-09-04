@@ -295,7 +295,7 @@ export const mockCalendarEvents: CalendarEvent[] = [
 // Mock API functions that simulate backend calls
 export const mockApi = {
   // Jobs
-  getJobs: async (filters?: any): Promise<{ jobs: Job[]; total: number }> => {
+  getJobs: async (filters?: unknown): Promise<{ jobs: Job[]; total: number }> => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -384,7 +384,7 @@ export const mockApi = {
     };
   },
   
-  register: async (userData: any): Promise<{ user: User; token: string }> => {
+  register: async (userData: unknown): Promise<{ user: User; token: string }> => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     return {
       user: { ...userData, id: Date.now().toString(), role: 'student' },

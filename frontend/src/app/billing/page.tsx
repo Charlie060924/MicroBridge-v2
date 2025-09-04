@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import SharedBillingDashboard from '@/components/billing/SharedBillingDashboard';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import Button from '@/components/common/ui/Button';
+import Button from '@/components/ui/Button';
 
 const BillingPage: React.FC = () => {
   const { user, isLoading } = useAuth();

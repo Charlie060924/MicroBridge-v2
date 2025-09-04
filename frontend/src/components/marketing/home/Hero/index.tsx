@@ -134,7 +134,7 @@ const Hero = ({ variant = "student" }: HeroProps) => {
           <div className="animate_right hidden md:w-1/2 lg:block">
             <div className="relative 2xl:-mr-7.5">
               {/* Main Image */}
-              <div className="relative aspect-700/444 w-full">
+              <div className="relative w-full h-[444px]">
                 <Image
                   className="shadow-solid-l dark:hidden"
                   src={

@@ -11,10 +11,10 @@ import HelpSupportSection from './sections/HelpSupportSection';
 import { useSettings } from './hooks/useSettings';
 import { useSettingsShortcuts } from '@/hooks/useKeyboardShortcuts';
 import StickyActionBar, { SettingsActionBar } from '@/components/common/StickyActionBar';
-import { animations } from '@/components/common/ui/Animations';
+import { animations } from '@/components/ui/Animations';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import Button from '@/components/common/ui/Button';
+import Button from '@/components/ui/button';
 
 export default function SettingsPage() {
   const { settings, saveSettings, resetSettings, isLoading, hasChanges, isSettingsLoaded } = useSettings();
@@ -28,7 +28,7 @@ export default function SettingsPage() {
       await saveSettings();
       // Show success message or toast
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      // console.error('Failed to save settings:', error);
       // Show error message or toast
     } finally {
       setIsSaving(false);

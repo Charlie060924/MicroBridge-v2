@@ -423,9 +423,9 @@ class MockReviewService {
   }
 
   // Flag a review for moderation
-  async flagReview(reviewId: string, reason: string): Promise<void> {
+  async flagReview(_reviewId: string, _reason: string): Promise<void> {
     // In a real implementation, this would create a moderation ticket
-    console.log(`Review ${reviewId} flagged for moderation: ${reason}`);
+    // console.log(`Review ${_reviewId} flagged for moderation: ${_reason}`);
   }
 
   // Get pending reviews for a user

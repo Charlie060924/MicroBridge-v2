@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, User, Building } from 'lucide-react';
-import Badge from '@/components/common/ui/Badge';
+import Badge from '@/components/ui/badge';
 
 interface BillingHistoryItem {
   id: string;

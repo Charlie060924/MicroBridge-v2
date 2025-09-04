@@ -24,8 +24,8 @@ class RecentlyViewedJobsService {
       
       const jobs = JSON.parse(stored) as RecentlyViewedJob[];
       return jobs.sort((a, b) => new Date(b.viewedAt).getTime() - new Date(a.viewedAt).getTime());
-    } catch (error) {
-      console.error('Error getting recently viewed jobs:', error);
+    } catch {
+      // console.error('Error getting recently viewed jobs:', error);
       return [];
     }
   }
@@ -51,8 +51,8 @@ class RecentlyViewedJobsService {
       const updatedJobs = [recentlyViewedJob, ...filteredJobs].slice(0, MAX_RECENT_JOBS);
       
       localStorage.setItem(key, JSON.stringify(updatedJobs));
-    } catch (error) {
-      console.error('Error adding recently viewed job:', error);
+    } catch {
+      // console.error('Error adding recently viewed job:', error);
     }
   }
 
@@ -66,8 +66,8 @@ class RecentlyViewedJobsService {
       const updatedJobs = existingJobs.filter(job => job.id !== jobId);
       
       localStorage.setItem(key, JSON.stringify(updatedJobs));
-    } catch (error) {
-      console.error('Error removing recently viewed job:', error);
+    } catch {
+      // console.error('Error removing recently viewed job:', error);
     }
   }
 
@@ -78,39 +78,39 @@ class RecentlyViewedJobsService {
       
       const key = this.getStorageKey(userId);
       localStorage.removeItem(key);
-    } catch (error) {
-      console.error('Error clearing recently viewed jobs:', error);
+    } catch {
+      // console.error('Error clearing recently viewed jobs:', error);
     }
   }
 
   // Get recently viewed jobs from API (if available)
-  async fetchRecentlyViewedJobsFromAPI(userId?: string): Promise<RecentlyViewedJob[]> {
+  async fetchRecentlyViewedJobsFromAPI(_userId?: string): Promise<RecentlyViewedJob[]> {
     try {
       // TODO: Replace with actual API endpoint when backend is ready
-      // const response = await fetch(`/api/jobs/recently-viewed${userId ? `?userId=${userId}` : ''}`);
+      // const response = await fetch(`/api/jobs/recently-viewed${_userId ? `?userId=${_userId}` : ''}`);
       // if (!response.ok) throw new Error('Failed to fetch recently viewed jobs');
       // return await response.json();
       
       // For now, return empty array - will be replaced with actual API call
       return [];
-    } catch (error) {
-      console.error('Error fetching recently viewed jobs from API:', error);
+    } catch {
+      // console.error('Error fetching recently viewed jobs from API:', error);
       return [];
     }
   }
 
   // Sync with API (when backend is ready)
-  async syncWithAPI(userId?: string): Promise<void> {
+  async syncWithAPI(_userId?: string): Promise<void> {
     try {
       // TODO: Implement API sync when backend is ready
-      // const apiJobs = await this.fetchRecentlyViewedJobsFromAPI(userId);
-      // const localJobs = this.getRecentlyViewedJobs(userId);
+      // const apiJobs = await this.fetchRecentlyViewedJobsFromAPI(_userId);
+      // const localJobs = this.getRecentlyViewedJobs(_userId);
       // 
       // // Merge and sync logic here
       // const mergedJobs = this.mergeJobs(apiJobs, localJobs);
-      // localStorage.setItem(this.getStorageKey(userId), JSON.stringify(mergedJobs));
-    } catch (error) {
-      console.error('Error syncing recently viewed jobs with API:', error);
+      // localStorage.setItem(this.getStorageKey(_userId), JSON.stringify(mergedJobs));
+    } catch {
+      // console.error('Error syncing recently viewed jobs with API:', error);
     }
   }
 

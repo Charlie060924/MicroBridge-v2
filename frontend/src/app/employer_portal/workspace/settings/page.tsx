@@ -12,7 +12,7 @@ import OtherSettingsSection from './sections/OtherSettingsSection';
 import { useSettings } from './hooks/useSettings';
 import { useSettingsShortcuts } from '@/hooks/useKeyboardShortcuts';
 import StickyActionBar, { SettingsActionBar } from '@/components/common/StickyActionBar';
-import { animations } from '@/components/common/ui/Animations';
+import { animations } from '@/components/ui/Animations';
 
 export default function EmployerSettingsPage() {
   const { settings, saveSettings, resetSettings, isLoading, hasChanges } = useSettings();
@@ -24,7 +24,7 @@ export default function EmployerSettingsPage() {
       await saveSettings();
       // Show success message or toast
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      // console.error('Failed to save settings:', error);
       // Show error message or toast
     } finally {
       setIsSaving(false);

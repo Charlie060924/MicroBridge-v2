@@ -18,7 +18,7 @@ export const originTracking = {
       timestamp: Date.now()
     };
     sessionStorage.setItem('jobNavigationOrigin', JSON.stringify(originContext));
-    console.log('Origin tracking set:', originContext);
+    // console.log('Origin tracking set:', originContext);
   },
 
   /**
@@ -28,7 +28,7 @@ export const originTracking = {
     try {
       const stored = sessionStorage.getItem('jobNavigationOrigin');
       if (!stored) {
-        console.log('No origin tracking found');
+        // console.log('No origin tracking found');
         return null;
       }
       
@@ -37,12 +37,12 @@ export const originTracking = {
       // Check if the origin is still valid (within 1 hour)
       const oneHour = 60 * 60 * 1000;
       if (Date.now() - originContext.timestamp > oneHour) {
-        console.log('Origin tracking expired, clearing');
+        // console.log('Origin tracking expired, clearing');
         sessionStorage.removeItem('jobNavigationOrigin');
         return null;
       }
       
-      console.log('Origin tracking found:', originContext);
+      // console.log('Origin tracking found:', originContext);
       return originContext;
     } catch (error) {
       console.error('Error parsing origin context:', error);
@@ -56,7 +56,7 @@ export const originTracking = {
    */
   clearOrigin: (): void => {
     sessionStorage.removeItem('jobNavigationOrigin');
-    console.log('Origin tracking cleared');
+    // console.log('Origin tracking cleared');
   },
 
   /**
@@ -107,14 +107,14 @@ export const useOriginTracking = () => {
   const getReturnUrl = () => {
     const origin = getOrigin();
     const url = originTracking.getReturnUrl(origin?.page || null);
-    console.log('Return URL:', url, 'for origin:', origin?.page);
+    // console.log('Return URL:', url, 'for origin:', origin?.page);
     return url;
   };
 
   const getReturnText = () => {
     const origin = getOrigin();
     const text = originTracking.getReturnText(origin?.page || null);
-    console.log('Return text:', text, 'for origin:', origin?.page);
+    // console.log('Return text:', text, 'for origin:', origin?.page);
     return text;
   };
 

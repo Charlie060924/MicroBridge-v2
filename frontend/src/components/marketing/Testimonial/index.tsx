@@ -1,5 +1,5 @@
 "use client";
-import { lazy, Suspense, useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import SectionHeader from "@/components/common/Common/SectionHeader";
 import { Autoplay, Pagination } from "swiper";
@@ -8,8 +8,8 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-// Only lazy load the SingleTestimonial component
-const SingleTestimonial = lazy(() => import("./SingleTestimonial"));
+// Import SingleTestimonial directly instead of lazy loading
+import SingleTestimonial from "./SingleTestimonial";
 
 // Import testimonial data normally
 import { testimonialData } from "./testimonialData";
@@ -73,9 +73,7 @@ const Testimonial = () => {
       >
         {data.map((review) => (
           <SwiperSlide key={review?.id}>
-            <Suspense fallback={<TestimonialSkeleton />}>
-              <SingleTestimonial review={review} />
-            </Suspense>
+            <SingleTestimonial review={review} />
           </SwiperSlide>
         ))}
       </Swiper>
@@ -115,9 +113,7 @@ const Testimonial = () => {
             >
               {testimonialData.map((review) => (
                 <SwiperSlide key={review?.id}>
-                  <Suspense fallback={<TestimonialSkeleton />}>
-                    <SingleTestimonial review={review} />
-                  </Suspense>
+                  <SingleTestimonial review={review} />
                 </SwiperSlide>
               ))}
             </Swiper>

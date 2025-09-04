@@ -51,7 +51,7 @@ export default function NotificationHistoryPage() {
     try {
       await markAsRead(id);
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      // console.error('Failed to mark notification as read:', error);
     }
   };
 
@@ -59,7 +59,7 @@ export default function NotificationHistoryPage() {
     try {
       await deleteNotification(id);
     } catch (error) {
-      console.error('Failed to delete notification:', error);
+      // console.error('Failed to delete notification:', error);
     }
   };
 

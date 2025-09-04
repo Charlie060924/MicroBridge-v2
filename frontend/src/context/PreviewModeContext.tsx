@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { NavigationMemory } from '@/utils/navigationMemory';
+import { previewDemoDataService, PreviewDemoDataService } from '@/services/demoData';
+import { previewAnalytics } from '@/services/previewAnalytics';
 
 interface PreviewModeContextType {
   isPreviewMode: boolean;
@@ -12,6 +14,10 @@ interface PreviewModeContextType {
   exitPreviewMode: () => void;
   isFeatureLocked: (feature: string) => boolean;
   currentLandingPage: 'student' | 'employer' | 'general' | null;
+  demoDataService: PreviewDemoDataService;
+  getDemoData: () => any;
+  getABTestVariation: (element: string) => string;
+  setABTestVariation: (variation: number) => void;
 }
 
 const PreviewModeContext = createContext<PreviewModeContextType | undefined>(undefined);
@@ -74,6 +80,8 @@ export const PreviewModeProvider: React.FC<PreviewModeProviderProps> = ({ childr
       sessionStorage.setItem('previewType', type);
       // Save landing origin for this preview session
       NavigationMemory.saveLandingOrigin(type);
+      // Start analytics tracking
+      previewAnalytics.startPreviewSession(type);
     } else {
       // Check session storage for existing preview mode
       const storedPreview = sessionStorage.getItem('previewMode');
@@ -82,6 +90,8 @@ export const PreviewModeProvider: React.FC<PreviewModeProviderProps> = ({ childr
       if (storedPreview === 'true' && (storedType === 'student' || storedType === 'employer')) {
         setIsPreviewMode(true);
         setPreviewType(storedType);
+        // Resume analytics tracking if session exists
+        previewAnalytics.startPreviewSession(storedType);
       }
     }
   }, [searchParams, isAuthenticated]);
@@ -108,6 +118,9 @@ export const PreviewModeProvider: React.FC<PreviewModeProviderProps> = ({ childr
   };
 
   const exitPreviewMode = () => {
+    // End analytics tracking before exiting
+    previewAnalytics.endPreviewSession();
+    
     setIsPreviewMode(false);
     setPreviewType(null);
     sessionStorage.removeItem('previewMode');
@@ -164,13 +177,33 @@ export const PreviewModeProvider: React.FC<PreviewModeProviderProps> = ({ childr
     return lockedFeatures[previewType!]?.includes(feature) || false;
   };
 
+  // Demo data functions
+  const getDemoData = () => {
+    if (!isPreviewMode || !previewType) return null;
+    return previewDemoDataService.getDemoData(previewType);
+  };
+
+  const getABTestVariation = (element: string): string => {
+    // Get variation from analytics service (which handles assignment)
+    const variationIndex = previewAnalytics.getABTestVariation(element);
+    return previewDemoDataService.getABTestVariation(element as any);
+  };
+
+  const setABTestVariation = (variation: number) => {
+    previewDemoDataService.setABTestVariation(variation);
+  };
+
   const value: PreviewModeContextType = {
     isPreviewMode,
     previewType,
     enterPreviewMode,
     exitPreviewMode,
     isFeatureLocked,
-    currentLandingPage
+    currentLandingPage,
+    demoDataService: previewDemoDataService,
+    getDemoData,
+    getABTestVariation,
+    setABTestVariation
   };
 
   return (

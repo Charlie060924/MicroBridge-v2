@@ -8,6 +8,7 @@ import { originTracking } from "@/utils/originTracking";
 import { usePreviewMode } from "@/context/PreviewModeContext";
 import LockedFeature from "@/components/common/LockedFeature";
 import PreviewBanner from "@/components/common/PreviewBanner";
+import PreviewModeShowcase from "@/components/common/PreviewModeShowcase";
 
 // Import types
 interface Job {
@@ -97,7 +98,7 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
   });
 
   const router = useRouter();
-  const { isPreviewMode, isFeatureLocked } = usePreviewMode();
+  const { isPreviewMode, isFeatureLocked, getDemoData } = usePreviewMode();
 
   // Replace the useEffect with temporary mock data to avoid API errors
   useEffect(() => {
@@ -205,8 +206,15 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
           }
         ];
 
-        const mockCandidates: Candidate[] = isPreviewMode ? [] : [
-          {
+        let mockCandidates: Candidate[] = [];
+        
+        if (isPreviewMode) {
+          const demoData = getDemoData();
+          // Use mock candidates data or fallback to empty array
+          mockCandidates = demoData ? [] : []; // Will show demo candidates with CTA
+        } else {
+          mockCandidates = [
+            {
             id: "1",
             name: "Sarah Wilson",
             headline: "Senior Frontend Developer",
@@ -332,27 +340,47 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
             profilePicture: "/images/user/user-03.png",
             matchScore: 82
           }
-        ];
+          ];
+        }
 
-        const mockStats = isPreviewMode ? {
-          totalJobs: 0,
-          activeJobs: 0,
-          totalApplications: 0,
-          pendingApplications: 0,
-          averageTimeToFill: 0,
-          totalViews: 0,
-          shortlistedCandidates: 0,
-          savedCandidates: 0
-        } : {
-          totalJobs: 15,
-          activeJobs: 8,
-          totalApplications: 45,
-          pendingApplications: 12,
-          averageTimeToFill: 14,
-          totalViews: 234,
-          shortlistedCandidates: 5,
-          savedCandidates: 3
-        };
+        let mockStats;
+        if (isPreviewMode) {
+          const demoData = getDemoData();
+          if (demoData?.stats) {
+            mockStats = {
+              totalJobs: demoData.stats.jobsPosted,
+              activeJobs: demoData.stats.activeProjects,
+              totalApplications: demoData.stats.applicationsReceived,
+              pendingApplications: Math.floor(demoData.stats.applicationsReceived * 0.3),
+              averageTimeToFill: demoData.stats.avgTimeToHire,
+              totalViews: demoData.stats.applicationsReceived * 3,
+              shortlistedCandidates: demoData.stats.candidatesInterviewed,
+              savedCandidates: Math.floor(demoData.stats.candidatesInterviewed * 0.8)
+            };
+          } else {
+            mockStats = {
+              totalJobs: 0,
+              activeJobs: 0,
+              totalApplications: 0,
+              pendingApplications: 0,
+              averageTimeToFill: 0,
+              totalViews: 0,
+              shortlistedCandidates: 0,
+              savedCandidates: 0
+            };
+          }
+        } else {
+          mockStats = {
+            totalJobs: 15,
+            activeJobs: 8,
+            totalApplications: 45,
+            pendingApplications: 12,
+            averageTimeToFill: 14,
+            totalViews: 234,
+            shortlistedCandidates: 5,
+            savedCandidates: 3
+          };
+        }
 
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -591,6 +619,13 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
             )}
           </div>
         </div>
+
+        {/* Preview Mode CTA Showcase */}
+        {isPreviewMode && (
+          <div className="mt-8">
+            <PreviewModeShowcase variant="inline" />
+          </div>
+        )}
       </div>
     </div>
   );

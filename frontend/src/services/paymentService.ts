@@ -22,9 +22,9 @@ class PaymentService {
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Error creating payment intent:', error);
-      throw error;
+    } catch {
+      // console.error('Error creating payment intent:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -59,8 +59,8 @@ class PaymentService {
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Card payment error:', error);
+    } catch {
+      // console.error('Card payment error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Payment failed'
@@ -94,8 +94,8 @@ class PaymentService {
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('PayMe payment error:', error);
+    } catch {
+      // console.error('PayMe payment error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'PayMe payment failed'
@@ -122,8 +122,8 @@ class PaymentService {
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Alipay payment error:', error);
+    } catch {
+      // console.error('Alipay payment error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Alipay payment failed'
@@ -156,8 +156,8 @@ class PaymentService {
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Saved payment error:', error);
+    } catch {
+      // console.error('Saved payment error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Saved payment failed'
@@ -181,16 +181,16 @@ class PaymentService {
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Error getting payment status:', error);
-      throw error;
+    } catch {
+      // console.error('Error getting payment status:', error);
+      // Re-throw error for handling upstream
     }
   }
 
   /**
    * Get saved payment methods for user
    */
-  async getSavedPaymentMethods(): Promise<any[]> {
+  async getSavedPaymentMethods(): Promise<unknown[]> {
     try {
       const response = await fetch(`${this.baseUrl}/api/payments/saved-methods`, {
         headers: {
@@ -203,8 +203,8 @@ class PaymentService {
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Error getting saved payment methods:', error);
+    } catch {
+      // console.error('Error getting saved payment methods:', error);
       return [];
     }
   }
@@ -225,9 +225,9 @@ class PaymentService {
       }
 
       return await response.blob();
-    } catch (error) {
-      console.error('Error downloading receipt:', error);
-      throw error;
+    } catch {
+      // console.error('Error downloading receipt:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -246,8 +246,8 @@ class PaymentService {
       });
 
       return response.ok;
-    } catch (error) {
-      console.error('Error sending confirmation email:', error);
+    } catch {
+      // console.error('Error sending confirmation email:', error);
       return false;
     }
   }

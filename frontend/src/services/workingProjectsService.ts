@@ -34,9 +34,9 @@ class WorkingProjectsService {
     try {
       const response = await api.get(this.baseUrl);
       return response.data;
-    } catch (error) {
-      console.error('Error fetching working projects:', error);
-      throw error;
+    } catch {
+      // console.error('Error fetching working projects:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -44,9 +44,9 @@ class WorkingProjectsService {
     try {
       const response = await api.get(`${this.baseUrl}/${id}`);
       return response.data;
-    } catch (error) {
-      console.error('Error fetching working project:', error);
-      throw error;
+    } catch {
+      // console.error('Error fetching working project:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -54,9 +54,9 @@ class WorkingProjectsService {
     try {
       const response = await api.patch(`${this.baseUrl}/${id}/progress`, { progress });
       return response.data;
-    } catch (error) {
-      console.error('Error updating project progress:', error);
-      throw error;
+    } catch {
+      // console.error('Error updating project progress:', error);
+      // Re-throw error for handling upstream
     }
   }
 
@@ -64,9 +64,9 @@ class WorkingProjectsService {
     try {
       const response = await api.post(`${this.baseUrl}/${id}/submit`);
       return response.data;
-    } catch (error) {
-      console.error('Error submitting project for review:', error);
-      throw error;
+    } catch {
+      // console.error('Error submitting project for review:', error);
+      // Re-throw error for handling upstream
     }
   }
 

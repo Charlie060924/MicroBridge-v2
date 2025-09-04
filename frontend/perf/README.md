@@ -138,3 +138,4 @@ perf/
 - **Smooth animations** at 60fps
 - **Fast navigation** between pages
 
+
