@@ -8,6 +8,9 @@ import LockedFeature from "@/components/common/LockedFeature";
 import { usePreviewMode } from "@/context/PreviewModeContext";
 import PreviewBanner from "@/components/common/PreviewBanner";
 import PreviewModeShowcase from "@/components/common/PreviewModeShowcase";
+import { jobService } from "@/services/jobService";
+import { matchingService } from "@/services/matchingService";
+import { useAuth } from "@/hooks/useAuth";
 
 // Import types from the components that define them
 import { Job } from "./JobCategoryCard";
@@ -75,8 +78,9 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
 
   const router = useRouter();
   const { isPreviewMode, isFeatureLocked, getDemoData } = usePreviewMode();
+  const { user: authUser } = useAuth();
 
-  // Replace the useEffect with temporary mock data to avoid API errors
+  // Fetch real data from API
   useEffect(() => {
     console.log("🎓 StudentHomepage useEffect triggered, isPreviewMode:", isPreviewMode);
     
@@ -84,17 +88,77 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
       try {
         console.log("🎓 Fetching student homepage data");
         setError(null);
+        setIsDataLoading(true);
         
-        // Use demo data in preview mode, fallback to temporary mock data
-        let mockJobs: Job[] = [];
-        let mockProjects: Project[] = [];
-        let mockSkills: string[] = [];
-
         if (isPreviewMode) {
-          const demoData = getDemoData();
-          if (demoData) {
-            // Convert demo jobs to Job interface format
-            mockJobs = demoData.demoDataService?.getDemoJobs() || [
+          // Use demo data in preview mode
+          handlePreviewModeData();
+        } else {
+          // Fetch real data from backend
+          await fetchRealData();
+        }
+      } catch (error) {
+        console.error("🎓 Error fetching student homepage data:", error);
+        setError("Failed to load dashboard data. Please try refreshing the page.");
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+
+    const fetchRealData = async () => {
+      // Fetch featured jobs
+      const jobsResult = await jobService.listJobs({}, 1, 6);
+      if (jobsResult.success && jobsResult.data) {
+        const jobs: Job[] = jobsResult.data.jobs.map(job => ({
+          id: job.id,
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          salary: job.salary ? `$${job.salary.min_amount}-${job.salary.max_amount}` : 'Negotiable',
+          duration: job.duration ? `${job.duration} months` : 'Flexible',
+          category: job.category,
+          description: job.description,
+          skills: job.skills.map(skill => skill.name),
+          rating: 4.5, // TODO: Add rating from backend
+          isBookmarked: false, // TODO: Add bookmark status from backend
+          postedDate: job.created_at.split('T')[0],
+          deadline: job.application_deadline?.split('T')[0] || '',
+          isRemote: job.is_remote,
+          experienceLevel: job.experience_level === 'entry' ? 'Entry' : 
+                          job.experience_level === 'intermediate' ? 'Intermediate' : 'Advanced'
+        }));
+        setFeaturedJobs(jobs);
+      }
+
+      // Fetch job recommendations if user is authenticated
+      if (authUser?.id) {
+        const recommendationsResult = await matchingService.getAIJobRecommendations(authUser.id, { limit: 5 });
+        if (recommendationsResult.success && recommendationsResult.data) {
+          // Convert recommendations to jobs format if needed
+          console.log("🤖 Got job recommendations:", recommendationsResult.data);
+        }
+
+        // Set user skills from profile
+        if (authUser.skills) {
+          setUserSkills(Array.isArray(authUser.skills) ? authUser.skills : []);
+        }
+      }
+
+      // Fetch recently viewed jobs
+      const recentJobs = recentlyViewedJobsService.getRecentJobs();
+      setRecentlyViewedJobs(recentJobs);
+    };
+
+    const handlePreviewModeData = () => {
+      // Use demo data in preview mode
+      let mockJobs: Job[] = [];
+      let mockProjects: Project[] = [];
+      let mockSkills: string[] = [];
+      
+      const demoData = getDemoData();
+      if (demoData) {
+        // Convert demo jobs to Job interface format
+        mockJobs = demoData.demoDataService?.getDemoJobs() || [
               {
                 id: "1",
                 title: "Frontend Developer",
