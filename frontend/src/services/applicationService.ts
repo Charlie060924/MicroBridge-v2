@@ -84,23 +84,21 @@ export interface ApplicationListResponse {
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
-  error?: string;
   message?: string;
+  errors?: string[];
 }
 
 class ApplicationService {
-  // Create a new application
-  async createApplication(request: CreateApplicationRequest): Promise<ApiResponse<ApplicationResponse>> {
+  // Submit a new application
+  async submitApplication(request: CreateApplicationRequest): Promise<ApiResponse<ApplicationResponse>> {
     try {
       const response = await api.post('/applications', request);
-      return {
-        success: true,
-        data: response.data
-      };
-    } catch (error: unknown) {
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to create application'
+        message: error.response?.data?.message || 'Failed to submit application',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -109,14 +107,12 @@ class ApplicationService {
   async getApplication(id: string): Promise<ApiResponse<ApplicationResponse>> {
     try {
       const response = await api.get(`/applications/${id}`);
-      return {
-        success: true,
-        data: response.data
-      };
-    } catch (error: unknown) {
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to get application'
+        message: error.response?.data?.message || 'Failed to get application',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -166,14 +162,12 @@ class ApplicationService {
       }
 
       const response = await api.get(`/applications/user?${params.toString()}`);
-      return {
-        success: true,
-        data: response.data
-      };
-    } catch (error: unknown) {
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to get user applications'
+        message: error.response?.data?.message || 'Failed to get user applications',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -190,15 +184,13 @@ class ApplicationService {
         params.append('status', status);
       }
 
-      const response = await api.get(`/applications/job/${jobId}?${params.toString()}`);
-      return {
-        success: true,
-        data: response.data
-      };
-    } catch (error: unknown) {
+      const response = await api.get(`/jobs/${jobId}/applications?${params.toString()}`);
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to get job applications'
+        message: error.response?.data?.message || 'Failed to get job applications',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -207,14 +199,12 @@ class ApplicationService {
   async updateApplicationStatus(id: string, request: ApplicationStatusUpdateRequest): Promise<ApiResponse<ApplicationResponse>> {
     try {
       const response = await api.put(`/applications/${id}/status`, request);
-      return {
-        success: true,
-        data: response.data
-      };
-    } catch (error: unknown) {
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to update application status'
+        message: error.response?.data?.message || 'Failed to update application status',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -222,15 +212,13 @@ class ApplicationService {
   // Withdraw application
   async withdrawApplication(id: string, request: ApplicationWithdrawalRequest = {}): Promise<ApiResponse> {
     try {
-      await api.post(`/applications/${id}/withdraw`, request);
-      return {
-        success: true,
-        message: 'Application withdrawn successfully'
-      };
-    } catch (error: unknown) {
+      const response = await api.put(`/applications/${id}/withdraw`, request);
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to withdraw application'
+        message: error.response?.data?.message || 'Failed to withdraw application',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }

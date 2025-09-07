@@ -37,29 +37,40 @@ export interface ResendVerificationRequest {
   email: string;
 }
 
+export interface UserResponse {
+  id: string;
+  email: string;
+  name: string;
+  user_type: string;
+  email_verified: boolean;
+  is_active: boolean;
+  bio: string;
+  skills: string[];
+  interests: string[];
+  experience_level: string;
+  location: string;
+  portfolio: string;
+  preferred_salary: string;
+  work_preference: string;
+  level: number;
+  xp: number;
+  career_coins: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AuthResponse {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    user_type: string;
-    email_verified: boolean;
-    level: number;
-    xp: number;
-    career_coins: number;
-    created_at: string;
-    updated_at: string;
-  };
+  user: UserResponse;
   access_token: string;
   refresh_token: string;
-  expires_at: string;
+  expires_in: number;
 }
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
-  error?: string;
   message?: string;
+  errors?: string[];
 }
 
 class AuthService {
@@ -107,20 +118,18 @@ class AuthService {
   async login(credentials: LoginRequest): Promise<ApiResponse<AuthResponse>> {
     try {
       const response = await api.post('/auth/login', credentials);
-      const data = response.data;
+      const apiResponse = response.data;
       
-      if (data.access_token) {
-        this.setTokens(data.access_token, data.refresh_token);
+      if (apiResponse.success && apiResponse.data?.access_token) {
+        this.setTokens(apiResponse.data.access_token, apiResponse.data.refresh_token);
       }
       
-      return {
-        success: true,
-        data: data
-      };
-    } catch (error: unknown) {
+      return apiResponse;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Login failed'
+        message: error.response?.data?.message || 'Login failed',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -129,20 +138,18 @@ class AuthService {
   async register(userData: RegisterRequest): Promise<ApiResponse<AuthResponse>> {
     try {
       const response = await api.post('/auth/register', userData);
-      const data = response.data;
+      const apiResponse = response.data;
       
-      if (data.access_token) {
-        this.setTokens(data.access_token, data.refresh_token);
+      if (apiResponse.success && apiResponse.data?.access_token) {
+        this.setTokens(apiResponse.data.access_token, apiResponse.data.refresh_token);
       }
       
-      return {
-        success: true,
-        data: data
-      };
-    } catch (error: unknown) {
+      return apiResponse;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Registration failed'
+        message: error.response?.data?.message || 'Registration failed',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -159,15 +166,13 @@ class AuthService {
   // Forgot Password
   async forgotPassword(request: ForgotPasswordRequest): Promise<ApiResponse> {
     try {
-      await api.post('/auth/forgot-password', request);
-      return {
-        success: true,
-        message: 'Password reset email sent'
-      };
-    } catch (error: unknown) {
+      const response = await api.post('/auth/forgot-password', request);
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to send reset email'
+        message: error.response?.data?.message || 'Failed to send reset email',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -175,31 +180,27 @@ class AuthService {
   // Reset Password
   async resetPassword(request: ResetPasswordRequest): Promise<ApiResponse> {
     try {
-      await api.post('/auth/reset-password', request);
-      return {
-        success: true,
-        message: 'Password reset successfully'
-      };
-    } catch (error: unknown) {
+      const response = await api.post('/auth/reset-password', request);
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to reset password'
+        message: error.response?.data?.message || 'Failed to reset password',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
 
   // Verify Email
-  async verifyEmail(request: VerifyEmailRequest): Promise<ApiResponse> {
+  async verifyEmail(token: string): Promise<ApiResponse> {
     try {
-      await api.post('/auth/verify-email', request);
-      return {
-        success: true,
-        message: 'Email verified successfully'
-      };
-    } catch (error: unknown) {
+      const response = await api.get(`/auth/verify-email?token=${token}`);
+      return response.data;
+    } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to verify email'
+        message: error.response?.data?.message || 'Failed to verify email',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
@@ -220,63 +221,58 @@ class AuthService {
     }
   }
 
-  // Get current user
-  async getCurrentUser(): Promise<ApiResponse<unknown>> {
+  // Get current user profile
+  async getCurrentUser(): Promise<ApiResponse<UserResponse>> {
     try {
       const token = this.getToken();
       if (!token) {
         return {
           success: false,
-          error: 'No authentication token'
+          message: 'No authentication token',
+          errors: ['No authentication token']
         };
       }
 
-      const response = await api.get('/users/me');
-      return {
-        success: true,
-        data: response.data
-      };
-    } catch (error: unknown) {
+      const response = await api.get('/users/profile');
+      return response.data;
+    } catch (error: any) {
       if (error.response?.status === 401) {
         this.clearTokens();
       }
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to get user data'
+        message: error.response?.data?.message || 'Failed to get user data',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
 
   // Refresh token
-  async refreshToken(): Promise<ApiResponse<{ access_token: string; expires_at: string }>> {
+  async refreshToken(): Promise<ApiResponse<{ access_token: string; refresh_token: string; expires_in: number }>> {
     try {
       const refreshToken = this.getRefreshToken();
       if (!refreshToken) {
         return {
           success: false,
-          error: 'No refresh token'
+          message: 'No refresh token',
+          errors: ['No refresh token']
         };
       }
 
       const response = await api.post('/auth/refresh', { refresh_token: refreshToken });
-      const data = response.data;
+      const apiResponse = response.data;
       
-      if (data.access_token) {
-        localStorage.setItem(this.tokenKey, data.access_token);
+      if (apiResponse.success && apiResponse.data?.access_token) {
+        this.setTokens(apiResponse.data.access_token, apiResponse.data.refresh_token);
       }
       
-      return {
-        success: true,
-        data: {
-          access_token: data.access_token,
-          expires_at: data.expires_at
-        }
-      };
-    } catch (error: unknown) {
+      return apiResponse;
+    } catch (error: any) {
       this.clearTokens();
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to refresh token'
+        message: error.response?.data?.message || 'Failed to refresh token',
+        errors: error.response?.data?.errors || [error.message]
       };
     }
   }
