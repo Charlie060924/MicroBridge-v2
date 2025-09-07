@@ -77,7 +77,10 @@
       "Read(/C:\\Users\\yeekw\\Desktop\\MicroBridge-v2\\backend\\internal\\repository/**)",
       "Read(/C:\\Users\\yeekw\\Desktop\\MicroBridge-v2\\backend\\internal\\dto/**)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(dir:*)",
+      "Bash(mkdir:*)",
+      "Bash(go test:*)"
     ],
     "deny": [],
     "ask": []
