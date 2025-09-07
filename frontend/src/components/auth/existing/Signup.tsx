@@ -15,6 +15,7 @@ const Signup = () => {
     lastName: "",
     email: "",
     password: "",
+    user_type: "student" as "student" | "employer",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,15 +25,16 @@ const Signup = () => {
       setIsLoading(true);
       try {
         const result = await register({
-          firstName: data.firstName,
-          lastName: data.lastName,
+          name: `${data.firstName} ${data.lastName}`,
           email: data.email,
           password: data.password,
+          user_type: data.user_type,
         });
         
         if (result.success) {
           // Check landing page origin for proper routing
           const landingOrigin = NavigationMemory.getLandingOrigin();
+          const userType = result.data?.user?.user_type || data.user_type;
           
           if (landingOrigin) {
             // Route based on landing page origin
@@ -42,22 +44,22 @@ const Signup = () => {
             // Clear the landing origin after use
             NavigationMemory.clearLandingOrigin();
           } else {
-            // Default behavior based on user role
-            const userRole = localStorage.getItem('mock_user_role') || 'student';
-            const basePath = userRole === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
+            // Default behavior based on user type from registration
+            const basePath = userType === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
             router.push(basePath);
-            toast.success(`Welcome! Redirecting you to your ${userRole} dashboard.`);
+            toast.success(`Welcome! Redirecting you to your ${userType} dashboard.`);
           }
         } else {
-          alert(result.error || "Registration failed");
+          const errorMessage = result.error || result.errors?.join(', ') || "Registration failed";
+          toast.error(errorMessage);
         }
       } catch (error) {
-        alert("Registration failed. Please try again.");
+        toast.error("Registration failed. Please try again.");
       } finally {
         setIsLoading(false);
       }
     } else {
-      alert("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
     }
   };
 
@@ -206,6 +208,35 @@ const Signup = () => {
                   }
                   className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-hidden dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
                 />
+              </div>
+
+              {/* User Type Selection */}
+              <div className="mb-7.5">
+                <p className="mb-3 text-sm text-body-color dark:text-body-color-dark">I am a:</p>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="user_type"
+                      value="student"
+                      checked={data.user_type === "student"}
+                      onChange={(e) => setData({ ...data, user_type: e.target.value as "student" | "employer" })}
+                      className="accent-primary"
+                    />
+                    <span>Student looking for opportunities</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="user_type"
+                      value="employer"
+                      checked={data.user_type === "employer"}
+                      onChange={(e) => setData({ ...data, user_type: e.target.value as "student" | "employer" })}
+                      className="accent-primary"
+                    />
+                    <span>Employer hiring talent</span>
+                  </label>
+                </div>
               </div>
 
               {/* Checkbox and Submit */}

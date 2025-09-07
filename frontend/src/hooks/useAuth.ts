@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { mockApi, User } from '@/services/mockData';
+import { authService, type UserResponse } from '@/services/authService';
 
 interface AuthState {
-  user: User | null;
+  user: UserResponse | null;
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -16,28 +16,37 @@ export function useAuth() {
     isAuthenticated: false,
   });
 
-  // Check for existing token and mock role on mount and when mock role changes
+  // Check for existing token on mount and validate it
   useEffect(() => {
     const checkAuth = async () => {
       setAuthState(prev => ({ ...prev, isLoading: true }));
       
-      const token = localStorage.getItem('auth_token');
-      const mockRole = localStorage.getItem('mock_user_role');
+      const token = authService.getToken();
       
-      if (token && mockRole !== 'none') {
+      if (token) {
         try {
-          // Mock: validate token and get user
-          const user = await mockApi.getCurrentUser();
-          setAuthState({
-            user,
-            token,
-            isLoading: false,
-            isAuthenticated: true,
-          });
+          // Validate token by getting current user
+          const result = await authService.getCurrentUser();
+          if (result.success && result.data) {
+            setAuthState({
+              user: result.data,
+              token,
+              isLoading: false,
+              isAuthenticated: true,
+            });
+          } else {
+            console.log('🔐 Token invalid, clearing auth state');
+            authService.clearTokens();
+            setAuthState({
+              user: null,
+              token: null,
+              isLoading: false,
+              isAuthenticated: false,
+            });
+          }
         } catch (error) {
-          console.log('🔐 Token invalid, clearing auth state');
-          // Token invalid, clear it
-          localStorage.removeItem('auth_token');
+          console.log('🔐 Error validating token, clearing auth state');
+          authService.clearTokens();
           setAuthState({
             user: null,
             token: null,
@@ -46,7 +55,7 @@ export function useAuth() {
           });
         }
       } else {
-        console.log('🔐 No token or mock role is "none", setting unauthenticated');
+        console.log('🔐 No token found, setting unauthenticated');
         setAuthState({
           user: null,
           token: null,
@@ -58,10 +67,10 @@ export function useAuth() {
 
     checkAuth();
 
-    // Listen for storage changes (when mock role changes)
+    // Listen for storage changes (when tokens change)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'mock_user_role' || e.key === 'auth_token') {
-        console.log('🔄 Storage changed, rechecking auth state');
+      if (e.key === 'auth_token') {
+        console.log('🔄 Auth token changed, rechecking auth state');
         checkAuth();
       }
     };
@@ -73,46 +82,73 @@ export function useAuth() {
   const login = async (email: string, password: string) => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
-      const { user, token } = await mockApi.login(email, password);
-      localStorage.setItem('auth_token', token);
-      setAuthState({
-        user,
-        token,
-        isLoading: false,
-        isAuthenticated: true,
-      });
-      console.log('🔐 Login successful:', user.role);
-      return { success: true };
+      const result = await authService.login({ email, password });
+      
+      if (result.success && result.data) {
+        const token = authService.getToken();
+        setAuthState({
+          user: result.data.user,
+          token,
+          isLoading: false,
+          isAuthenticated: true,
+        });
+        console.log('🔐 Login successful:', result.data.user.user_type);
+        return { success: true, data: result.data };
+      } else {
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+        console.log('🔐 Login failed:', result.message);
+        return { success: false, error: result.message, errors: result.errors };
+      }
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
-      console.log('🔐 Login failed:', error);
-      return { success: false, error: 'Invalid credentials' };
+      console.log('🔐 Login error:', error);
+      return { success: false, error: 'Login failed. Please try again.' };
     }
   };
 
-  const register = async (userData: any) => {
+  const register = async (userData: {
+    email: string;
+    name: string;
+    password: string;
+    user_type: 'student' | 'employer';
+    phone?: string;
+    experience_level?: string;
+    location?: string;
+    work_preference?: string;
+    bio?: string;
+    portfolio?: string;
+    skills?: string[];
+    interests?: string[];
+  }) => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
-      const { user, token } = await mockApi.register(userData);
-      localStorage.setItem('auth_token', token);
-      setAuthState({
-        user,
-        token,
-        isLoading: false,
-        isAuthenticated: true,
-      });
-      console.log('🔐 Registration successful:', user.role);
-      return { success: true };
+      const result = await authService.register(userData);
+      
+      if (result.success && result.data) {
+        const token = authService.getToken();
+        setAuthState({
+          user: result.data.user,
+          token,
+          isLoading: false,
+          isAuthenticated: true,
+        });
+        console.log('🔐 Registration successful:', result.data.user.user_type);
+        return { success: true, data: result.data };
+      } else {
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+        console.log('🔐 Registration failed:', result.message);
+        return { success: false, error: result.message, errors: result.errors };
+      }
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
-      console.log('🔐 Registration failed:', error);
-      return { success: false, error: 'Registration failed' };
+      console.log('🔐 Registration error:', error);
+      return { success: false, error: 'Registration failed. Please try again.' };
     }
   };
 
   const logout = () => {
     console.log('🔐 Logging out user');
-    localStorage.removeItem('auth_token');
+    authService.clearTokens();
     setAuthState({
       user: null,
       token: null,
@@ -121,10 +157,33 @@ export function useAuth() {
     });
   };
 
+  // Add token refresh function
+  const refreshToken = async () => {
+    try {
+      const result = await authService.refreshToken();
+      if (result.success && result.data) {
+        const token = authService.getToken();
+        setAuthState(prev => ({
+          ...prev,
+          token,
+        }));
+        return { success: true };
+      } else {
+        // Refresh failed, logout user
+        logout();
+        return { success: false, error: result.message };
+      }
+    } catch (error) {
+      logout();
+      return { success: false, error: 'Token refresh failed' };
+    }
+  };
+
   return {
     ...authState,
     login,
     register,
     logout,
+    refreshToken,
   };
 }

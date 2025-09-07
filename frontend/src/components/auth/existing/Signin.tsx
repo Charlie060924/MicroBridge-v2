@@ -28,6 +28,9 @@ const Signin = () => {
           const navigationState = NavigationMemory.getState();
           const landingOrigin = NavigationMemory.getLandingOrigin();
           
+          // Get user type from the response
+          const userType = result.data?.user?.user_type || 'student';
+          
           if (navigationState) {
             // Show welcome back message
             toast.success("Welcome back! Continue exploring where you left off.");
@@ -46,22 +49,23 @@ const Signin = () => {
             // Clear the landing origin after use
             NavigationMemory.clearLandingOrigin();
           } else {
-            // Default behavior based on user role
-            const userRole = localStorage.getItem('mock_user_role') || 'student';
-            const basePath = userRole === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
+            // Default behavior based on user type from backend
+            const basePath = userType === 'employer' ? '/employer_portal/workspace' : '/student_portal/workspace';
             router.push(basePath);
-            toast.success(`Welcome! Redirecting you to your ${userRole} dashboard.`);
+            toast.success(`Welcome! Redirecting you to your ${userType} dashboard.`);
           }
         } else {
-          alert(result.error || "Login failed");
+          // Show more specific error messages
+          const errorMessage = result.error || result.errors?.join(', ') || "Login failed";
+          toast.error(errorMessage);
         }
       } catch (error) {
-        alert("Login failed. Please try again.");
+        toast.error("Login failed. Please try again.");
       } finally {
         setIsLoading(false);
       }
     } else {
-      alert("Please enter both email and password.");
+      toast.error("Please enter both email and password.");
     }
   };
 
