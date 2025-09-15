@@ -80,7 +80,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
 
   return (
     <div className={`bg-white rounded-lg border p-4 transition-all duration-200 ${
-      isOverdue ? 'border-red-300 : 'border-gray-200 
+      isOverdue ? 'border-red-300' : 'border-gray-200' 
     } ${milestone.status === 'completed' ? 'opacity-75' : ''}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3 flex-1">
@@ -89,7 +89,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
             <h3 className={`font-semibold text-sm ${
               milestone.status === 'completed' 
                 ? 'text-gray-600 line-through' 
-                : 'text-gray-900
+                : 'text-gray-900'
             }`}>
               {milestone.title}
             </h3>
@@ -134,14 +134,14 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
             {getStatusText(milestone.status)}
           </div>
           
-          <div className="flex items-center space-x-1 text-xs text-gray-500
+          <div className="flex items-center space-x-1 text-xs text-gray-500">
             <Calendar className="h-3 w-3" />
             <span>Due: {formatDate(milestone.dueDate)}</span>
           </div>
         </div>
 
         {milestone.completedDate && (
-          <div className="text-xs text-gray-500
+          <div className="text-xs text-gray-500">
             Completed: {formatDate(milestone.completedDate)}
           </div>
         )}
@@ -151,7 +151,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
         <div className="mt-3 p-2 bg-red-50 border border-red-200  rounded-md">
           <div className="flex items-center space-x-2">
             <AlertCircle className="h-4 w-4 text-red-600" />
-            <span className="text-xs text-red-700
+            <span className="text-xs text-red-700">
               This milestone is overdue
             </span>
           </div>
@@ -159,13 +159,13 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
       )}
 
       {isEditable && onStatusChange && (
-        <div className="mt-3 pt-3 border-t border-gray-200
+        <div className="mt-3 pt-3 border-t border-gray-200">
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-500
+            <span className="text-xs text-gray-500">Status:</span>
             <select
               value={milestone.status}
               onChange={(e) => handleStatusChange(e.target.value as Milestone['status'])}
-              className="text-xs border border-gray-300 rounded px-2 py-1 bg-white  text-gray-900 
+              className="text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-900"
             >
               <option value="pending">Pending</option>
               <option value="in_progress">In Progress</option>

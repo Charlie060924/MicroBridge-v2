@@ -1,10 +1,11 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { NavigationMemory } from "@/utils/navigationMemory";
+import { ProgressIndicator, ProgressStep } from "@/components/common/ProgressIndicator";
 import toast from "react-hot-toast";
 
 const Signup = () => {
@@ -18,6 +19,40 @@ const Signup = () => {
     user_type: "student" as "student" | "employer",
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Progress tracking for signup steps
+  const signupSteps: ProgressStep[] = useMemo(() => {
+    const hasBasicInfo = data.firstName && data.lastName;
+    const hasCredentials = data.email && data.password;
+    const hasUserType = data.user_type;
+    
+    return [
+      {
+        id: 'basic-info',
+        label: 'Basic Info',
+        completed: !!hasBasicInfo,
+        current: !hasBasicInfo
+      },
+      {
+        id: 'credentials',
+        label: 'Credentials',
+        completed: !!hasCredentials,
+        current: !!hasBasicInfo && !hasCredentials
+      },
+      {
+        id: 'user-type',
+        label: 'Account Type',
+        completed: !!hasUserType,
+        current: !!hasBasicInfo && !!hasCredentials && !hasUserType
+      },
+      {
+        id: 'complete',
+        label: 'Complete',
+        completed: false,
+        current: !!hasBasicInfo && !!hasCredentials && !!hasUserType
+      }
+    ];
+  }, [data]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,9 +119,19 @@ const Signup = () => {
           </div>
 
           <div className="rounded-lg bg-white px-7.5 pt-7.5 shadow-solid-8 dark:border dark:border-strokedark dark:bg-black xl:px-15 xl:pt-15">
-            <h2 className="mb-15 text-center text-3xl font-semibold text-black dark:text-white xl:text-sectiontitle2">
+            <h2 className="mb-8 text-center text-3xl font-semibold text-black dark:text-white xl:text-sectiontitle2">
               Create an Account
             </h2>
+
+            {/* Progress Indicator */}
+            <div className="mb-10">
+              <ProgressIndicator 
+                steps={signupSteps}
+                className="max-w-md mx-auto"
+                showLabels={true}
+                variant="horizontal"
+              />
+            </div>
 
             {/* Social Signups */}
             <div className="flex flex-col">

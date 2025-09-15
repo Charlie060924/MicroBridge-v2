@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, User, Building } from 'lucide-react';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/badge';
 
 interface PaymentItem {

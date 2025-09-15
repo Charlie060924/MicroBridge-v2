@@ -10,7 +10,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import Card from '@/components/ui/card';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import PaymentList from './PaymentList';
 import BillingHistoryTable from './BillingHistoryTable';
 import PaymentSetupModal from './PaymentSetupModal';

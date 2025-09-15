@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Save, X, Check, Edit3, Send, LucideIcon } from 'lucide-react';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 
 interface Action {
   label: string;

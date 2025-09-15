@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import analyticsService from '@/services/analyticsService';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -21,6 +22,7 @@ interface EmptyStateProps {
   };
   illustration?: React.ReactNode;
   className?: string;
+  emptyStateType?: string; // For analytics tracking
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
@@ -31,7 +33,21 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   secondaryAction,
   illustration,
   className = '',
+  emptyStateType = 'generic',
 }) => {
+  // Track empty state display
+  React.useEffect(() => {
+    analyticsService.trackAction('empty_state_displayed', 'EmptyState', {
+      emptyStateType,
+      title
+    });
+  }, [emptyStateType, title]);
+
+  const handleActionClick = (actionHandler: () => void, actionType: 'primary' | 'secondary') => {
+    // Track empty state action
+    analyticsService.trackEmptyStateAction(emptyStateType, `${actionType}_action_clicked`);
+    actionHandler();
+  };
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -96,7 +112,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           {action && (
             <Button
               variant={action.variant || 'primary'}
-              onClick={action.onClick}
+              onClick={() => handleActionClick(action.onClick, 'primary')}
               icon={action.icon}
             >
               {action.label}
@@ -105,7 +121,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           {secondaryAction && (
             <Button
               variant={secondaryAction.variant || 'secondary'}
-              onClick={secondaryAction.onClick}
+              onClick={() => handleActionClick(secondaryAction.onClick, 'secondary')}
               icon={secondaryAction.icon}
             >
               {secondaryAction.label}
@@ -120,6 +136,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 // Predefined empty states for common scenarios
 export const NoJobsEmptyState: React.FC<{ onBrowseJobs?: () => void }> = ({ onBrowseJobs }) => (
   <EmptyState
+    emptyStateType="no_jobs_found"
     title="No jobs found"
     description="We couldn't find any jobs matching your criteria. Try adjusting your filters or browse all available opportunities."
     action={onBrowseJobs ? {
