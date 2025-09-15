@@ -4,7 +4,7 @@ import { User, Mail, Camera, Save, X, Edit3, Key, Link, Eye } from 'lucide-react
 import SettingCard from '../components/SettingCard';
 import { CONNECTED_ACCOUNTS } from '../utils/settingsConstants';
 import { useSettings } from '../hooks/useSettings';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import Input from '@/components/ui/input';
 import ProfilePreview from '@/components/common/ProfilePreview';
 import { useProfileShortcuts } from '@/hooks/useKeyboardShortcuts';

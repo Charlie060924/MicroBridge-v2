@@ -14,7 +14,14 @@ import StickyActionBar, { SettingsActionBar } from '@/components/common/StickyAc
 import { animations } from '@/components/ui/Animations';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
+
+// Import Phase 2 VerificationDiscoveryHub
+import dynamic from 'next/dynamic';
+const VerificationDiscoveryHub = dynamic(() => import("@/components/common/VerificationDiscoveryHub"), {
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
+  ssr: false
+});
 
 export default function SettingsPage() {
   const { settings, saveSettings, resetSettings, isLoading, hasChanges, isSettingsLoaded } = useSettings();
@@ -128,6 +135,11 @@ export default function SettingsPage() {
               </Button>
             </div>
           </div>
+        </motion.div>
+
+        {/* Phase 2: Verification & Discovery Hub */}
+        <motion.div variants={itemVariants}>
+          <VerificationDiscoveryHub userType="student" />
         </motion.div>
 
         {/* Settings Sections */}

@@ -14,6 +14,13 @@ import { useSettingsShortcuts } from '@/hooks/useKeyboardShortcuts';
 import StickyActionBar, { SettingsActionBar } from '@/components/common/StickyActionBar';
 import { animations } from '@/components/ui/Animations';
 
+// Import Phase 2 VerificationDiscoveryHub
+import dynamic from 'next/dynamic';
+const VerificationDiscoveryHub = dynamic(() => import("@/components/common/VerificationDiscoveryHub"), {
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
+  ssr: false
+});
+
 export default function EmployerSettingsPage() {
   const { settings, saveSettings, resetSettings, isLoading, hasChanges } = useSettings();
   const [isSaving, setIsSaving] = useState(false);
@@ -82,6 +89,11 @@ export default function EmployerSettingsPage() {
               Unsaved Changes
             </motion.div>
           )}
+        </motion.div>
+
+        {/* Phase 2: Verification & Discovery Hub */}
+        <motion.div variants={itemVariants}>
+          <VerificationDiscoveryHub userType="employer" />
         </motion.div>
 
         {/* Settings Sections */}

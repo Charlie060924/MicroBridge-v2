@@ -45,6 +45,12 @@ interface Application {
 
 import { Candidate } from '@/data/mockCandidates';
 
+// Import Phase 2 VerificationDiscoveryHub
+const VerificationDiscoveryHub = dynamic(() => import("@/components/common/VerificationDiscoveryHub"), {
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
+  ssr: false
+});
+
 // Dynamic imports for components with error boundaries
 const RecommendedCandidates = dynamic(() => import("./RecommendedCandidates"), {
   loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
@@ -620,6 +626,11 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
           </div>
         </div>
 
+        {/* Phase 2: Verification & Discovery Hub */}
+        <div className="mt-8 mb-8">
+          <VerificationDiscoveryHub userType="employer" />
+        </div>
+
         {/* Preview Mode CTA Showcase */}
         {isPreviewMode && (
           <div className="mt-8">
@@ -631,4 +642,4 @@ const EmployerHomepage: React.FC<EmployerHomepageProps> = ({ user }) => {
   );
 };
 
-export default dynamic(() => Promise.resolve(EmployerHomepage), { ssr: false });
+export default EmployerHomepage;

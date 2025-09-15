@@ -160,4 +160,5 @@ const JobCategoryCard: React.FC<JobCategoryCardProps> = ({ job, onBookmark, onCl
   );
 };
 
+// Optimize with Million.js for better performance
 export default JobCategoryCard; 

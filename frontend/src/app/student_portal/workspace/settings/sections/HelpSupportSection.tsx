@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { HelpCircle, ExternalLink, FileText, Shield, MessageCircle, BookOpen, Phone, Mail } from 'lucide-react';
 import SettingCard from '../components/SettingCard';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import ContactSupportModal from '@/components/common/ContactSupportModal';
 
 interface HelpSupportSectionProps {

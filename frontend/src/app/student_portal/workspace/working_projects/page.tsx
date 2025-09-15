@@ -1,15 +1,33 @@
+
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Clock, CheckCircle, AlertCircle, PlayCircle, ExternalLink, DollarSign, Eye, FolderOpen } from "lucide-react";
+import { Calendar, Clock, CheckCircle, AlertCircle, PlayCircle, ExternalLink, DollarSign, Eye, FolderOpen, Settings, Users, MessageSquare } from "lucide-react";
 import { useWorkingProjects } from "@/hooks/useStudentData";
 import { usePerformanceMonitor } from "@/components/performance/PerformanceMonitor";
 import { WorkingProjectsSkeleton } from "@/components/skeletons/PageSkeletons";
+import ProjectKickoffModal from "@/components/onboarding/ProjectKickoffModal";
+import ProjectMilestonePlanner from "@/components/onboarding/ProjectMilestonePlanner";
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  startDate: string;
+  earnings: number;
+  progress: number;
+  employer: string;
+}
 
 const WorkingProjectsPage: React.FC = () => {
   const router = useRouter();
-  const { data: projects, isLoading, error } = useWorkingProjects();
+  const { data, isLoading, error } = useWorkingProjects();
+  const projects: Project[] = Array.isArray(data) ? data : [];
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showKickoff, setShowKickoff] = useState(false);
+  const [showMilestones, setShowMilestones] = useState(false);
   
   // Performance monitoring
   usePerformanceMonitor('WorkingProjects');
@@ -30,7 +48,7 @@ const WorkingProjectsPage: React.FC = () => {
             </div>
             <button
               onClick={() => router.push('/student_portal/workspace/jobs')}
-              className="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2"
             >
               <Eye className="h-4 w-4" />
               <span>Browse Jobs</span>
@@ -96,14 +114,41 @@ const WorkingProjectsPage: React.FC = () => {
                   <span className="text-sm text-gray-600 dark:text-gray-400">
                     Employer: {project.employer}
                   </span>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                    View Details
-                  </button>
+                  <div className="flex space-x-2">
+                    {project.status === 'pending' && (
+                      <button 
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setShowKickoff(true);
+                        }}
+                        className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-1"
+                      >
+                        <Users className="h-3 w-3" />
+                        <span>Start Kickoff</span>
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => {
+                        setSelectedProject(project);
+                        setShowMilestones(true);
+                      }}
+                      className="px-3 py-1 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors duration-200 flex items-center space-x-1"
+                    >
+                      <Settings className="h-3 w-3" />
+                      <span>Milestones</span>
+                    </button>
+                    <button 
+                      onClick={() => router.push(`/student_portal/workspace/project-details/${project.id}`)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                    >
+                      View Details
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
             
-            {projects?.length === 0 && (
+            {projects && projects.length === 0 && (
               <div className="text-center py-8">
                 <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -123,6 +168,31 @@ const WorkingProjectsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      {showKickoff && selectedProject && (
+        <ProjectKickoffModal
+          project={selectedProject}
+          onClose={() => {
+            setShowKickoff(false);
+            setSelectedProject(null);
+          }}
+          onComplete={() => {
+            setShowKickoff(false);
+            setSelectedProject(null);
+          }}
+        />
+      )}
+
+      {showMilestones && selectedProject && (
+        <ProjectMilestonePlanner
+          project={selectedProject}
+          onClose={() => {
+            setShowMilestones(false);
+            setSelectedProject(null);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -11,11 +11,28 @@ import PreviewModeShowcase from "@/components/common/PreviewModeShowcase";
 import { jobService } from "@/services/jobService";
 import { matchingService } from "@/services/matchingService";
 import { useAuth } from "@/hooks/useAuth";
+import useErrorHandler from "@/hooks/useErrorHandler";
+import ErrorFallback from "@/components/common/ErrorFallback";
+import analyticsService from "@/services/analyticsService";
+import usePerformanceMonitor from "@/hooks/usePerformanceMonitor";
+
+// Import Phase 2 VerificationDiscoveryHub
+const VerificationDiscoveryHub = dynamic(() => import("@/components/common/VerificationDiscoveryHub"), {
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
+  ssr: false
+});
+
+// Import Phase 3 Gamification Widget
+const GamificationWidget = dynamic(() => import("@/components/gamification/GamificationWidget"), {
+  loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
+  ssr: false
+});
 
 // Import types from the components that define them
 import { Job } from "./JobCategoryCard";
 import { Project } from "./OngoingProjects";
 import { RecentlyViewedJob, recentlyViewedJobsService } from "@/services/recentlyViewedJobsService";
+import { LevelData } from "@/types/level";
 
 const SearchBar = dynamic(() => import("./SearchBar_and_Filter/SearchBar"), {
   loading: () => <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
@@ -63,11 +80,27 @@ interface StudentHomepageProps {
 const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   console.log("🎓 StudentHomepage rendering with user:", user);
   
+  // Performance monitoring
+  const { startMeasurement, endMeasurement, isSlowRender, averageRenderTime } = usePerformanceMonitor({
+    componentName: 'StudentHomepage',
+    enableMemoryTracking: true,
+    enableRenderTimeTracking: true,
+    sampleRate: 0.2 // Track 20% of renders
+  });
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Use new error handler
+  const { error, handleError, clearError, retry, canRetry } = useErrorHandler({
+    maxRetries: 3,
+    showToast: true,
+    onError: (error) => {
+      analyticsService.trackErrorRecovery(error.name || 'StudentHomepageError', false, 'StudentHomepage');
+    }
+  });
   
   // Real data state
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
@@ -75,37 +108,14 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   const [ongoingProjects, setOngoingProjects] = useState<Project[]>([]);
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [levelData, setLevelData] = useState<LevelData | null>(null);
 
   const router = useRouter();
   const { isPreviewMode, isFeatureLocked, getDemoData } = usePreviewMode();
   const { user: authUser } = useAuth();
 
-  // Fetch real data from API
-  useEffect(() => {
-    console.log("🎓 StudentHomepage useEffect triggered, isPreviewMode:", isPreviewMode);
-    
-    const fetchData = async () => {
-      try {
-        console.log("🎓 Fetching student homepage data");
-        setError(null);
-        setIsDataLoading(true);
-        
-        if (isPreviewMode) {
-          // Use demo data in preview mode
-          handlePreviewModeData();
-        } else {
-          // Fetch real data from backend
-          await fetchRealData();
-        }
-      } catch (error) {
-        console.error("🎓 Error fetching student homepage data:", error);
-        setError("Failed to load dashboard data. Please try refreshing the page.");
-      } finally {
-        setIsDataLoading(false);
-      }
-    };
-
-    const fetchRealData = async () => {
+  // Define data fetching functions outside of useEffect for reusability
+  const fetchRealData = async () => {
       // Fetch featured jobs
       const jobsResult = await jobService.listJobs({}, 1, 6);
       if (jobsResult.success && jobsResult.data) {
@@ -144,12 +154,28 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
         }
       }
 
+      // Fetch level data (mock for now - would come from level service)
+      const mockLevelData: LevelData = {
+        level: 8,
+        xp: 420,
+        xpToNext: 580,
+        achievements: [],
+        totalXP: 6200,
+        careerCoins: 150,
+        unlockedFeatures: ['daily_dashes', 'streaks', 'rewards_store'],
+        streakDays: 7,
+        totalStreakDays: 12,
+        prestigeLevel: 0,
+        metaAchievements: []
+      };
+      setLevelData(mockLevelData);
+
       // Fetch recently viewed jobs
       const recentJobs = recentlyViewedJobsService.getRecentJobs();
       setRecentlyViewedJobs(recentJobs);
-    };
+  };
 
-    const handlePreviewModeData = () => {
+  const handlePreviewModeData = async () => {
       // Use demo data in preview mode
       let mockJobs: Job[] = [];
       let mockProjects: Project[] = [];
@@ -159,64 +185,65 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
       if (demoData) {
         // Convert demo jobs to Job interface format
         mockJobs = demoData.demoDataService?.getDemoJobs() || [
-              {
-                id: "1",
-                title: "Frontend Developer",
-                company: "TechCorp",
-                location: "Remote",
-                salary: "$25-35/hr",
-                duration: "3 months",
-                category: "Development",
-                description: "Build responsive web applications using modern technologies",
-                skills: ["React", "TypeScript", "CSS"],
-                rating: 4.5,
-                isBookmarked: false,
-                postedDate: "2024-01-15",
-                deadline: "2024-02-15",
-                isRemote: true,
-                experienceLevel: "Intermediate"
-              }
-            ];
-            
-            // Show demo projects in preview
-            mockProjects = demoData.projects ? demoData.projects.map((project: any) => ({
-              id: project.id,
-              title: project.title,
-              company: project.company,
-              status: project.status === 'active' ? 'In Progress' : project.status === 'completed' ? 'Completed' : 'Pending',
-              progress: project.progress,
-              dueDate: project.milestones?.[project.milestones.length - 1]?.dueDate || '2024-02-01',
-              startDate: '2024-01-01',
-              description: project.description,
-              payment: `$${project.budget}`,
-              category: project.category
-            })) : [];
-
-            // Show demo skills
-            mockSkills = ["React", "TypeScript", "UI/UX Design", "Python", "Node.js", "Figma"];
-          } else {
-            // Fallback for preview mode without demo data
-            mockJobs = [
-              {
-                id: "1",
-                title: "Frontend Developer",
-                company: "TechCorp",
-                location: "Remote",
-                salary: "$25-35/hr",
-                duration: "3 months",
-                category: "Development",
-                description: "Build responsive web applications using modern technologies",
-                skills: ["React", "TypeScript", "CSS"],
-                rating: 4.5,
-                isBookmarked: false,
-                postedDate: "2024-01-15",
-                deadline: "2024-02-15",
-                isRemote: true,
-                experienceLevel: "Intermediate"
-              }
-            ];
+          {
+            id: "1",
+            title: "Frontend Developer",
+            company: "TechCorp",
+            location: "Remote",
+            salary: "$25-35/hr",
+            duration: "3 months",
+            category: "Development",
+            description: "Build responsive web applications using modern technologies",
+            skills: ["React", "TypeScript", "CSS"],
+            rating: 4.5,
+            isBookmarked: false,
+            postedDate: "2024-01-15",
+            deadline: "2024-02-15",
+            isRemote: true,
+            experienceLevel: "Intermediate"
           }
-        } else {
+        ];
+        
+        // Show demo projects in preview
+        mockProjects = demoData.projects ? demoData.projects.map((project: any) => ({
+          id: project.id,
+          title: project.title,
+          company: project.company,
+          status: project.status === 'active' ? 'In Progress' : project.status === 'completed' ? 'Completed' : 'Pending',
+          progress: project.progress,
+          dueDate: project.milestones?.[project.milestones.length - 1]?.dueDate || '2024-02-01',
+          startDate: '2024-01-01',
+          description: project.description,
+          payment: `$${project.budget}`,
+          category: project.category
+        })) : [];
+
+        // Show demo skills
+        mockSkills = ["React", "TypeScript", "UI/UX Design", "Python", "Node.js", "Figma"];
+      } else {
+        // Fallback for preview mode without demo data
+        mockJobs = [
+          {
+            id: "1",
+            title: "Frontend Developer",
+            company: "TechCorp",
+            location: "Remote",
+            salary: "$25-35/hr",
+            duration: "3 months",
+            category: "Development",
+            description: "Build responsive web applications using modern technologies",
+            skills: ["React", "TypeScript", "CSS"],
+            rating: 4.5,
+            isBookmarked: false,
+            postedDate: "2024-01-15",
+            deadline: "2024-02-15",
+            isRemote: true,
+            experienceLevel: "Intermediate"
+          }
+        ];
+      }
+      
+      if (!isPreviewMode) {
           // Regular mode mock data for development
           mockJobs = [
             {
@@ -335,16 +362,28 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
           console.error("🎓 Error loading recently viewed jobs:", error);
           setRecentlyViewedJobs([]);
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error fetching data';
-        console.error('🎓 Error fetching student homepage data:', error);
-        setError(errorMessage);
+    };
+
+  // Fetch real data from API
+  useEffect(() => {
+    console.log("🎓 StudentHomepage useEffect triggered, isPreviewMode:", isPreviewMode);
+    
+    const fetchData = async () => {
+      try {
+        console.log("🎓 Fetching student homepage data");
+        clearError();
+        setIsDataLoading(true);
         
-        // Set safe defaults on error
-        setFeaturedJobs([]);
-        setRecentlyViewedJobs([]);
-        setOngoingProjects([]);
-        setUserSkills([]);
+        if (isPreviewMode) {
+          // Use demo data in preview mode
+          await handlePreviewModeData();
+        } else {
+          // Fetch real data from backend
+          await fetchRealData();
+        }
+      } catch (err) {
+        console.error("🎓 Error fetching student homepage data:", err);
+        handleError(err as Error);
       } finally {
         setIsDataLoading(false);
       }
@@ -410,6 +449,13 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
     setSearchCategory(category);
     setIsLoading(true);
     
+    // Track search in analytics
+    analyticsService.trackSearchEffectiveness(
+      query || `${location} ${category}`.trim(),
+      0, // Will be updated when results are displayed
+      'none' // Will be updated when user takes action
+    );
+    
     const timer = setTimeout(() => setIsLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
@@ -420,6 +466,15 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
 
   const handleJobClick = useCallback((job: Job) => {
     console.log("🎓 Job clicked:", job.id);
+    
+    // Track job view action
+    analyticsService.trackAction('job_viewed', 'JobCard', {
+      jobId: job.id,
+      jobTitle: job.title,
+      company: job.company,
+      category: job.category
+    });
+    
     // Add job to recently viewed when clicked
     try {
       recentlyViewedJobsService.addRecentlyViewedJob(job);
@@ -439,6 +494,10 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
 
   const handleClearFilters = useCallback(() => {
     console.log("🎓 Clearing search filters");
+    
+    // Track empty state action
+    analyticsService.trackEmptyStateAction('no_jobs_found', 'clear_filters');
+    
     setSearchQuery("");
     setSearchLocation("");
     setSearchCategory("");
@@ -546,21 +605,52 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   if (error) {
     console.log("🎓 Showing error state:", error);
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-600 mb-4">Something went wrong loading the dashboard</div>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80"
-          >
-            Retry
-          </button>
-        </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <ErrorFallback
+          error={error}
+          resetError={async () => {
+            try {
+              await retry(async () => {
+                // Retry the data fetch
+                const fetchData = async () => {
+                  if (isPreviewMode) {
+                    await handlePreviewModeData();
+                  } else {
+                    await fetchRealData();
+                  }
+                };
+                await fetchData();
+              });
+              analyticsService.trackErrorRecovery(error.name || 'StudentHomepageError', true, 'StudentHomepage');
+            } catch (retryError) {
+              console.error("🎓 Retry failed:", retryError);
+            }
+          }}
+          type="generic"
+          title="Dashboard Error"
+          message="We couldn't load your dashboard. This might be a temporary issue."
+          showRetry={canRetry}
+          retryText={canRetry ? "Try Again" : "Refresh Page"}
+          className="p-8"
+        />
       </div>
     );
   }
 
   console.log("🎓 Rendering main content with jobs:", featuredJobs.length);
+
+  // Start performance measurement
+  React.useEffect(() => {
+    startMeasurement();
+    return endMeasurement;
+  });
+
+  // Track render performance in analytics
+  React.useEffect(() => {
+    if (isSlowRender) {
+      analyticsService.trackPerformance('slow_render_detected', averageRenderTime, 'StudentHomepage');
+    }
+  }, [isSlowRender, averageRenderTime]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -581,6 +671,14 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                   Ready to explore new micro-internship opportunities?
                 </p>
                 <div className="mt-4">
+                  {levelData && (
+                    <GamificationWidget 
+                      levelData={levelData} 
+                      userType="student" 
+                      layout="compact" 
+                      showChallenges={false}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -730,6 +828,11 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
                   </div>
                 </div>
 
+                {/* Phase 2: Verification & Discovery Hub */}
+                <div className="mb-8">
+                  <VerificationDiscoveryHub userType="student" />
+                </div>
+
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {statsCards.map((stat, index) => (
@@ -753,7 +856,9 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
 
                 {/* Preview Mode CTA Showcase */}
                 {isPreviewMode && (
-                  <PreviewModeShowcase variant="inline" />
+                  <div className="mt-8">
+                    <PreviewModeShowcase variant="inline" />
+                  </div>
                 )}
               </div>
             )}
@@ -764,4 +869,4 @@ const StudentHomepage: React.FC<StudentHomepageProps> = ({ user }) => {
   );
 };
 
-export default dynamic(() => Promise.resolve(StudentHomepage), { ssr: false });
+export default StudentHomepage;

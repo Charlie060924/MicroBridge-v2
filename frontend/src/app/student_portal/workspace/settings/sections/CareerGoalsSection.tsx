@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Target, Edit3, Save, X, Plus, Trash2 } from 'lucide-react';
 import SettingCard from '../components/SettingCard';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import { useSettings } from '../hooks/useSettings';
 import { CAREER_INTERESTS, TARGET_INDUSTRIES, AVAILABILITY_PREFERENCES } from '../utils/studentConstants';
+import CompensationCalculator, { CompensationExpectation } from '@/components/common/CompensationCalculator';
+import CareerPathVisualization from '@/components/common/CareerPathVisualization';
 
 interface CareerGoalsSectionProps {
   onSaveAll?: () => Promise<void>;
@@ -16,6 +18,7 @@ interface CareerGoalsData {
   targetIndustries: string[];
   careerStatement: string;
   availability: string[];
+  compensationExpectation?: CompensationExpectation;
 }
 
 const CareerGoalsSection: React.FC<CareerGoalsSectionProps> = ({ 
@@ -29,7 +32,14 @@ const CareerGoalsSection: React.FC<CareerGoalsSectionProps> = ({
     interests: settings.account.interests || [],
     targetIndustries: settings.account.targetIndustries || [],
     careerStatement: settings.account.careerStatement || '',
-    availability: settings.account.availability || []
+    availability: settings.account.availability || [],
+    compensationExpectation: settings.account.compensationExpectation || {
+      hourlyMin: 80,
+      hourlyMax: 150,
+      projectMin: 3000,
+      projectMax: 8000,
+      preferredType: 'both'
+    }
   });
 
   const handleSave = () => {
@@ -45,7 +55,14 @@ const CareerGoalsSection: React.FC<CareerGoalsSectionProps> = ({
       interests: settings.account.interests || [],
       targetIndustries: settings.account.targetIndustries || [],
       careerStatement: settings.account.careerStatement || '',
-      availability: settings.account.availability || []
+      availability: settings.account.availability || [],
+      compensationExpectation: settings.account.compensationExpectation || {
+        hourlyMin: 80,
+        hourlyMax: 150,
+        projectMin: 3000,
+        projectMax: 8000,
+        preferredType: 'both'
+      }
     });
     setIsEditing(false);
   };
@@ -74,6 +91,13 @@ const CareerGoalsSection: React.FC<CareerGoalsSectionProps> = ({
     setTempData(prev => ({
       ...prev,
       availability: toggleArrayItem(prev.availability, availability)
+    }));
+  };
+
+  const handleCompensationChange = (compensationExpectation: CompensationExpectation) => {
+    setTempData(prev => ({
+      ...prev,
+      compensationExpectation
     }));
   };
 
@@ -190,6 +214,26 @@ const CareerGoalsSection: React.FC<CareerGoalsSectionProps> = ({
           </p>
         </div>
 
+        {/* Compensation Expectations */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <CompensationCalculator
+            selectedInterests={tempData.interests}
+            selectedIndustries={tempData.targetIndustries}
+            onExpectationChange={handleCompensationChange}
+            disabled={!isEditing}
+            value={tempData.compensationExpectation}
+          />
+        </div>
+
+        {/* Career Path Visualization */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <CareerPathVisualization
+            selectedInterests={tempData.interests}
+            selectedIndustries={tempData.targetIndustries}
+            disabled={!isEditing}
+          />
+        </div>
+
         {/* Summary Display (when not editing) */}
         {!isEditing && (
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
@@ -224,6 +268,22 @@ const CareerGoalsSection: React.FC<CareerGoalsSectionProps> = ({
                   }
                 </span>
               </div>
+              {tempData.compensationExpectation && (
+                <div>
+                  <span className="font-medium text-blue-800 dark:text-blue-200">Compensation:</span>
+                  <span className="text-blue-700 dark:text-blue-300 ml-2">
+                    {tempData.compensationExpectation.preferredType === 'hourly' && 
+                      `HKD $${tempData.compensationExpectation.hourlyMin}-${tempData.compensationExpectation.hourlyMax}/hour`
+                    }
+                    {tempData.compensationExpectation.preferredType === 'project' && 
+                      `HKD $${tempData.compensationExpectation.projectMin.toLocaleString()}-${tempData.compensationExpectation.projectMax.toLocaleString()}/project`
+                    }
+                    {tempData.compensationExpectation.preferredType === 'both' && 
+                      `HKD $${tempData.compensationExpectation.hourlyMin}-${tempData.compensationExpectation.hourlyMax}/hour or $${tempData.compensationExpectation.projectMin.toLocaleString()}-${tempData.compensationExpectation.projectMax.toLocaleString()}/project`
+                    }
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}

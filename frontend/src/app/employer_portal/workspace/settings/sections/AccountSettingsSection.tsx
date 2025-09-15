@@ -4,7 +4,7 @@ import { Building2, Mail, Camera, Save, X, Edit3, Key, Link, Eye, Phone, Globe, 
 import SettingCard from '../components/SettingCard';
 import { CONNECTED_ACCOUNTS, COMPANY_SIZE_OPTIONS, INDUSTRY_OPTIONS } from '../utils/settingsConstants';
 import { useSettings } from '../hooks/useSettings';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import Input from '@/components/ui/input';
 import { useProfileShortcuts } from '@/hooks/useKeyboardShortcuts';
 

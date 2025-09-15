@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { GraduationCap, Edit3, Save, X, Plus, Trash2 } from 'lucide-react';
 import SettingCard from '../components/SettingCard';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import Input from '@/components/ui/input';
+import AutocompleteInput from '@/components/ui/AutocompleteInput';
 import { useSettings } from '../hooks/useSettings';
 import { HK_UNIVERSITIES, STUDENT_MAJORS, YEAR_OF_STUDY } from '../utils/studentConstants';
 
@@ -81,6 +82,18 @@ const EducationInfoSection: React.FC<EducationInfoSectionProps> = ({
     return acc;
   }, {} as Record<string, typeof STUDENT_MAJORS[number][]>);
 
+  // Convert data for autocomplete
+  const universityOptions = HK_UNIVERSITIES.map(uni => ({
+    value: uni,
+    label: uni
+  }));
+
+  const majorOptions = STUDENT_MAJORS.map(major => ({
+    value: major.value,
+    label: major.label,
+    category: major.category
+  }));
+
   return (
     <SettingCard
       icon={GraduationCap}
@@ -93,20 +106,21 @@ const EducationInfoSection: React.FC<EducationInfoSectionProps> = ({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             University <span className="text-red-500">*</span>
           </label>
-          <select
-            value={tempData.university}
-            onChange={(e) => handleInputChange('university', e.target.value)}
-            disabled={!isEditing}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed"
-            required
-          >
-            <option value="">Select your university</option>
-            {HK_UNIVERSITIES.map((university) => (
-              <option key={university} value={university}>
-                {university}
-              </option>
-            ))}
-          </select>
+          {isEditing ? (
+            <AutocompleteInput
+              options={universityOptions}
+              value={tempData.university}
+              onChange={(value) => handleInputChange('university', value)}
+              placeholder="Search and select your university"
+              searchable={true}
+              allowFreeText={false}
+              disabled={!isEditing}
+            />
+          ) : (
+            <div className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              {tempData.university || 'Not specified'}
+            </div>
+          )}
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Select your Hong Kong university
           </p>
@@ -117,24 +131,22 @@ const EducationInfoSection: React.FC<EducationInfoSectionProps> = ({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Major/Field of Study <span className="text-red-500">*</span>
           </label>
-          <select
-            value={tempData.major}
-            onChange={(e) => handleInputChange('major', e.target.value)}
-            disabled={!isEditing}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed"
-            required
-          >
-            <option value="">Select your major</option>
-            {Object.entries(groupedMajors).map(([category, majors]) => (
-              <optgroup key={category} label={category}>
-                {majors.map((major) => (
-                  <option key={major.value} value={major.value}>
-                    {major.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+          {isEditing ? (
+            <AutocompleteInput
+              options={majorOptions}
+              value={tempData.major}
+              onChange={(value) => handleInputChange('major', value)}
+              placeholder="Search for your major or field of study"
+              searchable={true}
+              allowFreeText={false}
+              groupByCategory={true}
+              disabled={!isEditing}
+            />
+          ) : (
+            <div className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              {STUDENT_MAJORS.find(m => m.value === tempData.major)?.label || tempData.major || 'Not specified'}
+            </div>
+          )}
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Your area of specialization
           </p>

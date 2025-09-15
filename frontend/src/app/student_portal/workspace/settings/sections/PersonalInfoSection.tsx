@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { User, Mail, Camera, Save, X, Edit3, Phone } from 'lucide-react';
 import SettingCard from '../components/SettingCard';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import Input from '@/components/ui/input';
 import { useSettings } from '../hooks/useSettings';
 

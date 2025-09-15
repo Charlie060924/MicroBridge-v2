@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Key, LogOut, Smartphone, AlertTriangle, Eye, Activity } from 'lucide-react';
 import SettingCard from '../components/SettingCard';
 import ToggleSwitch from '../components/ToggleSwitch';
-import Button from '@/components/ui/button';
+import Button from '@/components/ui/Button';
 import { useSettings } from '../hooks/useSettings';
 
 interface SecurityAccountSectionProps {

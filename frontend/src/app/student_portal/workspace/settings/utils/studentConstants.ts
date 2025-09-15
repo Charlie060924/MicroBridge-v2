@@ -128,17 +128,45 @@ export const CAREER_INTERESTS = [
   { value: "mobile_development", label: "Mobile Development" },
   { value: "data_science", label: "Data Science" },
   { value: "machine_learning", label: "Machine Learning" },
+  { value: "artificial_intelligence", label: "Artificial Intelligence" },
   { value: "cybersecurity", label: "Cybersecurity" },
+  { value: "cloud_computing", label: "Cloud Computing" },
+  { value: "devops", label: "DevOps & Infrastructure" },
+  { value: "blockchain", label: "Blockchain Development" },
+  { value: "game_development", label: "Game Development" },
   { value: "ux_ui_design", label: "UX/UI Design" },
   { value: "graphic_design", label: "Graphic Design" },
+  { value: "motion_graphics", label: "Motion Graphics & Animation" },
+  { value: "product_design", label: "Product Design" },
   { value: "product_management", label: "Product Management" },
   { value: "project_management", label: "Project Management" },
+  { value: "business_operations", label: "Business Operations" },
   { value: "digital_marketing", label: "Digital Marketing" },
+  { value: "content_marketing", label: "Content Marketing" },
+  { value: "social_media", label: "Social Media Management" },
+  { value: "seo_sem", label: "SEO & SEM" },
   { value: "business_analysis", label: "Business Analysis" },
+  { value: "data_analysis", label: "Data Analysis" },
+  { value: "financial_analysis", label: "Financial Analysis" },
+  { value: "market_research", label: "Market Research" },
   { value: "consulting", label: "Consulting" },
+  { value: "strategy", label: "Strategy & Planning" },
+  { value: "sales", label: "Sales & Business Development" },
+  { value: "customer_success", label: "Customer Success" },
+  { value: "hr_recruiting", label: "HR & Recruiting" },
+  { value: "content_writing", label: "Content Writing & Copywriting" },
+  { value: "video_production", label: "Video Production" },
+  { value: "photography", label: "Photography" },
   { value: "entrepreneurship", label: "Entrepreneurship" },
+  { value: "startup", label: "Startup Environment" },
   { value: "research", label: "Research & Development" },
-  { value: "teaching", label: "Teaching & Education" }
+  { value: "quality_assurance", label: "Quality Assurance" },
+  { value: "teaching", label: "Teaching & Education" },
+  { value: "training", label: "Training & Development" },
+  { value: "nonprofit", label: "Nonprofit & Social Impact" },
+  { value: "sustainability", label: "Sustainability & ESG" },
+  { value: "legal_tech", label: "Legal Tech & Compliance" },
+  { value: "event_management", label: "Event Management" }
 ] as const;
 
 export const TARGET_INDUSTRIES = [
@@ -192,7 +220,14 @@ export const DEFAULT_STUDENT_SETTINGS = {
     interests: [],
     targetIndustries: [],
     careerStatement: "",
-    availability: []
+    availability: [],
+    compensationExpectation: {
+      hourlyMin: 80,
+      hourlyMax: 150,
+      projectMin: 3000,
+      projectMax: 8000,
+      preferredType: 'both'
+    }
   },
   skills: {
     technicalSkills: [],
