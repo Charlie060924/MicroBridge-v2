@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { mockStudents, mockEmployers, mockCompletedJobs, getMockUserReviewStats } from '@/data/mockReviewData';
 import { ReviewsSection, ReviewSystem } from '@/components/reviews';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
 import { Star, User, Building, Briefcase } from 'lucide-react';
 

@@ -1,5 +1,17 @@
 // Unit tests for PreviewDemoData service
 
+// Mock dependencies that might not exist
+jest.mock('../mockData', () => ({
+  Job: {},
+  Application: {},
+  CalendarEvent: {},
+  User: {}
+}));
+
+jest.mock('@/data/mockCandidates', () => ({
+  Candidate: {}
+}));
+
 import { previewDemoDataService, PreviewDemoDataService } from '../demoData';
 
 describe('PreviewDemoDataService', () => {

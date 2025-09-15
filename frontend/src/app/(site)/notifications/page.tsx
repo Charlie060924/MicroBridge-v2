@@ -28,10 +28,6 @@ const NotificationsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
 
-  useEffect(() => {
-    loadNotifications();
-  }, [currentPage, unreadOnly, loadNotifications]);
-
   const loadNotifications = useCallback(async () => {
     setLoading(true);
     try {
@@ -48,6 +44,10 @@ const NotificationsPage = () => {
       setLoading(false);
     }
   }, [currentPage, unreadOnly]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [currentPage, unreadOnly, loadNotifications]);
 
   const getNotificationIcon = (type: string) => {
     switch (type.toLowerCase()) {
