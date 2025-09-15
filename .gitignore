@@ -67,3 +67,5 @@ build/
 
 # Contentlayer
 .contentlayer
+# Million Lint
+.million
