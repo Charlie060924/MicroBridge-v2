@@ -30,9 +30,8 @@ export const metadata: Metadata = {
 
 // Dynamically import all components with loading states and error handling
 const Hero = lazy(() => import("@/components/marketing/home/Hero/index").catch(() => ({ default: () => <div>Error loading Hero</div> })));
-const Brands = lazy(() => import("@/components/marketing/Brands/index").catch(() => ({ default: () => <div>Error loading Brands</div> })));
 const Features = lazy(() => import("@/components/marketing/home/Features/index").catch(() => ({ default: () => <div>Error loading Features</div> })));
-const FeaturesTab = lazy(() => import("@/components/marketing/home/FeaturesTab/index").catch(() => ({ default: () => <div>Error loading FeaturesTab</div> })));
+const ProcessRoadmap = lazy(() => import("@/components/marketing/ProcessRoadmap/index").catch(() => ({ default: () => <div>Error loading ProcessRoadmap</div> })));
 const Pricing = lazy(() => import("@/components/marketing/Pricing/index").catch(() => ({ default: () => <div>Error loading Pricing</div> })));
 const FAQ = lazy(() => import("@/components/marketing/FAQ/index").catch(() => ({ default: () => <div>Error loading FAQ</div> })));
 const Contact = lazy(() => import("@/components/marketing/Contact/index").catch(() => ({ default: () => <div>Error loading Contact</div> })));
@@ -63,17 +62,13 @@ export default function EmployerHomePage() {
         <LazyLoadComponent>
           <Hero variant="employer" />
         </LazyLoadComponent>
-        
+
         <LazyLoadComponent>
-          <Brands />
+          <ProcessRoadmap userType="employer" />
         </LazyLoadComponent>
-        
+
         <LazyLoadComponent>
           <Features variant="employer" />
-        </LazyLoadComponent>
-        
-        <LazyLoadComponent>
-          <FeaturesTab variant="employer" />
         </LazyLoadComponent>
         
         {/* Below-the-fold components (less critical) */}

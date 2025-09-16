@@ -32,10 +32,9 @@ export const metadata: Metadata = {
 const Hero = lazy(() => import("@/components/marketing/home/Hero/index").catch(() => ({ default: () => <div>Error loading Hero</div> })));
 const Brands = lazy(() => import("@/components/marketing/Brands/index").catch(() => ({ default: () => <div>Error loading Brands</div> })));
 const Feature = lazy(() => import("@/components/marketing/home/Features/index").catch(() => ({ default: () => <div>Error loading Features</div> })));
-const FeaturesTab = lazy(() => import("@/components/marketing/home/FeaturesTab/index").catch(() => ({ default: () => <div>Error loading FeaturesTab</div> })));
 const Testimonial = lazy(() => import("@/components/marketing/Testimonial/index").catch(() => ({ default: () => <div>Error loading Testimonial</div> })));
 const Pricing = lazy(() => import("@/components/marketing/Pricing/index").catch(() => ({ default: () => <div>Error loading Pricing</div> })));
-const HowItWorks = lazy(() => import("@/components/marketing/HowItWorks/index").catch(() => ({ default: () => <div>Error loading HowItWorks</div> })));
+const ProcessRoadmap = lazy(() => import("@/components/marketing/ProcessRoadmap/index").catch(() => ({ default: () => <div>Error loading ProcessRoadmap</div> })));
 const FAQ = lazy(() => import("@/components/marketing/FAQ/index").catch(() => ({ default: () => <div>Error loading FAQ</div> })));
 const Contact = lazy(() => import("@/components/marketing/Contact/index").catch(() => ({ default: () => <div>Error loading Contact</div> })));
 const Blog = lazy(() => import("@/components/marketing/Blog/index"));
@@ -69,18 +68,14 @@ export default function Home() {
           <Hero />
         </LazyLoadComponent>
 
-        {/* How It Works - Before Features as per UX recommendations */}
+        {/* Process Roadmap - Unified How It Works and Features Tab */}
         <LazyLoadComponent>
-          <HowItWorks />
+          <ProcessRoadmap userType="student" />
         </LazyLoadComponent>
 
         {/* Main features */}
         <LazyLoadComponent>
           <Feature />
-        </LazyLoadComponent>
-
-        <LazyLoadComponent>
-          <FeaturesTab />
         </LazyLoadComponent>
 
         {/* Below-the-fold components (less critical) */}
